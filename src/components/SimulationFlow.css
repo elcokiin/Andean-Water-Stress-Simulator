@@ -1,0 +1,47 @@
+/* Paleta alegre y legible para el diagrama (React Flow) */
+.simulation-flow {
+  --flow-surface: #f8fafc;
+  --flow-panel-border: #e2e8f0;
+  font-family: var(--sans, system-ui, 'Segoe UI', Roboto, sans-serif);
+  color: #0f172a;
+  background: var(--flow-surface);
+}
+
+.simulation-flow__title {
+  margin: 0;
+  padding: 1rem 1.25rem 0.75rem;
+  text-align: center;
+  font-size: clamp(1.05rem, 2.5vw, 1.35rem);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: #0f172a;
+}
+
+.simulation-flow__panel {
+  flex: 1;
+  margin: 0 1rem 1rem;
+  min-height: 0;
+  border: 1px solid var(--flow-panel-border);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow:
+    0 1px 2px rgb(15 23 42 / 6%),
+    0 8px 24px rgb(14 165 233 / 8%);
+  background: #fff;
+}
+
+.simulation-flow .react-flow {
+  --xy-background-color-default: #f8fafc;
+  --xy-background-pattern-dots-color-default: #bae6fd;
+  --xy-node-border-default: 1px solid #7dd3fc;
+  --xy-node-background-color-default: #f0f9ff;
+  --xy-node-boxshadow-hover-default: 0 2px 8px rgb(14 165 233 / 18%);
+  --xy-node-boxshadow-selected-default: 0 0 0 2px #38bdf8;
+  --xy-handle-background-color-default: #0ea5e9;
+  --xy-handle-border-color-default: #fff;
+  --xy-edge-label-background-color-default: #fff;
+  --xy-edge-label-color-default: #0f172a;
+  --xy-controls-button-background-color-default: #fff;
+  --xy-controls-button-border-color-default: #e2e8f0;
+  --xy-controls-button-background-color-hover-default: #f0f9ff;
+}

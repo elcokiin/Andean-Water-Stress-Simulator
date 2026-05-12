@@ -24,6 +24,18 @@ Code is very cheap to write. Do not give time estimates; with agents, code is
 practically instant to generate. Unless stated otherwise, time to implement is
 not a blocker.
 
+## Project context and decisions
+
+For information about the project, its objectives, and domain-level guidance when
+making design or product decisions, read and align with `DOMAIN_DOC.html` in the
+repository root.
+
+## Stack and tooling
+
+This is a React application built with Vite. Run `package.json` scripts and
+other project commands with Bun (for example `bun run <script>`, `bun install`,
+`bunx <tool>`), not npm, pnpm, or yarn, unless a documented exception applies.
+
 ## Reference Repos
 
 Repos in `.reference`, such as xyflow, are available for patterns or view exactly how works the package. If
