@@ -9,7 +9,7 @@ import {
   MarkerType,
   BackgroundVariant,
 } from "@xyflow/react";
-import type { Connection, Edge, Node } from "@xyflow/react";
+import type { Connection, Edge } from "@xyflow/react";
 import { useNavigate } from "react-router-dom";
 import "@xyflow/react/dist/style.css";
 
@@ -48,11 +48,8 @@ const baseNodeStyle = {
   textAlign: "center" as const,
 };
 
-function nodeLabel(node: Node): ReactNode {
-  return (node.data as { label: ReactNode }).label;
-}
-
-const initialNodes: Node[] = [
+type NodeData = { label: ReactNode };
+const initialNodes = [
   {
     id: "start",
     data: { label: "Inicio PNR" },
@@ -242,7 +239,7 @@ const defaultEdgeOptions = {
 
 export default function PointOfNoReturnFlow() {
   const navigate = useNavigate();
-  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
+  const [nodes, , onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
 
   const onConnect = useCallback(
@@ -275,7 +272,7 @@ export default function PointOfNoReturnFlow() {
               }}
             >
               <div style={{ transform: "rotate(-45deg)", textAlign: "center" }}>
-                {node.data.label}
+                {(node.data as NodeData).label}
               </div>
             </div>
           ),
@@ -310,7 +307,7 @@ export default function PointOfNoReturnFlow() {
                 justifyContent: "center",
               }}
             >
-              <div style={{ transform: "skew(10deg)" }}>{node.data.label}</div>
+              <div style={{ transform: "skew(10deg)" }}>{(node.data as NodeData).label}</div>
             </div>
           ),
         },
@@ -343,7 +340,7 @@ export default function PointOfNoReturnFlow() {
                 fontWeight: 700,
               }}
             >
-              <div style={{ transform: "skew(10deg)" }}>{node.data.label}</div>
+              <div style={{ transform: "skew(10deg)" }}>{(node.data as NodeData).label}</div>
             </div>
           ),
         },
@@ -394,7 +391,7 @@ export default function PointOfNoReturnFlow() {
       </div>
       <div style={{ flex: 1, width: "100%" }}>
         <ReactFlow
-          nodes={displayNodes}
+          nodes={displayNodes as typeof nodes}
           edges={edges}
           onNodesChange={onNodesChange}
           onEdgesChange={onEdgesChange}

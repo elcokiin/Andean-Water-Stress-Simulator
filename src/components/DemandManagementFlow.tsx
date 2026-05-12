@@ -1,6 +1,6 @@
 import { useCallback, type ReactNode } from "react";
 import { ReactFlow, Background, Controls, useNodesState, useEdgesState, addEdge, MarkerType, BackgroundVariant } from "@xyflow/react";
-import type { Connection, Edge, Node } from "@xyflow/react";
+import type { Connection, Edge } from "@xyflow/react";
 import { useNavigate } from "react-router-dom";
 import "@xyflow/react/dist/style.css";
 
@@ -38,11 +38,10 @@ const baseNodeStyle = {
   textAlign: "center" as const,
 };
 
-function nodeLabel(node: Node): ReactNode {
-  return (node.data as { label: ReactNode }).label;
-}
+type NodeData = { label: ReactNode };
+const getLabel = (node: { data: unknown }): ReactNode => (node.data as NodeData).label;
 
-const initialNodes: Node[] = [
+const initialNodes = [
   {
     id: "start",
     data: { label: "Inicio Demanda" },
@@ -165,7 +164,7 @@ const defaultEdgeOptions = {
 
 export default function DemandManagementFlow() {
   const navigate = useNavigate();
-  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
+  const [nodes, , onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
 
   const onConnect = useCallback(
@@ -195,7 +194,7 @@ export default function DemandManagementFlow() {
               }}
             >
               <div style={{ transform: "rotate(-45deg)", textAlign: "center" }}>
-                {nodeLabel(node)}
+                {getLabel(node)}
               </div>
             </div>
           ),
@@ -231,7 +230,7 @@ export default function DemandManagementFlow() {
                 justifyContent: "center",
               }}
             >
-              <div style={{ transform: "skew(10deg)" }}>{nodeLabel(node)}</div>
+              <div style={{ transform: "skew(10deg)" }}>{getLabel(node)}</div>
             </div>
           ),
         },
@@ -283,7 +282,7 @@ export default function DemandManagementFlow() {
       </div>
       <div style={{ flex: 1, width: "100%" }}>
         <ReactFlow 
-          nodes={displayNodes} 
+          nodes={displayNodes as typeof nodes} 
           edges={edges} 
           onNodesChange={onNodesChange}
           onEdgesChange={onEdgesChange}
