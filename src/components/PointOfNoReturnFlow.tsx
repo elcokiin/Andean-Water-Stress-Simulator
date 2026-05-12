@@ -1,5 +1,14 @@
 import { useCallback, type ReactNode } from "react";
-import { ReactFlow, Background, Controls, useNodesState, useEdgesState, addEdge, MarkerType, BackgroundVariant } from "@xyflow/react";
+import {
+  ReactFlow,
+  Background,
+  Controls,
+  useNodesState,
+  useEdgesState,
+  addEdge,
+  MarkerType,
+  BackgroundVariant,
+} from "@xyflow/react";
 import type { Connection, Edge, Node } from "@xyflow/react";
 import { useNavigate } from "react-router-dom";
 import "@xyflow/react/dist/style.css";
@@ -48,7 +57,15 @@ const initialNodes: Node[] = [
     id: "start",
     data: { label: "Inicio PNR" },
     position: { x: 340, y: 50 },
-    style: { ...baseNodeStyle, borderRadius: "50%", width: 120, height: 60, display: "flex", alignItems: "center", justifyContent: "center" },
+    style: {
+      ...baseNodeStyle,
+      borderRadius: "50%",
+      width: 120,
+      height: 60,
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+    },
   },
   {
     id: "input_data",
@@ -60,114 +77,159 @@ const initialNodes: Node[] = [
     id: "decision_vol",
     data: { label: "¿El Volumen Actual es < 15%?" },
     position: { x: 300, y: 280 },
-    style: { ...baseNodeStyle, width: 200, background: "#fef3c7", borderColor: "#fcd34d" },
+    style: {
+      ...baseNodeStyle,
+      width: 200,
+      background: "#fef3c7",
+      borderColor: "#fcd34d",
+    },
   },
   {
     id: "reset_counter",
     data: { label: "Contador_Crisis = 0" },
     position: { x: 100, y: 450 },
-    style: { ...baseNodeStyle, background: "#f0fdf4", borderColor: "#86efac", color: "#14532d" },
+    style: {
+      ...baseNodeStyle,
+      background: "#f0fdf4",
+      borderColor: "#86efac",
+      color: "#14532d",
+    },
   },
   {
     id: "decision_caudal",
     data: { label: "¿El Caudal de Entrada es < 20% del promedio?" },
     position: { x: 500, y: 430 },
-    style: { ...baseNodeStyle, width: 220, background: "#fef3c7", borderColor: "#fcd34d" },
+    style: {
+      ...baseNodeStyle,
+      width: 220,
+      background: "#fef3c7",
+      borderColor: "#fcd34d",
+    },
   },
   {
     id: "add_time",
     data: { label: "Contador_Crisis = Contador_Crisis + 1" },
     position: { x: 500, y: 620 },
-    style: { ...baseNodeStyle, background: "#fff7ed", borderColor: "#fdba74", color: "#9a3412" },
+    style: {
+      ...baseNodeStyle,
+      background: "#fff7ed",
+      borderColor: "#fdba74",
+      color: "#9a3412",
+    },
   },
   {
     id: "decision_counter",
     data: { label: "¿Contador_Crisis >= 60 días?" },
     position: { x: 520, y: 770 },
-    style: { ...baseNodeStyle, width: 200, background: "#fef3c7", borderColor: "#fcd34d" },
+    style: {
+      ...baseNodeStyle,
+      width: 200,
+      background: "#fef3c7",
+      borderColor: "#fcd34d",
+    },
   },
   {
     id: "alert_output",
     data: { label: "¡ALERTA DE COLAPSO HÍDRICO!" },
     position: { x: 750, y: 970 },
-    style: { ...baseNodeStyle, width: 240, background: "#fef2f2", borderColor: "#fca5a5", color: "#7f1d1d" },
+    style: {
+      ...baseNodeStyle,
+      width: 240,
+      background: "#fef2f2",
+      borderColor: "#fca5a5",
+      color: "#7f1d1d",
+    },
   },
   {
     id: "degradation",
     data: { label: "Activar Lazo R1: Degradación Severa de Páramo" },
     position: { x: 750, y: 1120 },
-    style: { ...baseNodeStyle, width: 240, background: "#7f1d1d", borderColor: "#991b1b", color: "#ffffff" },
+    style: {
+      ...baseNodeStyle,
+      width: 240,
+      background: "#7f1d1d",
+      borderColor: "#991b1b",
+      color: "#ffffff",
+    },
   },
   {
     id: "end",
     data: { label: "Fin PNR" },
     position: { x: 340, y: 1300 },
-    style: { ...baseNodeStyle, borderRadius: "50%", width: 120, height: 60, display: "flex", alignItems: "center", justifyContent: "center" },
+    style: {
+      ...baseNodeStyle,
+      borderRadius: "50%",
+      width: 120,
+      height: 60,
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+    },
   },
 ];
 
 const initialEdges: Edge[] = [
   { id: "e1", source: "start", target: "input_data", ...forwardEdge },
   { id: "e2", source: "input_data", target: "decision_vol", ...forwardEdge },
-  { 
-    id: "e3", 
-    source: "decision_vol", 
-    target: "reset_counter", 
+  {
+    id: "e3",
+    source: "decision_vol",
+    target: "reset_counter",
     label: "No",
     style: { stroke: flow.branchNo, strokeWidth: flow.strokeWidth },
     markerEnd: marker(flow.branchNo),
-    ...edgeLabel 
+    ...edgeLabel,
   },
-  { 
-    id: "e4", 
-    source: "decision_vol", 
-    target: "decision_caudal", 
+  {
+    id: "e4",
+    source: "decision_vol",
+    target: "decision_caudal",
     label: "Sí",
     style: { stroke: flow.branchYes, strokeWidth: flow.strokeWidth },
     markerEnd: marker(flow.branchYes),
-    ...edgeLabel 
+    ...edgeLabel,
   },
-  { 
-    id: "e5", 
-    source: "decision_caudal", 
-    target: "reset_counter", 
+  {
+    id: "e5",
+    source: "decision_caudal",
+    target: "reset_counter",
     label: "No",
     style: { stroke: flow.branchNo, strokeWidth: flow.strokeWidth },
     markerEnd: marker(flow.branchNo),
-    ...edgeLabel 
+    ...edgeLabel,
   },
-  { 
-    id: "e6", 
-    source: "decision_caudal", 
-    target: "add_time", 
+  {
+    id: "e6",
+    source: "decision_caudal",
+    target: "add_time",
     label: "Sí",
     style: { stroke: flow.branchYes, strokeWidth: flow.strokeWidth },
     markerEnd: marker(flow.branchYes),
-    ...edgeLabel 
+    ...edgeLabel,
   },
-  { 
-    id: "e7", 
-    source: "add_time", 
-    target: "decision_counter", 
-    ...forwardEdge 
+  {
+    id: "e7",
+    source: "add_time",
+    target: "decision_counter",
+    ...forwardEdge,
   },
-  { 
-    id: "e8", 
-    source: "decision_counter", 
-    target: "end", 
+  {
+    id: "e8",
+    source: "decision_counter",
+    target: "end",
     label: "No",
     style: { stroke: flow.branchNo, strokeWidth: flow.strokeWidth },
     markerEnd: marker(flow.branchNo),
-    ...edgeLabel 
+    ...edgeLabel,
   },
-  { 
-    id: "e9", 
-    source: "decision_counter", 
-    target: "alert_output", 
+  {
+    id: "e9",
+    source: "decision_counter",
+    target: "alert_output",
     label: "Sí",
     style: { stroke: flow.alert, strokeWidth: flow.strokeWidth },
     markerEnd: marker(flow.alert),
-    ...edgeLabel 
+    ...edgeLabel,
   },
   { id: "e10", source: "alert_output", target: "degradation", ...forwardEdge },
   { id: "e11", source: "reset_counter", target: "end", ...forwardEdge },
@@ -189,10 +251,13 @@ export default function PointOfNoReturnFlow() {
   );
 
   const displayNodes = nodes.map((node) => {
+    if (!node.data) return node;
+    
     if (node.id.startsWith("decision")) {
       return {
         ...node,
         data: {
+          ...node.data,
           label: (
             <div
               style={{
@@ -210,7 +275,7 @@ export default function PointOfNoReturnFlow() {
               }}
             >
               <div style={{ transform: "rotate(-45deg)", textAlign: "center" }}>
-                {nodeLabel(node)}
+                {node.data.label}
               </div>
             </div>
           ),
@@ -222,13 +287,14 @@ export default function PointOfNoReturnFlow() {
           background: "transparent",
           border: "none",
           padding: 0,
-        }
+        },
       };
     }
     if (node.id === "input_data") {
       return {
         ...node,
         data: {
+          ...node.data,
           label: (
             <div
               style={{
@@ -244,7 +310,7 @@ export default function PointOfNoReturnFlow() {
                 justifyContent: "center",
               }}
             >
-              <div style={{ transform: "skew(10deg)" }}>{nodeLabel(node)}</div>
+              <div style={{ transform: "skew(10deg)" }}>{node.data.label}</div>
             </div>
           ),
         },
@@ -253,13 +319,14 @@ export default function PointOfNoReturnFlow() {
           background: "transparent",
           border: "none",
           padding: 0,
-        }
+        },
       };
     }
     if (node.id === "alert_output") {
       return {
         ...node,
         data: {
+          ...node.data,
           label: (
             <div
               style={{
@@ -276,7 +343,7 @@ export default function PointOfNoReturnFlow() {
                 fontWeight: 700,
               }}
             >
-              <div style={{ transform: "skew(10deg)" }}>{nodeLabel(node)}</div>
+              <div style={{ transform: "skew(10deg)" }}>{node.data.label}</div>
             </div>
           ),
         },
@@ -285,7 +352,7 @@ export default function PointOfNoReturnFlow() {
           background: "transparent",
           border: "none",
           padding: 0,
-        }
+        },
       };
     }
     if (node.id === "start" || node.id === "end") {
@@ -293,14 +360,15 @@ export default function PointOfNoReturnFlow() {
         ...node,
         style: {
           ...node.style,
-          background: node.id === "start"
-            ? "linear-gradient(180deg, #ecfdf5 0%, #d1fae5 100%)"
-            : "linear-gradient(180deg, #f5f3ff 0%, #ede9fe 100%)",
+          background:
+            node.id === "start"
+              ? "linear-gradient(180deg, #ecfdf5 0%, #d1fae5 100%)"
+              : "linear-gradient(180deg, #f5f3ff 0%, #ede9fe 100%)",
           border: `2px solid ${node.id === "start" ? "#34d399" : "#a78bfa"}`,
           color: node.id === "start" ? "#065f46" : "#5b21b6",
           fontWeight: 600,
-        }
-      }
+        },
+      };
     }
     return node;
   });
@@ -316,27 +384,25 @@ export default function PointOfNoReturnFlow() {
       }}
     >
       <div style={{ padding: "20px" }}>
-        <button 
+        <button
           onClick={() => navigate("/")}
           className="mb-4 text-sm bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-2 px-4 rounded inline-flex items-center"
         >
           &larr; Volver al Diagrama Principal
         </button>
-        <h1 className="text-2xl font-bold">
-          Subproceso Punto de No Retorno
-        </h1>
+        <h1 className="text-2xl font-bold">Subproceso Punto de No Retorno</h1>
       </div>
       <div style={{ flex: 1, width: "100%" }}>
-        <ReactFlow 
-          nodes={displayNodes} 
-          edges={edges} 
+        <ReactFlow
+          nodes={displayNodes}
+          edges={edges}
           onNodesChange={onNodesChange}
           onEdgesChange={onEdgesChange}
           onConnect={onConnect}
           fitView
           defaultEdgeOptions={defaultEdgeOptions}
         >
-          <Background 
+          <Background
             variant={BackgroundVariant.Dots}
             gap={14}
             size={1.25}
