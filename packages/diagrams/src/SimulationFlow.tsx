@@ -1,20 +1,24 @@
-import { useCallback, type ReactNode } from "react";
+import { useCallback, type CSSProperties, type ReactNode } from "react";
 import {
-  ReactFlow,
-  MiniMap,
-  Controls,
   Background,
-  useNodesState,
-  useEdgesState,
-  addEdge,
-  MarkerType,
   BackgroundVariant,
+  Controls,
+  MarkerType,
+  MiniMap,
+  ReactFlow,
+  addEdge,
+  useEdgesState,
+  useNodesState,
 } from "@xyflow/react";
 import type { Connection, Edge, Node } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import "./SimulationFlow.css";
 
-/** Paleta: avance (cielo), éxito/fin de bucle (verde), iteración (ámbar) */
+type DiagramProps = {
+  height?: CSSProperties["height"];
+  title?: string;
+};
+
 const flow = {
   forward: "#0ea5e9",
   branchYes: "#22c55e",
@@ -42,7 +46,14 @@ function nodeLabel(node: Node): ReactNode {
   return (node.data as { label: ReactNode }).label;
 }
 
-// 1. Nodos (formas simuladas + colores por rol)
+const subprocessNodeStyle = {
+  padding: "10px",
+  height: "100%",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+} as const;
+
 const initialNodes: Node[] = [
   {
     id: "1",
@@ -208,7 +219,6 @@ const initialEdges: Edge[] = [
   { id: "e5-6", source: "5", target: "6", ...forwardEdge },
   { id: "e6-7", source: "6", target: "7", ...forwardEdge },
   { id: "e7-8", source: "7", target: "8", ...forwardEdge },
-
   {
     id: "e8-10",
     source: "8",
@@ -218,7 +228,6 @@ const initialEdges: Edge[] = [
     markerEnd: marker(flow.branchYes),
     ...edgeLabel,
   },
-
   {
     id: "e8-9",
     source: "8",
@@ -237,7 +246,6 @@ const initialEdges: Edge[] = [
     style: { stroke: flow.loop, strokeWidth: flow.strokeWidth },
     markerEnd: marker(flow.loop),
   },
-
   {
     id: "e10-11",
     source: "10",
@@ -252,13 +260,6 @@ const defaultEdgeOptions = {
   markerEnd: marker(flow.forward),
 };
 
-import {
-  HoverCard,
-  HoverCardContent,
-  HoverCardTrigger,
-} from "../../components/ui/hover-card";
-import { useNavigate } from "react-router-dom";
-
 function minimapNodeColor(node: Node) {
   if (node.type === "input") return "#34d399";
   if (node.type === "output") return "#a78bfa";
@@ -268,8 +269,10 @@ function minimapNodeColor(node: Node) {
   return "#38bdf8";
 }
 
-export default function SimulationFlow() {
-  const navigate = useNavigate();
+export default function SimulationFlow({
+  height = "calc(100vh - 12rem)",
+  title = "Diagrama de Flujo Principal (Bucle de Simulación de Tiempo)",
+}: DiagramProps) {
   const [nodes, , onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
 
@@ -307,7 +310,7 @@ export default function SimulationFlow() {
         },
       };
     }
-    if (node.id === "2") {
+    if (node.id === "2" || node.id === "10") {
       return {
         ...node,
         data: {
@@ -315,9 +318,12 @@ export default function SimulationFlow() {
             <div
               style={{
                 transform: "skew(-10deg)",
-                background: "linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%)",
-                border: "2px solid #fb923c",
-                color: "#9a3412",
+                background:
+                  node.id === "10"
+                    ? "linear-gradient(135deg, #fefce8 0%, #fef9c3 100%)"
+                    : "linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%)",
+                border: `2px solid ${node.id === "10" ? "#eab308" : "#fb923c"}`,
+                color: node.id === "10" ? "#713f12" : "#9a3412",
                 padding: "10px",
                 borderRadius: 8,
               }}
@@ -328,147 +334,11 @@ export default function SimulationFlow() {
         },
       };
     }
-    if (node.id === "3") {
+    if (node.id === "3" || node.id === "4" || node.id === "5") {
       return {
         ...node,
         data: {
-          label: (
-            <HoverCard>
-              <HoverCardTrigger asChild>
-                <div
-                  style={{
-                    padding: "10px",
-                    cursor: "pointer",
-                    height: "100%",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
-                  {nodeLabel(node)}
-                </div>
-              </HoverCardTrigger>
-              <HoverCardContent className="w-64 z-50">
-                <div className="space-y-2">
-                  <h4 className="text-sm font-semibold">
-                    Subproceso de Impacto Climático
-                  </h4>
-                  <p className="text-sm text-muted-foreground">
-                    Haz clic aquí para ver el diagrama detallado del subproceso.
-                  </p>
-                  <button
-                    onClick={() => navigate("/impacto-climatico")}
-                    className="mt-2 text-xs bg-blue-500 hover:bg-blue-600 text-white px-3 py-1.5 rounded transition-colors"
-                  >
-                    Ver diagrama
-                  </button>
-                </div>
-              </HoverCardContent>
-            </HoverCard>
-          ),
-        },
-      };
-    }
-    if (node.id === "4") {
-      return {
-        ...node,
-        data: {
-          label: (
-            <HoverCard>
-              <HoverCardTrigger asChild>
-                <div
-                  style={{
-                    padding: "10px",
-                    cursor: "pointer",
-                    height: "100%",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
-                  {nodeLabel(node)}
-                </div>
-              </HoverCardTrigger>
-              <HoverCardContent className="w-64 z-50">
-                <div className="space-y-2">
-                  <h4 className="text-sm font-semibold">
-                    Subproceso de Gestión de Demanda
-                  </h4>
-                  <p className="text-sm text-muted-foreground">
-                    Haz clic aquí para ver el diagrama detallado del subproceso.
-                  </p>
-                  <button
-                    onClick={() => navigate("/gestion-demanda")}
-                    className="mt-2 text-xs bg-blue-500 hover:bg-blue-600 text-white px-3 py-1.5 rounded transition-colors"
-                  >
-                    Ver diagrama
-                  </button>
-                </div>
-              </HoverCardContent>
-            </HoverCard>
-          ),
-        },
-      };
-    }
-    if (node.id === "5") {
-      return {
-        ...node,
-        data: {
-          label: (
-            <HoverCard>
-              <HoverCardTrigger asChild>
-                <div
-                  style={{
-                    padding: "10px",
-                    cursor: "pointer",
-                    height: "100%",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
-                  {nodeLabel(node)}
-                </div>
-              </HoverCardTrigger>
-              <HoverCardContent className="w-64 z-50">
-                <div className="space-y-2">
-                  <h4 className="text-sm font-semibold">
-                    Subproceso Punto de No Retorno
-                  </h4>
-                  <p className="text-sm text-muted-foreground">
-                    Haz clic aquí para ver el diagrama detallado del subproceso.
-                  </p>
-                  <button
-                    onClick={() => navigate("/punto-no-retorno")}
-                    className="mt-2 text-xs bg-blue-500 hover:bg-blue-600 text-white px-3 py-1.5 rounded transition-colors"
-                  >
-                    Ver diagrama
-                  </button>
-                </div>
-              </HoverCardContent>
-            </HoverCard>
-          ),
-        },
-      };
-    }
-    if (node.id === "10") {
-      return {
-        ...node,
-        data: {
-          label: (
-            <div
-              style={{
-                transform: "skew(-10deg)",
-                background: "linear-gradient(135deg, #fefce8 0%, #fef9c3 100%)",
-                border: "2px solid #eab308",
-                color: "#713f12",
-                padding: "10px",
-                borderRadius: 8,
-              }}
-            >
-              <div style={{ transform: "skew(10deg)" }}>{nodeLabel(node)}</div>
-            </div>
-          ),
+          label: <div style={subprocessNodeStyle}>{nodeLabel(node)}</div>,
         },
       };
     }
@@ -480,14 +350,12 @@ export default function SimulationFlow() {
       className="simulation-flow"
       style={{
         width: "100%",
-        height: "100vh",
+        height,
         display: "flex",
         flexDirection: "column",
       }}
     >
-      <h1 className="simulation-flow__title">
-        Diagrama de Flujo Principal (Bucle de Simulación de Tiempo)
-      </h1>
+      <h1 className="simulation-flow__title">{title}</h1>
       <div className="simulation-flow__panel">
         <ReactFlow
           nodes={displayNodes}

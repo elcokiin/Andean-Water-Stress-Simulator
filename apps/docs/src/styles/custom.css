@@ -1,0 +1,18 @@
+:root {
+  --sl-color-accent-low: #dbeafe;
+  --sl-color-accent: #2563eb;
+  --sl-color-accent-high: #1d4ed8;
+}
+
+.diagram-frame {
+  border: 1px solid color-mix(in srgb, var(--sl-color-gray-3) 60%, white);
+  border-radius: 1rem;
+  overflow: hidden;
+  background: white;
+  box-shadow: 0 20px 40px rgb(37 99 235 / 8%);
+  margin: 1.5rem 0;
+}
+
+.diagram-frame :global(.simulation-flow) {
+  background: white;
+}

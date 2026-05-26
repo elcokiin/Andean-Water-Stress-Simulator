@@ -1,0 +1,21 @@
+---
+title: Proyecto Final Docs
+description: Documentacion del modelo y acceso rapido a los diagramas del proyecto.
+---
+
+import { CardGrid, LinkCard } from "@astrojs/starlight/components";
+
+Esta aplicacion de documentacion vive ahora en `apps/docs` dentro del monorepo con Turborepo. Reune el contexto del proyecto y separa los diagramas del app web principal.
+
+<CardGrid>
+  <LinkCard
+    title="Getting started"
+    href="/getting-started"
+    description="Comandos Bun y estructura base del monorepo."
+  />
+  <LinkCard
+    title="Diagramas"
+    href="/diagrams"
+    description="Entrada central para el flujo principal y sus subprocesos."
+  />
+</CardGrid>

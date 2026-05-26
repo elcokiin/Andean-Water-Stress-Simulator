@@ -1,14 +1,17 @@
-import { useCallback, type ReactNode } from "react";
+import { useCallback, type CSSProperties, type ReactNode } from "react";
 import { ReactFlow, Background, Controls, useNodesState, useEdgesState, addEdge, MarkerType, BackgroundVariant } from "@xyflow/react";
 import type { Connection, Edge } from "@xyflow/react";
-import { useNavigate } from "react-router-dom";
 import "@xyflow/react/dist/style.css";
+
+type DiagramProps = {
+  height?: CSSProperties["height"];
+  title?: string;
+};
 
 const flow = {
   forward: "#0ea5e9",
-  nino: "#ef4444",     // Red for El Niño
-  nina: "#3b82f6",     // Blue for La Niña
-  neutral: "#22c55e",  // Green for Neutral
+  branchYes: "#ef4444", // Redish for rationing
+  loop: "#22c55e", // Greenish for normal
   toEnd: "#8b5cf6",
   strokeWidth: 2.25,
 } as const;
@@ -45,124 +48,117 @@ const getLabel = (node: { data: unknown }): ReactNode => (node.data as NodeData)
 const initialNodes = [
   {
     id: "start",
-    data: { label: "Inicio Subproceso Clima" },
+    data: { label: "Inicio Demanda" },
     position: { x: 340, y: 50 },
-    style: { ...baseNodeStyle, borderRadius: "50%", width: 140, height: 60, display: "flex", alignItems: "center", justifyContent: "center" },
+    style: { ...baseNodeStyle, borderRadius: "50%", width: 120, height: 60, display: "flex", alignItems: "center", justifyContent: "center" },
   },
   {
-    id: "input_time",
-    data: { label: "Recibir el Tiempo actual de simulación (t)" },
+    id: "input_data",
+    data: { label: "Leer Volumen Actual y Población" },
     position: { x: 280, y: 200 },
-    style: { ...baseNodeStyle, width: 260 },
+    style: { ...baseNodeStyle, width: 240 },
   },
   {
-    id: "search_table",
-    data: { label: "Buscar el tiempo (t) en la Tabla de Datos del Índice ONI" },
+    id: "calc_level",
+    data: { label: "Calcular Nivel del Embalse (%) = (Vol / Capacidad) * 100" },
     position: { x: 280, y: 350 },
-    style: { ...baseNodeStyle, width: 260 },
+    style: { ...baseNodeStyle, width: 240 },
   },
   {
-    id: "interpolate",
-    data: { label: "Calcular ONI mediante Interpolación Lineal" },
-    position: { x: 280, y: 500 },
-    style: { ...baseNodeStyle, width: 260, background: "#f3e8ff", borderColor: "#c084fc", color: "#6b21a8" },
-  },
-  {
-    id: "decision_nino",
-    data: { label: "¿El ONI es >= 0.5?" },
-    position: { x: 300, y: 650 },
+    id: "decision_15",
+    data: { label: "¿El Nivel del Embalse es < 15%?" },
+    position: { x: 300, y: 500 },
     style: { ...baseNodeStyle, width: 200, background: "#fef3c7", borderColor: "#fcd34d" },
   },
   {
-    id: "el_nino",
-    data: { label: "Activar Fase El Niño: Reducir Precipitación y Aumentar Temperatura" },
-    position: { x: 50, y: 850 },
-    style: { ...baseNodeStyle, width: 280, background: "#fef2f2", borderColor: "#fca5a5", color: "#7f1d1d" },
+    id: "ration_extreme",
+    data: { label: "Racionamiento Extremo: Factor = 0.090" },
+    position: { x: 30, y: 650 },
+    style: { ...baseNodeStyle, background: "#fef2f2", borderColor: "#fca5a5", color: "#7f1d1d" },
   },
   {
-    id: "decision_nina",
-    data: { label: "¿El ONI es <= -0.5?" },
-    position: { x: 500, y: 850 },
+    id: "decision_30",
+    data: { label: "¿El Nivel del Embalse es < 30%?" },
+    position: { x: 500, y: 600 },
     style: { ...baseNodeStyle, width: 200, background: "#fef3c7", borderColor: "#fcd34d" },
   },
   {
-    id: "la_nina",
-    data: { label: "Activar Fase La Niña: Aumentar Precipitación Base" },
-    position: { x: 50, y: 1050 },
-    style: { ...baseNodeStyle, width: 260, background: "#eff6ff", borderColor: "#93c5fd", color: "#1e3a8a" },
+    id: "ration_moderate",
+    data: { label: "Racionamiento Moderado: Factor = 0.110" },
+    position: { x: 340, y: 750 },
+    style: { ...baseNodeStyle, background: "#fff7ed", borderColor: "#fdba74", color: "#9a3412" },
   },
   {
-    id: "neutral",
-    data: { label: "Fase Neutral: Mantener Precipitación y Temperatura Históricas" },
-    position: { x: 500, y: 1050 },
-    style: { ...baseNodeStyle, width: 280, background: "#f0fdf4", borderColor: "#86efac", color: "#14532d" },
+    id: "no_normal",
+    data: { label: "Estado Normal: Factor = 0.148" },
+    position: { x: 670, y: 750 },
+    style: { ...baseNodeStyle, background: "#f0fdf4", borderColor: "#86efac", color: "#14532d" },
   },
   {
-    id: "calculate",
-    data: { label: "Calcular Caudal de Entrada modificado y Tasa de Evaporación" },
-    position: { x: 280, y: 1250 },
-    style: { ...baseNodeStyle, width: 280 },
+    id: "calc_extract",
+    data: { label: "Calcular Extracción Total = Pob * Tasa * Factor" },
+    position: { x: 280, y: 950 },
+    style: { ...baseNodeStyle, width: 240 },
   },
   {
     id: "output",
-    data: { label: "Retornar Caudal de Entrada y Tasa de Evaporación" },
-    position: { x: 280, y: 1400 },
-    style: { ...baseNodeStyle, width: 280 },
+    data: { label: "Retornar Extracción Total" },
+    position: { x: 280, y: 1100 },
+    style: { ...baseNodeStyle, width: 240 },
   },
   {
     id: "end",
-    data: { label: "Fin Subproceso Clima" },
-    position: { x: 340, y: 1550 },
-    style: { ...baseNodeStyle, borderRadius: "50%", width: 140, height: 60, display: "flex", alignItems: "center", justifyContent: "center" },
+    data: { label: "Fin Demanda" },
+    position: { x: 340, y: 1250 },
+    style: { ...baseNodeStyle, borderRadius: "50%", width: 120, height: 60, display: "flex", alignItems: "center", justifyContent: "center" },
   },
 ];
 
 const initialEdges: Edge[] = [
-  { id: "e1", source: "start", target: "input_time", ...forwardEdge },
-  { id: "e2", source: "input_time", target: "search_table", ...forwardEdge },
-  { id: "e3", source: "search_table", target: "interpolate", ...forwardEdge },
-  { id: "e4", source: "interpolate", target: "decision_nino", ...forwardEdge },
+  { id: "e1", source: "start", target: "input_data", ...forwardEdge },
+  { id: "e2", source: "input_data", target: "calc_level", ...forwardEdge },
+  { id: "e3", source: "calc_level", target: "decision_15", ...forwardEdge },
   { 
-    id: "e5", 
-    source: "decision_nino", 
-    target: "el_nino", 
+    id: "e4", 
+    source: "decision_15", 
+    target: "ration_extreme", 
     label: "Sí",
-    style: { stroke: flow.nino, strokeWidth: flow.strokeWidth },
-    markerEnd: marker(flow.nino),
+    style: { stroke: flow.branchYes, strokeWidth: flow.strokeWidth },
+    markerEnd: marker(flow.branchYes),
     ...edgeLabel 
   },
   { 
-    id: "e6", 
-    source: "decision_nino", 
-    target: "decision_nina", 
+    id: "e5", 
+    source: "decision_15", 
+    target: "decision_30", 
     label: "No",
     style: { stroke: flow.forward, strokeWidth: flow.strokeWidth },
     markerEnd: marker(flow.forward),
     ...edgeLabel 
   },
   { 
-    id: "e7", 
-    source: "decision_nina", 
-    target: "la_nina", 
+    id: "e6", 
+    source: "decision_30", 
+    target: "ration_moderate", 
     label: "Sí",
-    style: { stroke: flow.nina, strokeWidth: flow.strokeWidth },
-    markerEnd: marker(flow.nina),
+    style: { stroke: "#f97316", strokeWidth: flow.strokeWidth },
+    markerEnd: marker("#f97316"),
     ...edgeLabel 
   },
   { 
-    id: "e8", 
-    source: "decision_nina", 
-    target: "neutral", 
+    id: "e7", 
+    source: "decision_30", 
+    target: "no_normal", 
     label: "No",
-    style: { stroke: flow.neutral, strokeWidth: flow.strokeWidth },
-    markerEnd: marker(flow.neutral),
+    style: { stroke: flow.loop, strokeWidth: flow.strokeWidth },
+    markerEnd: marker(flow.loop),
     ...edgeLabel 
   },
-  { id: "e9", source: "el_nino", target: "calculate", ...forwardEdge },
-  { id: "e10", source: "neutral", target: "calculate", ...forwardEdge },
-  { id: "e11", source: "la_nina", target: "calculate", ...forwardEdge },
-  { id: "e12", source: "calculate", target: "output", ...forwardEdge },
-  { id: "e13", source: "output", target: "end", ...forwardEdge },
+  { id: "e8", source: "ration_extreme", target: "calc_extract", ...forwardEdge },
+  { id: "e9", source: "ration_moderate", target: "calc_extract", ...forwardEdge },
+  { id: "e10", source: "no_normal", target: "calc_extract", ...forwardEdge },
+  { id: "e11", source: "calc_extract", target: "output", ...forwardEdge },
+  { id: "e12", source: "output", target: "end", ...forwardEdge },
 ];
 
 const defaultEdgeOptions = {
@@ -170,8 +166,10 @@ const defaultEdgeOptions = {
   markerEnd: marker(flow.forward),
 };
 
-export default function ClimateImpactFlow() {
-  const navigate = useNavigate();
+export default function DemandManagementFlow({
+  height = "calc(100vh - 8rem)",
+  title = "Subproceso de Gestión de Demanda",
+}: DiagramProps) {
   const [nodes, , onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
 
@@ -217,7 +215,7 @@ export default function ClimateImpactFlow() {
         }
       };
     }
-    if (node.id === "input_time" || node.id === "output") {
+    if (node.id === "input_data" || node.id === "output") {
       return {
         ...node,
         data: {
@@ -272,22 +270,12 @@ export default function ClimateImpactFlow() {
       className="simulation-flow"
       style={{
         width: "100%",
-        height: "100vh",
+        height,
         display: "flex",
         flexDirection: "column",
       }}
     >
-      <div style={{ padding: "20px" }}>
-        <button 
-          onClick={() => navigate("/")}
-          className="mb-4 text-sm bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-2 px-4 rounded inline-flex items-center"
-        >
-          &larr; Volver al Diagrama Principal
-        </button>
-        <h1 className="text-2xl font-bold">
-          Subproceso de Impacto Climático
-        </h1>
-      </div>
+      <h1 className="simulation-flow__title">{title}</h1>
       <div style={{ flex: 1, width: "100%" }}>
         <ReactFlow 
           nodes={displayNodes as typeof nodes} 

@@ -1,0 +1,31 @@
+---
+title: Diagramas
+description: Resumen de los diagramas movidos al proyecto de documentacion.
+---
+
+import { CardGrid, LinkCard } from "@astrojs/starlight/components";
+
+Los diagramas interactivos del proyecto se movieron al app de documentacion en `apps/docs` y comparten implementacion con `apps/web` mediante el paquete `@proyecto-final/diagrams`.
+
+<CardGrid>
+  <LinkCard
+    title="Flujo principal"
+    href="/diagrams/main-flow"
+    description="Bucle principal de simulacion desde condiciones iniciales hasta reportes."
+  />
+  <LinkCard
+    title="Impacto climatico"
+    href="/diagrams/climate-impact"
+    description="Lectura de ONI, fases climaticas y calculo de caudal y evaporacion."
+  />
+  <LinkCard
+    title="Gestion de demanda"
+    href="/diagrams/demand-management"
+    description="Nivel del embalse, racionamiento y extraccion total."
+  />
+  <LinkCard
+    title="Punto de no retorno"
+    href="/diagrams/point-of-no-return"
+    description="Umbral de crisis prolongada y alerta de colapso hidrico."
+  />
+</CardGrid>

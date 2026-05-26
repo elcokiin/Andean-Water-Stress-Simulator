@@ -1,0 +1,24 @@
+{
+  "name": "@proyecto-final/docs",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "lint": "astro check",
+    "typecheck": "astro check",
+    "test": "vitest run --passWithNoTests",
+    "format:check": "prettier --check ."
+  },
+  "dependencies": {
+    "@astrojs/mdx": "^5.0.6",
+    "@astrojs/react": "^5.0.5",
+    "@astrojs/starlight": "^0.39.2",
+    "@proyecto-final/diagrams": "workspace:*",
+    "astro": "^6.3.8",
+    "react": "^19.2.6",
+    "react-dom": "^19.2.6"
+  }
+}

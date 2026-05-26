@@ -1,4 +1,4 @@
-import { useCallback, type ReactNode } from "react";
+import { useCallback, type CSSProperties, type ReactNode } from "react";
 import {
   ReactFlow,
   Background,
@@ -10,8 +10,12 @@ import {
   BackgroundVariant,
 } from "@xyflow/react";
 import type { Connection, Edge } from "@xyflow/react";
-import { useNavigate } from "react-router-dom";
 import "@xyflow/react/dist/style.css";
+
+type DiagramProps = {
+  height?: CSSProperties["height"];
+  title?: string;
+};
 
 const flow = {
   forward: "#0ea5e9",
@@ -237,8 +241,10 @@ const defaultEdgeOptions = {
   markerEnd: marker(flow.forward),
 };
 
-export default function PointOfNoReturnFlow() {
-  const navigate = useNavigate();
+export default function PointOfNoReturnFlow({
+  height = "calc(100vh - 8rem)",
+  title = "Subproceso Punto de No Retorno",
+}: DiagramProps) {
   const [nodes, , onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
 
@@ -375,20 +381,12 @@ export default function PointOfNoReturnFlow() {
       className="simulation-flow"
       style={{
         width: "100%",
-        height: "100vh",
+        height,
         display: "flex",
         flexDirection: "column",
       }}
     >
-      <div style={{ padding: "20px" }}>
-        <button
-          onClick={() => navigate("/")}
-          className="mb-4 text-sm bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-2 px-4 rounded inline-flex items-center"
-        >
-          &larr; Volver al Diagrama Principal
-        </button>
-        <h1 className="text-2xl font-bold">Subproceso Punto de No Retorno</h1>
-      </div>
+      <h1 className="simulation-flow__title">{title}</h1>
       <div style={{ flex: 1, width: "100%" }}>
         <ReactFlow
           nodes={displayNodes as typeof nodes}

@@ -1,0 +1,77 @@
+---
+title: Getting started
+description: Get started with the Bun-based Turborepo setup for this project.
+---
+
+import {
+  CardGrid,
+  LinkCard,
+  Steps,
+  Tabs,
+  TabItem,
+} from "@astrojs/starlight/components";
+
+If you're new to this repository, follow these steps to get productive quickly.
+
+<Steps>
+  1. Install the workspace dependencies.
+
+     <Tabs syncKey="pkg-manager">
+       <TabItem label="bun">
+
+       ```bash
+       bun install
+       ```
+
+       </TabItem>
+     </Tabs>
+
+  2. Start the app you want to work on.
+
+     <Tabs syncKey="workspace-app">
+       <TabItem label="docs">
+
+       ```bash
+       bun run --filter @proyecto-final/docs dev
+       ```
+
+       </TabItem>
+       <TabItem label="web">
+
+       ```bash
+       bun run --filter @proyecto-final/web dev
+       ```
+
+       </TabItem>
+       <TabItem label="all">
+
+       ```bash
+       bun run dev
+       ```
+
+       </TabItem>
+     </Tabs>
+
+  3. Use Turborepo scripts from the repository root.
+
+     ```bash
+     bun run build
+     bun run lint
+     bun run typecheck
+     ```
+</Steps>
+
+## Learning paths
+
+<CardGrid>
+  <LinkCard
+    title="Read the diagrams"
+    href="/diagrams"
+    description="Open the migrated system diagrams in the Astro docs app."
+  />
+  <LinkCard
+    title="Inspect the web app"
+    href="/diagrams/main-flow"
+    description="Start from the main simulation flow and drill into each sub-process."
+  />
+</CardGrid>
