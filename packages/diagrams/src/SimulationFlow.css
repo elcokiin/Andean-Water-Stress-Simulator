@@ -2,7 +2,7 @@
 .simulation-flow {
   --flow-surface: #f8fafc;
   --flow-panel-border: #e2e8f0;
-  font-family: var(--sans, system-ui, 'Segoe UI', Roboto, sans-serif);
+  font-family: var(--sans, system-ui, "Segoe UI", Roboto, sans-serif);
   color: #0f172a;
   background: var(--flow-surface);
 }

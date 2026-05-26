@@ -255,7 +255,7 @@ export default function PointOfNoReturnFlow({
 
   const displayNodes = nodes.map((node) => {
     if (!node.data) return node;
-    
+
     if (node.id.startsWith("decision")) {
       return {
         ...node,
@@ -313,7 +313,9 @@ export default function PointOfNoReturnFlow({
                 justifyContent: "center",
               }}
             >
-              <div style={{ transform: "skew(10deg)" }}>{(node.data as NodeData).label}</div>
+              <div style={{ transform: "skew(10deg)" }}>
+                {(node.data as NodeData).label}
+              </div>
             </div>
           ),
         },
@@ -346,7 +348,9 @@ export default function PointOfNoReturnFlow({
                 fontWeight: 700,
               }}
             >
-              <div style={{ transform: "skew(10deg)" }}>{(node.data as NodeData).label}</div>
+              <div style={{ transform: "skew(10deg)" }}>
+                {(node.data as NodeData).label}
+              </div>
             </div>
           ),
         },

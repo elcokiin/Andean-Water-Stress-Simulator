@@ -1,5 +1,14 @@
 import { useCallback, type CSSProperties, type ReactNode } from "react";
-import { ReactFlow, Background, Controls, useNodesState, useEdgesState, addEdge, MarkerType, BackgroundVariant } from "@xyflow/react";
+import {
+  ReactFlow,
+  Background,
+  Controls,
+  useNodesState,
+  useEdgesState,
+  addEdge,
+  MarkerType,
+  BackgroundVariant,
+} from "@xyflow/react";
 import type { Connection, Edge } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 
@@ -10,9 +19,9 @@ type DiagramProps = {
 
 const flow = {
   forward: "#0ea5e9",
-  nino: "#ef4444",     // Red for El Niño
-  nina: "#3b82f6",     // Blue for La Niña
-  neutral: "#22c55e",  // Green for Neutral
+  nino: "#ef4444", // Red for El Niño
+  nina: "#3b82f6", // Blue for La Niña
+  neutral: "#22c55e", // Green for Neutral
   toEnd: "#8b5cf6",
   strokeWidth: 2.25,
 } as const;
@@ -44,14 +53,23 @@ const baseNodeStyle = {
 };
 
 type NodeData = { label: ReactNode };
-const getLabel = (node: { data: unknown }): ReactNode => (node.data as NodeData).label;
+const getLabel = (node: { data: unknown }): ReactNode =>
+  (node.data as NodeData).label;
 
 const initialNodes = [
   {
     id: "start",
     data: { label: "Inicio Subproceso Clima" },
     position: { x: 340, y: 50 },
-    style: { ...baseNodeStyle, borderRadius: "50%", width: 140, height: 60, display: "flex", alignItems: "center", justifyContent: "center" },
+    style: {
+      ...baseNodeStyle,
+      borderRadius: "50%",
+      width: 140,
+      height: 60,
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+    },
   },
   {
     id: "input_time",
@@ -69,41 +87,82 @@ const initialNodes = [
     id: "interpolate",
     data: { label: "Calcular ONI mediante Interpolación Lineal" },
     position: { x: 280, y: 500 },
-    style: { ...baseNodeStyle, width: 260, background: "#f3e8ff", borderColor: "#c084fc", color: "#6b21a8" },
+    style: {
+      ...baseNodeStyle,
+      width: 260,
+      background: "#f3e8ff",
+      borderColor: "#c084fc",
+      color: "#6b21a8",
+    },
   },
   {
     id: "decision_nino",
     data: { label: "¿El ONI es >= 0.5?" },
     position: { x: 300, y: 650 },
-    style: { ...baseNodeStyle, width: 200, background: "#fef3c7", borderColor: "#fcd34d" },
+    style: {
+      ...baseNodeStyle,
+      width: 200,
+      background: "#fef3c7",
+      borderColor: "#fcd34d",
+    },
   },
   {
     id: "el_nino",
-    data: { label: "Activar Fase El Niño: Reducir Precipitación y Aumentar Temperatura" },
+    data: {
+      label:
+        "Activar Fase El Niño: Reducir Precipitación y Aumentar Temperatura",
+    },
     position: { x: 50, y: 850 },
-    style: { ...baseNodeStyle, width: 280, background: "#fef2f2", borderColor: "#fca5a5", color: "#7f1d1d" },
+    style: {
+      ...baseNodeStyle,
+      width: 280,
+      background: "#fef2f2",
+      borderColor: "#fca5a5",
+      color: "#7f1d1d",
+    },
   },
   {
     id: "decision_nina",
     data: { label: "¿El ONI es <= -0.5?" },
     position: { x: 500, y: 850 },
-    style: { ...baseNodeStyle, width: 200, background: "#fef3c7", borderColor: "#fcd34d" },
+    style: {
+      ...baseNodeStyle,
+      width: 200,
+      background: "#fef3c7",
+      borderColor: "#fcd34d",
+    },
   },
   {
     id: "la_nina",
     data: { label: "Activar Fase La Niña: Aumentar Precipitación Base" },
     position: { x: 50, y: 1050 },
-    style: { ...baseNodeStyle, width: 260, background: "#eff6ff", borderColor: "#93c5fd", color: "#1e3a8a" },
+    style: {
+      ...baseNodeStyle,
+      width: 260,
+      background: "#eff6ff",
+      borderColor: "#93c5fd",
+      color: "#1e3a8a",
+    },
   },
   {
     id: "neutral",
-    data: { label: "Fase Neutral: Mantener Precipitación y Temperatura Históricas" },
+    data: {
+      label: "Fase Neutral: Mantener Precipitación y Temperatura Históricas",
+    },
     position: { x: 500, y: 1050 },
-    style: { ...baseNodeStyle, width: 280, background: "#f0fdf4", borderColor: "#86efac", color: "#14532d" },
+    style: {
+      ...baseNodeStyle,
+      width: 280,
+      background: "#f0fdf4",
+      borderColor: "#86efac",
+      color: "#14532d",
+    },
   },
   {
     id: "calculate",
-    data: { label: "Calcular Caudal de Entrada modificado y Tasa de Evaporación" },
+    data: {
+      label: "Calcular Caudal de Entrada modificado y Tasa de Evaporación",
+    },
     position: { x: 280, y: 1250 },
     style: { ...baseNodeStyle, width: 280 },
   },
@@ -117,7 +176,15 @@ const initialNodes = [
     id: "end",
     data: { label: "Fin Subproceso Clima" },
     position: { x: 340, y: 1550 },
-    style: { ...baseNodeStyle, borderRadius: "50%", width: 140, height: 60, display: "flex", alignItems: "center", justifyContent: "center" },
+    style: {
+      ...baseNodeStyle,
+      borderRadius: "50%",
+      width: 140,
+      height: 60,
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+    },
   },
 ];
 
@@ -126,41 +193,41 @@ const initialEdges: Edge[] = [
   { id: "e2", source: "input_time", target: "search_table", ...forwardEdge },
   { id: "e3", source: "search_table", target: "interpolate", ...forwardEdge },
   { id: "e4", source: "interpolate", target: "decision_nino", ...forwardEdge },
-  { 
-    id: "e5", 
-    source: "decision_nino", 
-    target: "el_nino", 
+  {
+    id: "e5",
+    source: "decision_nino",
+    target: "el_nino",
     label: "Sí",
     style: { stroke: flow.nino, strokeWidth: flow.strokeWidth },
     markerEnd: marker(flow.nino),
-    ...edgeLabel 
+    ...edgeLabel,
   },
-  { 
-    id: "e6", 
-    source: "decision_nino", 
-    target: "decision_nina", 
+  {
+    id: "e6",
+    source: "decision_nino",
+    target: "decision_nina",
     label: "No",
     style: { stroke: flow.forward, strokeWidth: flow.strokeWidth },
     markerEnd: marker(flow.forward),
-    ...edgeLabel 
+    ...edgeLabel,
   },
-  { 
-    id: "e7", 
-    source: "decision_nina", 
-    target: "la_nina", 
+  {
+    id: "e7",
+    source: "decision_nina",
+    target: "la_nina",
     label: "Sí",
     style: { stroke: flow.nina, strokeWidth: flow.strokeWidth },
     markerEnd: marker(flow.nina),
-    ...edgeLabel 
+    ...edgeLabel,
   },
-  { 
-    id: "e8", 
-    source: "decision_nina", 
-    target: "neutral", 
+  {
+    id: "e8",
+    source: "decision_nina",
+    target: "neutral",
     label: "No",
     style: { stroke: flow.neutral, strokeWidth: flow.strokeWidth },
     markerEnd: marker(flow.neutral),
-    ...edgeLabel 
+    ...edgeLabel,
   },
   { id: "e9", source: "el_nino", target: "calculate", ...forwardEdge },
   { id: "e10", source: "neutral", target: "calculate", ...forwardEdge },
@@ -220,7 +287,7 @@ export default function ClimateImpactFlow({
           background: "transparent",
           border: "none",
           padding: 0,
-        }
+        },
       };
     }
     if (node.id === "input_time" || node.id === "output") {
@@ -231,9 +298,10 @@ export default function ClimateImpactFlow({
             <div
               style={{
                 transform: "skew(-10deg)",
-                background: node.id === "output" 
-                  ? "linear-gradient(135deg, #fefce8 0%, #fef9c3 100%)"
-                  : "linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%)",
+                background:
+                  node.id === "output"
+                    ? "linear-gradient(135deg, #fefce8 0%, #fef9c3 100%)"
+                    : "linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%)",
                 border: `2px solid ${node.id === "output" ? "#eab308" : "#fb923c"}`,
                 color: node.id === "output" ? "#713f12" : "#9a3412",
                 padding: "10px",
@@ -253,7 +321,7 @@ export default function ClimateImpactFlow({
           background: "transparent",
           border: "none",
           padding: 0,
-        }
+        },
       };
     }
     if (node.id === "start" || node.id === "end") {
@@ -261,14 +329,15 @@ export default function ClimateImpactFlow({
         ...node,
         style: {
           ...node.style,
-          background: node.id === "start"
-            ? "linear-gradient(180deg, #ecfdf5 0%, #d1fae5 100%)"
-            : "linear-gradient(180deg, #f5f3ff 0%, #ede9fe 100%)",
+          background:
+            node.id === "start"
+              ? "linear-gradient(180deg, #ecfdf5 0%, #d1fae5 100%)"
+              : "linear-gradient(180deg, #f5f3ff 0%, #ede9fe 100%)",
           border: `2px solid ${node.id === "start" ? "#34d399" : "#a78bfa"}`,
           color: node.id === "start" ? "#065f46" : "#5b21b6",
           fontWeight: 600,
-        }
-      }
+        },
+      };
     }
     return node;
   });
@@ -285,16 +354,16 @@ export default function ClimateImpactFlow({
     >
       <h1 className="simulation-flow__title">{title}</h1>
       <div style={{ flex: 1, width: "100%" }}>
-        <ReactFlow 
-          nodes={displayNodes as typeof nodes} 
-          edges={edges} 
+        <ReactFlow
+          nodes={displayNodes as typeof nodes}
+          edges={edges}
           onNodesChange={onNodesChange}
           onEdgesChange={onEdgesChange}
           onConnect={onConnect}
           fitView
           defaultEdgeOptions={defaultEdgeOptions}
         >
-          <Background 
+          <Background
             variant={BackgroundVariant.Dots}
             gap={14}
             size={1.25}

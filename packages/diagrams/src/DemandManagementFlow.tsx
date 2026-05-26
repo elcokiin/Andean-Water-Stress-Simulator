@@ -1,5 +1,14 @@
 import { useCallback, type CSSProperties, type ReactNode } from "react";
-import { ReactFlow, Background, Controls, useNodesState, useEdgesState, addEdge, MarkerType, BackgroundVariant } from "@xyflow/react";
+import {
+  ReactFlow,
+  Background,
+  Controls,
+  useNodesState,
+  useEdgesState,
+  addEdge,
+  MarkerType,
+  BackgroundVariant,
+} from "@xyflow/react";
 import type { Connection, Edge } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 
@@ -43,14 +52,23 @@ const baseNodeStyle = {
 };
 
 type NodeData = { label: ReactNode };
-const getLabel = (node: { data: unknown }): ReactNode => (node.data as NodeData).label;
+const getLabel = (node: { data: unknown }): ReactNode =>
+  (node.data as NodeData).label;
 
 const initialNodes = [
   {
     id: "start",
     data: { label: "Inicio Demanda" },
     position: { x: 340, y: 50 },
-    style: { ...baseNodeStyle, borderRadius: "50%", width: 120, height: 60, display: "flex", alignItems: "center", justifyContent: "center" },
+    style: {
+      ...baseNodeStyle,
+      borderRadius: "50%",
+      width: 120,
+      height: 60,
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+    },
   },
   {
     id: "input_data",
@@ -68,31 +86,56 @@ const initialNodes = [
     id: "decision_15",
     data: { label: "¿El Nivel del Embalse es < 15%?" },
     position: { x: 300, y: 500 },
-    style: { ...baseNodeStyle, width: 200, background: "#fef3c7", borderColor: "#fcd34d" },
+    style: {
+      ...baseNodeStyle,
+      width: 200,
+      background: "#fef3c7",
+      borderColor: "#fcd34d",
+    },
   },
   {
     id: "ration_extreme",
     data: { label: "Racionamiento Extremo: Factor = 0.090" },
     position: { x: 30, y: 650 },
-    style: { ...baseNodeStyle, background: "#fef2f2", borderColor: "#fca5a5", color: "#7f1d1d" },
+    style: {
+      ...baseNodeStyle,
+      background: "#fef2f2",
+      borderColor: "#fca5a5",
+      color: "#7f1d1d",
+    },
   },
   {
     id: "decision_30",
     data: { label: "¿El Nivel del Embalse es < 30%?" },
     position: { x: 500, y: 600 },
-    style: { ...baseNodeStyle, width: 200, background: "#fef3c7", borderColor: "#fcd34d" },
+    style: {
+      ...baseNodeStyle,
+      width: 200,
+      background: "#fef3c7",
+      borderColor: "#fcd34d",
+    },
   },
   {
     id: "ration_moderate",
     data: { label: "Racionamiento Moderado: Factor = 0.110" },
     position: { x: 340, y: 750 },
-    style: { ...baseNodeStyle, background: "#fff7ed", borderColor: "#fdba74", color: "#9a3412" },
+    style: {
+      ...baseNodeStyle,
+      background: "#fff7ed",
+      borderColor: "#fdba74",
+      color: "#9a3412",
+    },
   },
   {
     id: "no_normal",
     data: { label: "Estado Normal: Factor = 0.148" },
     position: { x: 670, y: 750 },
-    style: { ...baseNodeStyle, background: "#f0fdf4", borderColor: "#86efac", color: "#14532d" },
+    style: {
+      ...baseNodeStyle,
+      background: "#f0fdf4",
+      borderColor: "#86efac",
+      color: "#14532d",
+    },
   },
   {
     id: "calc_extract",
@@ -110,7 +153,15 @@ const initialNodes = [
     id: "end",
     data: { label: "Fin Demanda" },
     position: { x: 340, y: 1250 },
-    style: { ...baseNodeStyle, borderRadius: "50%", width: 120, height: 60, display: "flex", alignItems: "center", justifyContent: "center" },
+    style: {
+      ...baseNodeStyle,
+      borderRadius: "50%",
+      width: 120,
+      height: 60,
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+    },
   },
 ];
 
@@ -118,44 +169,54 @@ const initialEdges: Edge[] = [
   { id: "e1", source: "start", target: "input_data", ...forwardEdge },
   { id: "e2", source: "input_data", target: "calc_level", ...forwardEdge },
   { id: "e3", source: "calc_level", target: "decision_15", ...forwardEdge },
-  { 
-    id: "e4", 
-    source: "decision_15", 
-    target: "ration_extreme", 
+  {
+    id: "e4",
+    source: "decision_15",
+    target: "ration_extreme",
     label: "Sí",
     style: { stroke: flow.branchYes, strokeWidth: flow.strokeWidth },
     markerEnd: marker(flow.branchYes),
-    ...edgeLabel 
+    ...edgeLabel,
   },
-  { 
-    id: "e5", 
-    source: "decision_15", 
-    target: "decision_30", 
+  {
+    id: "e5",
+    source: "decision_15",
+    target: "decision_30",
     label: "No",
     style: { stroke: flow.forward, strokeWidth: flow.strokeWidth },
     markerEnd: marker(flow.forward),
-    ...edgeLabel 
+    ...edgeLabel,
   },
-  { 
-    id: "e6", 
-    source: "decision_30", 
-    target: "ration_moderate", 
+  {
+    id: "e6",
+    source: "decision_30",
+    target: "ration_moderate",
     label: "Sí",
     style: { stroke: "#f97316", strokeWidth: flow.strokeWidth },
     markerEnd: marker("#f97316"),
-    ...edgeLabel 
+    ...edgeLabel,
   },
-  { 
-    id: "e7", 
-    source: "decision_30", 
-    target: "no_normal", 
+  {
+    id: "e7",
+    source: "decision_30",
+    target: "no_normal",
     label: "No",
     style: { stroke: flow.loop, strokeWidth: flow.strokeWidth },
     markerEnd: marker(flow.loop),
-    ...edgeLabel 
+    ...edgeLabel,
   },
-  { id: "e8", source: "ration_extreme", target: "calc_extract", ...forwardEdge },
-  { id: "e9", source: "ration_moderate", target: "calc_extract", ...forwardEdge },
+  {
+    id: "e8",
+    source: "ration_extreme",
+    target: "calc_extract",
+    ...forwardEdge,
+  },
+  {
+    id: "e9",
+    source: "ration_moderate",
+    target: "calc_extract",
+    ...forwardEdge,
+  },
   { id: "e10", source: "no_normal", target: "calc_extract", ...forwardEdge },
   { id: "e11", source: "calc_extract", target: "output", ...forwardEdge },
   { id: "e12", source: "output", target: "end", ...forwardEdge },
@@ -212,7 +273,7 @@ export default function DemandManagementFlow({
           background: "transparent",
           border: "none",
           padding: 0,
-        }
+        },
       };
     }
     if (node.id === "input_data" || node.id === "output") {
@@ -223,9 +284,10 @@ export default function DemandManagementFlow({
             <div
               style={{
                 transform: "skew(-10deg)",
-                background: node.id === "output" 
-                  ? "linear-gradient(135deg, #fefce8 0%, #fef9c3 100%)"
-                  : "linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%)",
+                background:
+                  node.id === "output"
+                    ? "linear-gradient(135deg, #fefce8 0%, #fef9c3 100%)"
+                    : "linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%)",
                 border: `2px solid ${node.id === "output" ? "#eab308" : "#fb923c"}`,
                 color: node.id === "output" ? "#713f12" : "#9a3412",
                 padding: "10px",
@@ -245,7 +307,7 @@ export default function DemandManagementFlow({
           background: "transparent",
           border: "none",
           padding: 0,
-        }
+        },
       };
     }
     if (node.id === "start" || node.id === "end") {
@@ -253,14 +315,15 @@ export default function DemandManagementFlow({
         ...node,
         style: {
           ...node.style,
-          background: node.id === "start"
-            ? "linear-gradient(180deg, #ecfdf5 0%, #d1fae5 100%)"
-            : "linear-gradient(180deg, #f5f3ff 0%, #ede9fe 100%)",
+          background:
+            node.id === "start"
+              ? "linear-gradient(180deg, #ecfdf5 0%, #d1fae5 100%)"
+              : "linear-gradient(180deg, #f5f3ff 0%, #ede9fe 100%)",
           border: `2px solid ${node.id === "start" ? "#34d399" : "#a78bfa"}`,
           color: node.id === "start" ? "#065f46" : "#5b21b6",
           fontWeight: 600,
-        }
-      }
+        },
+      };
     }
     return node;
   });
@@ -277,16 +340,16 @@ export default function DemandManagementFlow({
     >
       <h1 className="simulation-flow__title">{title}</h1>
       <div style={{ flex: 1, width: "100%" }}>
-        <ReactFlow 
-          nodes={displayNodes as typeof nodes} 
-          edges={edges} 
+        <ReactFlow
+          nodes={displayNodes as typeof nodes}
+          edges={edges}
           onNodesChange={onNodesChange}
           onEdgesChange={onEdgesChange}
           onConnect={onConnect}
           fitView
           defaultEdgeOptions={defaultEdgeOptions}
         >
-          <Background 
+          <Background
             variant={BackgroundVariant.Dots}
             gap={14}
             size={1.25}
