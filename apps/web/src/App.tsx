@@ -151,10 +151,10 @@ function App() {
           </div>
           <nav className="flex items-center gap-4">
             <Button variant="ghost" size="sm" asChild className="hidden text-muted-foreground hover:text-foreground md:flex">
-              <a href={import.meta.env.VITE_DOCS_URL} target="_blank" rel="noreferrer">Metodología</a>
+              <a href={`${import.meta.env.VITE_DOCS_URL}/metodologia-hipotesis`} target="_blank" rel="noreferrer">Metodología</a>
             </Button>
             <Button variant="ghost" size="sm" asChild className="hidden text-muted-foreground hover:text-foreground md:flex">
-              <a href={import.meta.env.VITE_DOCS_URL} target="_blank" rel="noreferrer">Documentación</a>
+              <a href={`${import.meta.env.VITE_DOCS_URL}/simulacion-hidrica`} target="_blank" rel="noreferrer">Documentación</a>
             </Button>
             <Button
               variant="ghost"
@@ -191,7 +191,7 @@ function App() {
               </Link>
             </Button>
             <Button size="lg" variant="outline" asChild className="rounded-full px-8 h-12 text-base font-semibold border-border/50 bg-background/50 backdrop-blur-sm hover:bg-muted/50 transition-all">
-              <a href={import.meta.env.VITE_DOCS_URL} target="_blank" rel="noreferrer">
+              <a href={`${import.meta.env.VITE_DOCS_URL}/metodologia-hipotesis`} target="_blank" rel="noreferrer">
                 Leer Hipótesis <ChevronRight className="ml-1 h-4 w-4 text-muted-foreground" />
               </a>
             </Button>

@@ -1,0 +1,51 @@
+---
+title: Simulación Hídrica Regional (Boyacá)
+description: Documentación del proyecto de simulación hídrica regional para el corredor urbano-industrial de Boyacá.
+---
+
+## Objetivo
+
+El proyecto consiste en una simulación hídrica regional para el corredor urbano-industrial de Boyacá, comprendiendo los municipios de Tunja, Duitama y Sogamoso. Su objetivo principal es determinar el momento exacto y las condiciones bajo las cuales el sistema hídrico cruza un umbral irreversible, configurando un colapso.
+
+### Subsistemas Urbanos
+
+- **Tunja:** Embalse La Copa. Operador: CORPOBOYACA / Veolia. Demanda: 148 L/hab/día. Crecimiento: 1.4% anual.
+- **Duitama:** Embalse La Playa. Operador: CORPOBOYACA / Empoduitama. Demanda: 132 L/hab/día. Crecimiento: 1.1% anual.
+- **Sogamoso:** Río Chicamocha. Operador: CORPOBOYACA / Coservicios. Demanda: 140 L/hab/día. Crecimiento: 0.9% anual.
+
+## Metodología
+
+Se utiliza un **Modelo de Dinámica de Sistemas (Forrester)** evaluado bajo el Índice Oceánico del Niño (ONI). Esta aproximación permite manejar la complejidad dinámica del sistema, analizar la irreversibilidad de umbrales críticos y probar escenarios de gestión a lo largo de décadas.
+
+## Hipótesis
+
+Un colapso suave precede a un colapso abrupto cuando las reservas hídricas bajan del 15%, activando bucles de retroalimentación que impiden la recuperación del sistema.
+
+### Señales Clave
+
+- Reducción de precipitaciones entre 30% y 60% durante eventos intensos de El Niño.
+- Punto de No Retorno (PNR) definido cuando las reservas caen por debajo del 15% por dos meses consecutivos.
+- Recarga menor al 20% de la media histórica como condición crítica de colapso.
+- Eficiencia media de distribución del 62%, con pérdidas del 38% en la red.
+
+## Estructura del Modelo
+
+- **Niveles:** Volumen almacenado en embalses (m³), Población, Nivel del acuífero (m), Cobertura de páramo (ha).
+- **Flujos (Tasas):** Caudal de entrada, Extracción total, Tasa de evaporación, Tasa de filtración.
+- **Auxiliares / Exógenas:** Índice ONI, Demanda per cápita, Factor de cobertura de páramo, Factor de racionamiento.
+
+## Escenarios
+
+1. **Línea base:** Serie histórica 2000-2023 utilizada para calibrar y validar el modelo.
+2. **El Niño moderado recurrente:** ONI +1.0 a +1.5 durante 8-12 meses cada 5 años. PNR estimado entre 2030 y 2035.
+3. **El Niño extraordinario prolongado:** ONI +2.0 a +3.0 durante 18-24 meses continuos. Resulta en un colapso acelerado antes del año 2030.
+
+## Lazos de Retroalimentación
+
+### Lazos de Refuerzo (+)
+- **Espiral de Escasez (R1):** Descenso de reservas → Aumento de extracción de acuíferos → Menor recarga → Mayor descenso. Es el principal mecanismo de colapso abrupto.
+- **Degradación del Páramo (R2):** Estrés hídrico → Muerte de vegetación → Menor retención de agua → Menor escorrentía.
+
+### Lazos de Balance (-)
+- **Regulación por Demanda (B1):** Descenso de reservas → Activación de racionamiento → Reducción del consumo.
+- **Recuperación Natural (B2):** Descenso de reservas → Lluvias post-Niño → Aumento de reservas.

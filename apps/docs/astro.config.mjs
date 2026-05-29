@@ -19,6 +19,13 @@ export default defineConfig({
           ],
         },
         {
+          label: "Investigación",
+          items: [
+            { label: "Simulación Hídrica", slug: "simulacion-hidrica" },
+            { label: "Metodología e Hipótesis", slug: "metodologia-hipotesis" },
+          ],
+        },
+        {
           label: "Diagramas",
           items: [
             { label: "Resumen", slug: "diagrams" },
