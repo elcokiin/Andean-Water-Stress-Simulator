@@ -3,23 +3,35 @@
   background:
     radial-gradient(
       circle at top left,
-      oklch(0.657 0.1385 234.8913 / 0.08),
+      color-mix(in oklch, var(--primary) 8%, transparent) 0%,
       transparent 45%
     ),
     radial-gradient(
       circle at top right,
-      oklch(0.5341 0.1177 112.1713 / 0.06),
+      color-mix(in oklch, var(--chart-3) 6%, transparent) 0%,
       transparent 40%
     ),
     radial-gradient(
       circle at bottom center,
-      oklch(0.7074 0.129 221.1118 / 0.05),
+      color-mix(in oklch, var(--secondary) 5%, transparent) 0%,
       transparent 50%
     ),
-    linear-gradient(
-      180deg,
-      oklch(0.9789 0.006 223.4551) 0%,
-      oklch(0.9653 0.01 218.5721) 48%,
-      oklch(0.953 0.0134 214.3593) 100%
-    );
+    var(--background);
+}
+
+@keyframes scroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(calc(-50% - 0.75rem)); /* Adjust for gap */
+  }
+}
+
+.animate-scroll {
+  animation: scroll 30s linear infinite;
+}
+
+.animate-scroll:hover {
+  animation-play-state: paused;
 }
