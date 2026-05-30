@@ -16,10 +16,7 @@ import {
   Minimize2,
   Pause,
   Play,
-  RotateCcw,
   Settings,
-  SkipBack,
-  SkipForward,
   Waves,
 } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -220,16 +217,7 @@ export default function ModelScene() {
           step={step}
           onConfigOpen={() => setConfigOpen(true)}
           onScenarioChange={setScenario}
-          onStepBack={() => setStep((value) => Math.max(value - 1, 0))}
-          onStepForward={() =>
-            setStep((value) => Math.min(value + 1, timeline.length - 1))
-          }
           onTogglePlayback={() => setIsPlaying((value) => !value)}
-          onReset={() => {
-            setIsPlaying(false);
-            setStep(0);
-            setScenario("baseline");
-          }}
         />
 
         <ModelConfigDialog
@@ -251,7 +239,7 @@ export default function ModelScene() {
 function TitleBar({ onOpenHelp }: { onOpenHelp: () => void }) {
   return (
     <div className="absolute top-4 left-1/2 z-10 -translate-x-1/2">
-      <div className="flex items-center gap-2 rounded-xl border border-border bg-background/85 px-3 py-2 shadow-lg backdrop-blur-sm sm:px-5">
+      <div className="flex items-center gap-2 rounded-[10px] border border-border bg-background/85 px-3 py-2 shadow-lg backdrop-blur-sm sm:px-5">
         <Button variant="ghost" size="icon-sm" asChild aria-label="Volver">
           <Link to="/">
             <ArrowLeft />
@@ -288,10 +276,7 @@ function ControlsPanel({
   selectedScenario,
   step,
   onConfigOpen,
-  onReset,
   onScenarioChange,
-  onStepBack,
-  onStepForward,
   onTogglePlayback,
 }: {
   isPlaying: boolean;
@@ -299,35 +284,37 @@ function ControlsPanel({
   selectedScenario: (typeof scenarios)[ScenarioId];
   step: number;
   onConfigOpen: () => void;
-  onReset: () => void;
   onScenarioChange: (scenario: ScenarioId) => void;
-  onStepBack: () => void;
-  onStepForward: () => void;
   onTogglePlayback: () => void;
 }) {
   return (
-    <Card className="absolute right-3 bottom-3 left-3 z-10 gap-3 border-border/80 bg-background/90 p-4 shadow-xl backdrop-blur-sm sm:right-auto sm:left-4 sm:w-[360px]">
-      <CardHeader className="flex-row items-center justify-between gap-3 p-0">
+    <Card className="absolute right-3 bottom-3 left-3 z-10 gap-3 rounded-[10px] border-border/80 bg-background/90 p-3 shadow-xl backdrop-blur-sm sm:right-auto sm:left-4 sm:w-[340px]">
+      <CardHeader className="flex items-center justify-between gap-3 p-0">
         <div>
           <CardTitle className="text-sm">Panel de control</CardTitle>
           <p className="text-xs text-muted-foreground">
-            Escenarios y navegacion temporal
+            {timeline[step]} · paso {step + 1}/{timeline.length}
           </p>
         </div>
-        <Button variant="outline" size="sm" onClick={onConfigOpen}>
-          <Settings data-icon="inline-start" />
-          Configurar
+        <Button
+          variant="outline"
+          size="icon"
+          className="rounded-[8px]"
+          onClick={onConfigOpen}
+          aria-label="Configurar modelo"
+        >
+          <Settings />
         </Button>
       </CardHeader>
 
-      <CardContent className="flex flex-col gap-4 p-0">
-        <div className="grid grid-cols-3 gap-2">
+      <CardContent className="flex flex-col gap-3 p-0">
+        <div className="grid grid-cols-3 gap-1.5">
           {(Object.keys(scenarios) as ScenarioId[]).map((scenarioId) => (
             <Button
               key={scenarioId}
               variant={scenario === scenarioId ? "default" : "outline"}
               size="sm"
-              className="h-auto flex-col items-start gap-1 px-2 py-2 text-left"
+              className="h-11 flex-col items-start gap-0.5 rounded-[8px] px-2 text-left"
               onClick={() => onScenarioChange(scenarioId)}
             >
               <span className="w-full truncate text-xs">
@@ -340,74 +327,47 @@ function ControlsPanel({
           ))}
         </div>
 
-        <div className="grid grid-cols-3 gap-2 text-xs">
-          <Metric label="Reserva" value={`${selectedScenario.reserve}%`} />
-          <Metric label="Entrada" value={selectedScenario.inflow} />
-          <Metric label="Demanda" value={selectedScenario.demand} />
+        <div className="rounded-[8px] border border-border bg-card/80 p-2.5">
+          <div className="flex items-center justify-between gap-3">
+            <div className="min-w-0">
+              <p className="text-xs font-medium text-foreground">
+                {selectedScenario.name}
+              </p>
+              <p className="truncate text-xs text-muted-foreground">
+                Reserva {selectedScenario.reserve}% · ONI {selectedScenario.oni}
+              </p>
+            </div>
+            <Badge
+              variant={
+                selectedScenario.reserve <= 15 ? "destructive" : "outline"
+              }
+              className="shrink-0 rounded-[6px]"
+            >
+              {selectedScenario.reserve <= 15 ? "PNR" : selectedScenario.badge}
+            </Badge>
+          </div>
+          <div className="mt-2 h-1.5 overflow-hidden rounded-[4px] bg-muted">
+            <div
+              className="h-full rounded-[4px] bg-primary transition-all"
+              style={{ width: `${selectedScenario.reserve}%` }}
+            />
+          </div>
         </div>
 
-        <Separator />
-
-        <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={onReset}
-            aria-label="Reiniciar simulacion"
-          >
-            <RotateCcw />
-          </Button>
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={onStepBack}
-            disabled={step <= 0}
-            aria-label="Paso anterior"
-          >
-            <SkipBack />
-          </Button>
+        <div className="grid grid-cols-[1fr_auto] items-center gap-3">
+          <div className="grid grid-cols-2 gap-1.5 text-xs">
+            <Metric label="Entrada" value={selectedScenario.inflow} />
+            <Metric label="Demanda" value={selectedScenario.demand} />
+          </div>
           <Button
             variant={isPlaying ? "secondary" : "default"}
             size="icon"
+            className="size-10 rounded-[8px]"
             onClick={onTogglePlayback}
             aria-label={isPlaying ? "Pausar simulacion" : "Iniciar simulacion"}
           >
             {isPlaying ? <Pause /> : <Play />}
           </Button>
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={onStepForward}
-            disabled={step >= timeline.length - 1}
-            aria-label="Siguiente paso"
-          >
-            <SkipForward />
-          </Button>
-          <div className="ml-auto text-right">
-            <p className="text-xs font-medium text-foreground">
-              {timeline[step]}
-            </p>
-            <p className="text-[0.68rem] text-muted-foreground">
-              Paso {step + 1} / {timeline.length}
-            </p>
-          </div>
-        </div>
-
-        <div className="rounded-lg border border-border bg-muted/45 p-3">
-          <div className="mb-2 flex items-center justify-between gap-2">
-            <span className="text-xs font-medium">Estado del sistema</span>
-            <Badge
-              variant={
-                selectedScenario.reserve <= 15 ? "destructive" : "outline"
-              }
-            >
-              {selectedScenario.reserve <= 15 ? "PNR" : selectedScenario.badge}
-            </Badge>
-          </div>
-          <p className="text-xs leading-relaxed text-muted-foreground">
-            {selectedScenario.name}: reserva simulada al{" "}
-            {selectedScenario.reserve}% con ONI {selectedScenario.oni}.
-          </p>
         </div>
       </CardContent>
     </Card>
@@ -416,7 +376,7 @@ function ControlsPanel({
 
 function Metric({ label, value }: { label: string; value: string }) {
   return (
-    <div className="min-w-0 rounded-lg border border-border bg-card/80 p-2">
+    <div className="min-w-0 rounded-[8px] border border-border bg-card/70 px-2 py-1.5">
       <p className="truncate text-[0.65rem] font-medium uppercase tracking-wide text-muted-foreground">
         {label}
       </p>
