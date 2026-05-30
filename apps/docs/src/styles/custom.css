@@ -1,18 +1,36 @@
-:root {
-  --sl-color-accent-low: #dbeafe;
-  --sl-color-accent: #2563eb;
-  --sl-color-accent-high: #1d4ed8;
+:root, :root[data-theme='dark'] {
+  --sl-color-bg: oklch(0.1859 0.0324 221.1646);
+  --sl-color-text: oklch(0.9493 0.0202 216.1968);
+  --sl-color-accent: oklch(0.7074 0.129 221.1118);
+  --sl-color-bg-nav: oklch(0.2951 0.0531 223.606);
+  --sl-color-bg-sidebar: oklch(0.1646 0.0273 217.6452);
+  --sl-color-hairline: oklch(0.3489 0.0629 223.0313);
+  --sl-color-hairline-shade: oklch(0.3489 0.0629 223.0313);
+  --sl-color-black: oklch(0.2419 0.0425 221.6995);
+  --sl-color-white: oklch(0.9493 0.0202 216.1968);
+}
+
+:root[data-theme='light'] {
+  --sl-color-bg: oklch(0.9789 0.006 223.4551);
+  --sl-color-text: oklch(0.3401 0.0462 225.0064);
+  --sl-color-accent: oklch(0.657 0.1385 234.8913);
+  --sl-color-bg-nav: oklch(0.953 0.0134 214.3593);
+  --sl-color-bg-sidebar: oklch(0.9789 0.006 223.4551);
+  --sl-color-hairline: oklch(0.9042 0.0209 219.701);
+  --sl-color-hairline-shade: oklch(0.9042 0.0209 219.701);
+  --sl-color-black: oklch(1 0 0);
+  --sl-color-white: oklch(0.3401 0.0462 225.0064);
 }
 
 .diagram-frame {
   border: 1px solid color-mix(in srgb, var(--sl-color-gray-3) 60%, white);
   border-radius: 1rem;
   overflow: hidden;
-  background: white;
+  background: var(--sl-color-black); /* Updated to use card background */
   box-shadow: 0 20px 40px rgb(37 99 235 / 8%);
   margin: 1.5rem 0;
 }
 
 .diagram-frame :global(.simulation-flow) {
-  background: white;
+  background: var(--sl-color-black); /* Updated to use card background */
 }
