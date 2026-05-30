@@ -4,7 +4,13 @@ import { ReservoirWater } from "./ReservoirWater";
 import { TunjaTerrain } from "./Terrain";
 import { TunjaEnvironment, TunjaLighting, TunjaSky } from "./TunjaSky";
 
-export function TunjaScene() {
+export function TunjaScene({
+  autoRotate = false,
+  waterLevel = 1,
+}: {
+  autoRotate?: boolean;
+  waterLevel?: number;
+}) {
   return (
     <>
       <TunjaEnvironment />
@@ -14,7 +20,7 @@ export function TunjaScene() {
       <CloudGroup position={[0.8, 5.05, -10.5]} scale={0.9} />
       <CloudGroup position={[4.9, 4.6, -9.3]} scale={1.0} />
       <TunjaTerrain />
-      <ReservoirWater />
+      <ReservoirWater level={waterLevel} />
       <ContactShadows
         position={[0, 0.02, 0]}
         scale={13}
@@ -24,6 +30,9 @@ export function TunjaScene() {
       />
       <OrbitControls
         makeDefault
+        autoRotate={autoRotate}
+        autoRotateSpeed={0.55}
+        enableDamping
         enablePan={false}
         minDistance={6}
         maxDistance={13}

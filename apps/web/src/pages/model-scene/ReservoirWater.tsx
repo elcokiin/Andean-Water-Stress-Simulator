@@ -1,7 +1,12 @@
 import { useMemo } from "react";
 import * as THREE from "three";
 
-export function ReservoirWater() {
+export function ReservoirWater({ level = 1 }: { level?: number }) {
+  const normalizedLevel = Math.min(Math.max(level, 0.24), 1);
+  const waterScaleX = 0.82 + normalizedLevel * 0.23;
+  const waterScaleY = 1.12 + normalizedLevel * 0.33;
+  const waterElevation = 0.035 + normalizedLevel * 0.025;
+
   const waterGeometry = useMemo(() => {
     const shape = new THREE.Shape();
     shape.moveTo(-5.8, -0.2);
@@ -15,9 +20,9 @@ export function ReservoirWater() {
 
   return (
     <group
-      position={[0, 0.06, 0.3]}
+      position={[0, waterElevation, 0.3]}
       rotation={[-Math.PI / 2, 0, -0.08]}
-      scale={[1.05, 1.45, 1]}
+      scale={[waterScaleX, waterScaleY, 1]}
     >
       <mesh receiveShadow geometry={waterGeometry}>
         <meshPhysicalMaterial
