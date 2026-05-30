@@ -452,7 +452,7 @@ function ModelConfigDialog({
         className={cn(
           "flex flex-col gap-0 overflow-hidden p-0",
           isExpanded
-            ? "h-[calc(100vh-2rem)] max-w-[calc(100vw-2rem)]"
+            ? "!h-[calc(100vh-2rem)] !max-h-[calc(100vh-2rem)] !w-[calc(100vw-2rem)] !max-w-[calc(100vw-2rem)] sm:!max-w-[calc(100vw-2rem)]"
             : "h-[min(720px,calc(100vh-2rem))] sm:max-w-2xl",
         )}
       >
