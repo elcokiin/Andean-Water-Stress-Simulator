@@ -11,6 +11,9 @@ import {
   CalendarClock,
   Gauge,
   HelpCircle,
+  Keyboard,
+  Maximize2,
+  Minimize2,
   Pause,
   Play,
   RotateCcw,
@@ -20,7 +23,7 @@ import {
   Waves,
 } from "lucide-react";
 import { Link } from "react-router-dom";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -40,8 +43,24 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { cn } from "@/lib/utils";
 
 type ScenarioId = "baseline" | "moderate" | "extreme";
+type ConfigTab = "scenarios" | "parameters" | "shortcuts";
+type ShortcutAction =
+  | "toggle-play"
+  | "step-forward"
+  | "step-back"
+  | "restart"
+  | "open-config"
+  | "close-config"
+  | "open-shortcuts-tab"
+  | "tab-scenarios"
+  | "tab-parameters"
+  | "tab-shortcuts"
+  | "toggle-expand"
+  | "save-config";
 
 const scenarios: Record<
   ScenarioId,
@@ -95,17 +114,54 @@ const timeline = [
   "2035 umbral",
 ] as const;
 
+const shortcutGroups = [
+  {
+    label: "Simulacion",
+    shortcuts: [
+      ["Espacio", "Inicia o pausa la simulacion"],
+      ["Flecha derecha", "Avanza un paso temporal"],
+      ["Flecha izquierda", "Retrocede un paso temporal"],
+      ["R", "Reinicia al escenario base"],
+      ["C", "Abre o cierra la configuracion"],
+      ["Esc", "Cierra la configuracion"],
+    ],
+  },
+  {
+    label: "Dialogo",
+    shortcuts: [
+      ["?", "Abre la referencia de atajos"],
+      ["Ctrl + 1", "Abre Escenarios"],
+      ["Ctrl + 2", "Abre Parametros"],
+      ["Ctrl + 3", "Abre Atajos"],
+      ["Ctrl + E", "Expande o restaura el dialogo"],
+      ["Ctrl + Enter", "Guarda y cierra la base"],
+    ],
+  },
+] as const;
+
 export default function ModelScene() {
   const [scenario, setScenario] = useState<ScenarioId>("baseline");
   const [isPlaying, setIsPlaying] = useState(false);
   const [step, setStep] = useState(1);
   const [configOpen, setConfigOpen] = useState(false);
+  const [configTab, setConfigTab] = useState<ConfigTab>("scenarios");
+  const [isDialogExpanded, setIsDialogExpanded] = useState(false);
   const selectedScenario = scenarios[scenario];
 
   const reservoirScale = useMemo(
     () => Math.max(selectedScenario.reserve / 68, 0.24),
     [selectedScenario.reserve],
   );
+
+  useModelKeyboardShortcuts({
+    configOpen,
+    setConfigOpen,
+    setConfigTab,
+    setIsDialogExpanded,
+    setIsPlaying,
+    setScenario,
+    setStep,
+  });
 
   return (
     <TooltipProvider delayDuration={300}>
@@ -177,11 +233,15 @@ export default function ModelScene() {
         />
 
         <ModelConfigDialog
+          configTab={configTab}
+          isExpanded={isDialogExpanded}
           open={configOpen}
           scenario={scenario}
           selectedScenario={selectedScenario}
+          onConfigTabChange={setConfigTab}
           onOpenChange={setConfigOpen}
           onScenarioChange={setScenario}
+          onToggleExpanded={() => setIsDialogExpanded((value) => !value)}
         />
       </div>
     </TooltipProvider>
@@ -366,85 +426,164 @@ function Metric({ label, value }: { label: string; value: string }) {
 }
 
 function ModelConfigDialog({
+  configTab,
+  isExpanded,
   open,
   scenario,
   selectedScenario,
+  onConfigTabChange,
   onOpenChange,
   onScenarioChange,
+  onToggleExpanded,
 }: {
+  configTab: ConfigTab;
+  isExpanded: boolean;
   open: boolean;
   scenario: ScenarioId;
   selectedScenario: (typeof scenarios)[ScenarioId];
+  onConfigTabChange: (tab: ConfigTab) => void;
   onOpenChange: (open: boolean) => void;
   onScenarioChange: (scenario: ScenarioId) => void;
+  onToggleExpanded: () => void;
 }) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[min(720px,calc(100vh-2rem))] overflow-y-auto sm:max-w-2xl">
-        <DialogHeader>
-          <DialogTitle>Configuracion del modelo</DialogTitle>
-          <DialogDescription>
-            Base inicial para conectar el modelo real de dinamica de sistemas,
-            sus escenarios y parametros de calibracion.
-          </DialogDescription>
+      <DialogContent
+        className={cn(
+          "flex flex-col gap-0 overflow-hidden p-0",
+          isExpanded
+            ? "h-[calc(100vh-2rem)] max-w-[calc(100vw-2rem)]"
+            : "h-[min(720px,calc(100vh-2rem))] sm:max-w-2xl",
+        )}
+      >
+        <DialogHeader className="shrink-0 border-b border-border px-6 py-4">
+          <div className="flex items-start gap-3 pr-8">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="-ml-2"
+              onClick={onToggleExpanded}
+              aria-label={
+                isExpanded ? "Restaurar tamano del dialogo" : "Expandir dialogo"
+              }
+              title={isExpanded ? "Restaurar tamano" : "Expandir dialogo"}
+            >
+              {isExpanded ? <Minimize2 /> : <Maximize2 />}
+            </Button>
+            <div className="min-w-0">
+              <DialogTitle>Configuracion del modelo</DialogTitle>
+              <DialogDescription>
+                Base inicial para conectar el modelo real de dinamica de
+                sistemas, sus escenarios y parametros de calibracion.
+              </DialogDescription>
+            </div>
+          </div>
         </DialogHeader>
 
-        <div className="grid gap-4 md:grid-cols-[1.1fr_0.9fr]">
-          <Card className="gap-3">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-sm">
-                <Gauge aria-hidden="true" />
-                Escenario activo
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="flex flex-col gap-2">
-              {(Object.keys(scenarios) as ScenarioId[]).map((scenarioId) => (
-                <Button
-                  key={scenarioId}
-                  variant={scenario === scenarioId ? "default" : "outline"}
-                  className="h-auto justify-start px-3 py-2 text-left"
-                  onClick={() => onScenarioChange(scenarioId)}
-                >
-                  <span className="flex min-w-0 flex-col items-start gap-1">
-                    <span className="truncate text-sm font-semibold">
-                      {scenarios[scenarioId].name}
-                    </span>
-                    <span className="truncate text-xs font-normal opacity-80">
-                      Reserva {scenarios[scenarioId].reserve}% - ONI{" "}
-                      {scenarios[scenarioId].oni}
-                    </span>
-                  </span>
-                </Button>
-              ))}
-            </CardContent>
-          </Card>
+        <Tabs
+          value={configTab}
+          onValueChange={(value) => onConfigTabChange(value as ConfigTab)}
+          className="min-h-0 flex-1 overflow-hidden"
+        >
+          <TabsList className="mx-6 mt-3 shrink-0">
+            <TabsTrigger value="scenarios">Escenarios</TabsTrigger>
+            <TabsTrigger value="parameters">Parametros</TabsTrigger>
+            <TabsTrigger value="shortcuts">Atajos</TabsTrigger>
+          </TabsList>
 
-          <Card className="gap-3">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-sm">
-                <CalendarClock aria-hidden="true" />
-                Parametros pendientes
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="flex flex-col gap-3 text-sm">
-              <Metric label="Reserva critica" value="15%" />
-              <Metric label="Recarga critica" value="< 20%" />
-              <Metric label="Eficiencia red" value="62%" />
-              <Metric label="Escenario" value={selectedScenario.badge} />
-            </CardContent>
-          </Card>
-        </div>
+          <div className="min-h-0 flex-1 overflow-y-auto px-6 py-4">
+            <TabsContent value="scenarios" className="mt-0">
+              <div className="grid gap-4 md:grid-cols-[1.1fr_0.9fr]">
+                <Card className="gap-3">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2 text-sm">
+                      <Gauge aria-hidden="true" />
+                      Escenario activo
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="flex flex-col gap-2">
+                    {(Object.keys(scenarios) as ScenarioId[]).map(
+                      (scenarioId) => (
+                        <Button
+                          key={scenarioId}
+                          variant={
+                            scenario === scenarioId ? "default" : "outline"
+                          }
+                          className="h-auto justify-start px-3 py-2 text-left"
+                          onClick={() => onScenarioChange(scenarioId)}
+                        >
+                          <span className="flex min-w-0 flex-col items-start gap-1">
+                            <span className="truncate text-sm font-semibold">
+                              {scenarios[scenarioId].name}
+                            </span>
+                            <span className="truncate text-xs font-normal opacity-80">
+                              Reserva {scenarios[scenarioId].reserve}% - ONI{" "}
+                              {scenarios[scenarioId].oni}
+                            </span>
+                          </span>
+                        </Button>
+                      ),
+                    )}
+                  </CardContent>
+                </Card>
 
-        <div className="rounded-lg border border-border bg-muted/40 p-4 text-sm">
-          <p className="font-medium text-foreground">Siguiente conexion</p>
-          <p className="mt-1 leading-relaxed text-muted-foreground">
-            Esta interfaz deja preparado el terreno visual para reemplazar los
-            valores mock por la salida real del modelo: stocks, flujos,
-            auxiliares, politicas y series temporales.
-          </p>
-        </div>
+                <Card className="gap-3">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2 text-sm">
+                      <Waves aria-hidden="true" />
+                      Lectura del escenario
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="flex flex-col gap-3">
+                    <Metric
+                      label="Reserva"
+                      value={`${selectedScenario.reserve}%`}
+                    />
+                    <Metric label="Entrada" value={selectedScenario.inflow} />
+                    <Metric label="Demanda" value={selectedScenario.demand} />
+                    <Metric label="ONI" value={selectedScenario.oni} />
+                  </CardContent>
+                </Card>
+              </div>
+            </TabsContent>
 
-        <DialogFooter>
+            <TabsContent value="parameters" className="mt-0">
+              <div className="grid gap-4 md:grid-cols-[0.9fr_1.1fr]">
+                <Card className="gap-3">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2 text-sm">
+                      <CalendarClock aria-hidden="true" />
+                      Parametros pendientes
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="flex flex-col gap-3 text-sm">
+                    <Metric label="Reserva critica" value="15%" />
+                    <Metric label="Recarga critica" value="< 20%" />
+                    <Metric label="Eficiencia red" value="62%" />
+                    <Metric label="Escenario" value={selectedScenario.badge} />
+                  </CardContent>
+                </Card>
+
+                <div className="rounded-lg border border-border bg-muted/40 p-4 text-sm">
+                  <p className="font-medium text-foreground">
+                    Siguiente conexion
+                  </p>
+                  <p className="mt-1 leading-relaxed text-muted-foreground">
+                    Esta interfaz deja preparado el terreno visual para
+                    reemplazar los valores mock por la salida real del modelo:
+                    stocks, flujos, auxiliares, politicas y series temporales.
+                  </p>
+                </div>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="shortcuts" className="mt-0">
+              <ShortcutsPanel />
+            </TabsContent>
+          </div>
+        </Tabs>
+
+        <DialogFooter className="shrink-0">
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Cerrar
           </Button>
@@ -453,4 +592,203 @@ function ModelConfigDialog({
       </DialogContent>
     </Dialog>
   );
+}
+
+function ShortcutsPanel() {
+  return (
+    <div className="flex flex-col gap-4">
+      <div>
+        <h3 className="flex items-center gap-2 text-sm font-medium">
+          <Keyboard aria-hidden="true" />
+          Atajos de teclado
+        </h3>
+        <p className="mt-1 text-xs text-muted-foreground">
+          Navegacion y control rapido del modelo, tomado del patron del
+          simulador PRNG.
+        </p>
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-2">
+        {shortcutGroups.map((group) => (
+          <Card key={group.label} className="gap-2">
+            <CardHeader>
+              <CardTitle className="text-sm">{group.label}</CardTitle>
+            </CardHeader>
+            <CardContent className="flex flex-col gap-2">
+              {group.shortcuts.map(([keys, description]) => (
+                <div
+                  key={keys}
+                  className="grid grid-cols-[8.5rem_1fr] items-center gap-3 rounded-lg border border-border bg-card/70 px-3 py-2 text-sm"
+                >
+                  <kbd className="truncate rounded-md border border-border bg-muted px-2 py-1 font-mono text-xs text-foreground">
+                    {keys}
+                  </kbd>
+                  <span className="min-w-0 text-xs text-muted-foreground">
+                    {description}
+                  </span>
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function useModelKeyboardShortcuts({
+  configOpen,
+  setConfigOpen,
+  setConfigTab,
+  setIsDialogExpanded,
+  setIsPlaying,
+  setScenario,
+  setStep,
+}: {
+  configOpen: boolean;
+  setConfigOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  setConfigTab: React.Dispatch<React.SetStateAction<ConfigTab>>;
+  setIsDialogExpanded: React.Dispatch<React.SetStateAction<boolean>>;
+  setIsPlaying: React.Dispatch<React.SetStateAction<boolean>>;
+  setScenario: React.Dispatch<React.SetStateAction<ScenarioId>>;
+  setStep: React.Dispatch<React.SetStateAction<number>>;
+}) {
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.repeat || event.altKey || event.metaKey) {
+        return;
+      }
+
+      const action = resolveShortcutAction({
+        ctrlKey: event.ctrlKey,
+        key: event.key,
+      });
+
+      if (!action) {
+        return;
+      }
+
+      if (!event.ctrlKey && isEditableElement(event.target)) {
+        return;
+      }
+
+      switch (action) {
+        case "toggle-play":
+          setIsPlaying((value) => !value);
+          event.preventDefault();
+          break;
+        case "step-forward":
+          setStep((value) => Math.min(value + 1, timeline.length - 1));
+          event.preventDefault();
+          break;
+        case "step-back":
+          setStep((value) => Math.max(value - 1, 0));
+          event.preventDefault();
+          break;
+        case "restart":
+          setIsPlaying(false);
+          setStep(0);
+          setScenario("baseline");
+          event.preventDefault();
+          break;
+        case "open-config":
+          setConfigOpen((value) => !value);
+          event.preventDefault();
+          break;
+        case "close-config":
+          if (configOpen) {
+            setConfigOpen(false);
+            event.preventDefault();
+          }
+          break;
+        case "open-shortcuts-tab":
+          setConfigTab("shortcuts");
+          setConfigOpen(true);
+          event.preventDefault();
+          break;
+        case "tab-scenarios":
+          setConfigTab("scenarios");
+          setConfigOpen(true);
+          event.preventDefault();
+          break;
+        case "tab-parameters":
+          setConfigTab("parameters");
+          setConfigOpen(true);
+          event.preventDefault();
+          break;
+        case "tab-shortcuts":
+          setConfigTab("shortcuts");
+          setConfigOpen(true);
+          event.preventDefault();
+          break;
+        case "toggle-expand":
+          setConfigOpen(true);
+          setIsDialogExpanded((value) => !value);
+          event.preventDefault();
+          break;
+        case "save-config":
+          setConfigOpen(false);
+          event.preventDefault();
+          break;
+      }
+    };
+
+    window.addEventListener("keydown", onKeyDown);
+    return () => {
+      window.removeEventListener("keydown", onKeyDown);
+    };
+  }, [
+    configOpen,
+    setConfigOpen,
+    setConfigTab,
+    setIsDialogExpanded,
+    setIsPlaying,
+    setScenario,
+    setStep,
+  ]);
+}
+
+function resolveShortcutAction({
+  ctrlKey,
+  key,
+}: {
+  ctrlKey: boolean;
+  key: string;
+}): ShortcutAction | null {
+  if (ctrlKey) {
+    const normalizedKey = key.toLowerCase();
+
+    if (normalizedKey === "1") return "tab-scenarios";
+    if (normalizedKey === "2") return "tab-parameters";
+    if (normalizedKey === "3") return "tab-shortcuts";
+    if (normalizedKey === "e") return "toggle-expand";
+    if (normalizedKey === "enter") return "save-config";
+
+    return null;
+  }
+
+  if (key === " ") return "toggle-play";
+
+  const normalizedKey = key.toLowerCase();
+
+  if (normalizedKey === "arrowright") return "step-forward";
+  if (normalizedKey === "arrowleft") return "step-back";
+  if (normalizedKey === "r") return "restart";
+  if (normalizedKey === "c") return "open-config";
+  if (normalizedKey === "escape") return "close-config";
+  if (key === "?") return "open-shortcuts-tab";
+
+  return null;
+}
+
+function isEditableElement(target: EventTarget | null): boolean {
+  if (!(target instanceof Element)) {
+    return false;
+  }
+
+  if (target.closest('[contenteditable="true"]')) {
+    return true;
+  }
+
+  return ["INPUT", "TEXTAREA", "SELECT"].includes(target.tagName);
 }
