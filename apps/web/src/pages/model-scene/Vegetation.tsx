@@ -261,8 +261,8 @@ export function EzTreeGrass() {
     const material = new THREE.MeshPhongMaterial({
       color: 0xffffff,
       map: sourceMap,
-      emissive: new THREE.Color(0x426f24),
-      emissiveIntensity: 0.075,
+      emissive: new THREE.Color(0x5f8f32),
+      emissiveIntensity: 0.26,
       shininess: 0.12,
       transparent: false,
       alphaTest: 0.36,
@@ -310,8 +310,8 @@ export function EzTreeGrass() {
     }
 
     mesh.count = count;
-    mesh.castShadow = true;
-    mesh.receiveShadow = true;
+    mesh.castShadow = false;
+    mesh.receiveShadow = false;
     mesh.instanceMatrix.needsUpdate = true;
     if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
 
