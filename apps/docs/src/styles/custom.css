@@ -34,3 +34,93 @@
 .diagram-frame :global(.simulation-flow) {
   background: var(--sl-color-black); /* Updated to use card background */
 }
+
+.insight-model-showcase {
+  position: relative;
+  display: grid;
+  gap: 1.1rem;
+  margin: 1.75rem 0 2rem;
+  padding: clamp(1rem, 2vw, 1.5rem);
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--sl-color-accent) 32%, transparent);
+  border-radius: 1.4rem;
+  background:
+    radial-gradient(circle at 12% 0%, color-mix(in srgb, var(--sl-color-accent) 30%, transparent), transparent 34%),
+    linear-gradient(135deg, color-mix(in srgb, var(--sl-color-bg-nav) 82%, transparent), var(--sl-color-bg));
+  box-shadow: 0 24px 70px rgb(0 0 0 / 22%);
+}
+
+.insight-model-showcase::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(color-mix(in srgb, var(--sl-color-accent) 14%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--sl-color-accent) 14%, transparent) 1px, transparent 1px);
+  background-size: 42px 42px;
+  mask-image: linear-gradient(135deg, rgb(0 0 0 / 45%), transparent 62%);
+}
+
+.insight-model-copy {
+  position: relative;
+  z-index: 1;
+  max-width: 54rem;
+}
+
+.insight-model-eyebrow {
+  width: fit-content;
+  margin: 0 0 0.65rem;
+  padding: 0.25rem 0.65rem;
+  border: 1px solid color-mix(in srgb, var(--sl-color-accent) 45%, transparent);
+  border-radius: 999px;
+  color: var(--sl-color-accent);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.insight-model-copy h2 {
+  margin: 0;
+  font-size: clamp(1.55rem, 3vw, 2.35rem);
+  line-height: 1.04;
+}
+
+.insight-model-copy p:not(.insight-model-eyebrow) {
+  max-width: 48rem;
+  margin: 0.75rem 0 0;
+  color: color-mix(in srgb, var(--sl-color-text) 78%, transparent);
+}
+
+.insight-model-shell {
+  position: relative;
+  z-index: 1;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--sl-color-white) 18%, transparent);
+  border-radius: 1rem;
+  background: var(--sl-color-bg-sidebar);
+  box-shadow:
+    0 18px 45px rgb(0 0 0 / 28%),
+    inset 0 1px 0 color-mix(in srgb, var(--sl-color-white) 16%, transparent);
+}
+
+.insight-model-shell::before {
+  content: "";
+  display: block;
+  width: 100%;
+  padding-top: min(72%, 680px);
+}
+
+.insight-model-shell iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  background: white;
+}
+
+.insight-model-showcase--page .insight-model-shell::before {
+  padding-top: min(78%, 760px);
+}
