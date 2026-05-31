@@ -1,4 +1,4 @@
-import { ArrowLeft, HelpCircle, Waves } from "lucide-react";
+import { ArrowLeft, HelpCircle, Moon, Sun, Waves } from "lucide-react";
 import { Link } from "react-router-dom";
 
 import { Button } from "@/components/ui/button";
@@ -8,9 +8,11 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useTheme } from "@/lib/theme-provider";
 import { useSimulationStore } from "@/lib/stores/simulation-store";
 
 export function TitleBar() {
+  const { theme, toggle } = useTheme();
   const setConfigOpen = useSimulationStore((s) => s.setConfigOpen);
 
   return (
@@ -40,6 +42,26 @@ export function TitleBar() {
             </Button>
           </TooltipTrigger>
           <TooltipContent>Guia del modelo</TooltipContent>
+        </Tooltip>
+        <Separator orientation="vertical" className="h-5" />
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              onClick={toggle}
+              aria-label={
+                theme === "dark"
+                  ? "Cambiar a modo claro"
+                  : "Cambiar a modo oscuro"
+              }
+            >
+              {theme === "dark" ? <Sun /> : <Moon />}
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>
+            {theme === "dark" ? "Modo claro" : "Modo oscuro"}
+          </TooltipContent>
         </Tooltip>
       </div>
     </div>

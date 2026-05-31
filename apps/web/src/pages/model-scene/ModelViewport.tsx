@@ -20,6 +20,7 @@ export function ModelViewport() {
   return (
     <div className="absolute inset-0">
       <Canvas
+        key={theme}
         camera={{ position: [6.8, 3.3, 6.8], fov: 42 }}
         dpr={[1, 2]}
         gl={{ antialias: true, alpha: false }}
