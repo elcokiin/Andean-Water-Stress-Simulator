@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import { useFrame, useLoader } from "@react-three/fiber";
 import * as THREE from "three";
 import { Tree } from "@/src/lib/ez-tree";
+import { getTerrainHeight } from "./terrain-height";
 
 type EzTreeConfig = {
   preset: string;
@@ -108,7 +109,7 @@ export function EzTreeForest() {
 
       return {
         preset,
-        position: [x, 0.12, z],
+        position: [x, getTerrainHeight(x, z), z],
         rotationY: (index * 2.399963) % (Math.PI * 2),
         scale: scale * (0.84 + ((index * 13) % 8) * 0.035),
         seed: 1240 + index * 73,
@@ -159,7 +160,7 @@ export function ForegroundShrubs() {
     const configs: EzTreeConfig[] = [
       {
         preset: "Bush 1",
-        position: [-5.1, 0.04, 3.45],
+        position: [-5.1, getTerrainHeight(-5.1, 3.45), 3.45],
         rotationY: 0.3,
         scale: 0.042,
         seed: 721,
@@ -167,7 +168,7 @@ export function ForegroundShrubs() {
       },
       {
         preset: "Bush 2",
-        position: [-4.35, 0.04, 3.92],
+        position: [-4.35, getTerrainHeight(-4.35, 3.92), 3.92],
         rotationY: 1.8,
         scale: 0.034,
         seed: 833,
@@ -175,7 +176,7 @@ export function ForegroundShrubs() {
       },
       {
         preset: "Bush 3",
-        position: [-3.55, 0.04, 3.5],
+        position: [-3.55, getTerrainHeight(-3.55, 3.5), 3.5],
         rotationY: 2.9,
         scale: 0.038,
         seed: 977,
@@ -183,7 +184,7 @@ export function ForegroundShrubs() {
       },
       {
         preset: "Bush 1",
-        position: [-2.78, 0.04, 4.02],
+        position: [-2.78, getTerrainHeight(-2.78, 4.02), 4.02],
         rotationY: 4.2,
         scale: 0.028,
         seed: 1044,
@@ -191,7 +192,7 @@ export function ForegroundShrubs() {
       },
       {
         preset: "Bush 2",
-        position: [3.1, 0.04, 3.8],
+        position: [3.1, getTerrainHeight(3.1, 3.8), 3.8],
         rotationY: 2.1,
         scale: 0.035,
         seed: 1180,
@@ -199,7 +200,7 @@ export function ForegroundShrubs() {
       },
       {
         preset: "Bush 3",
-        position: [3.82, 0.04, 3.35],
+        position: [3.82, getTerrainHeight(3.82, 3.35), 3.35],
         rotationY: 0.8,
         scale: 0.041,
         seed: 1292,
@@ -207,7 +208,7 @@ export function ForegroundShrubs() {
       },
       {
         preset: "Bush 1",
-        position: [4.6, 0.04, 3.85],
+        position: [4.6, getTerrainHeight(4.6, 3.85), 3.85],
         rotationY: 5.3,
         scale: 0.029,
         seed: 1408,
