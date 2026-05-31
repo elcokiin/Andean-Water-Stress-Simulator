@@ -1,6 +1,12 @@
-import { useMemo } from "react";
+import { Suspense, useMemo } from "react";
 import * as THREE from "three";
-import { EzTreeForest, EzTreeGrass, ForegroundShrubs } from "./Vegetation";
+import {
+  EzTreeForest,
+  EzTreeFlowers,
+  EzTreeGrass,
+  EzTreeRocks,
+  ForegroundShrubs,
+} from "./Vegetation";
 import { getTerrainHeight } from "./terrain-height";
 
 const SEGMENTS = 80;
@@ -37,6 +43,12 @@ export function TunjaTerrain() {
       <EzTreeGrass />
       <EzTreeForest />
       <ForegroundShrubs />
+      <Suspense fallback={null}>
+        <EzTreeFlowers />
+      </Suspense>
+      <Suspense fallback={null}>
+        <EzTreeRocks />
+      </Suspense>
     </group>
   );
 }

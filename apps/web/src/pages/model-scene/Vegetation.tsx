@@ -1,6 +1,7 @@
 import { useMemo, useRef } from "react";
 import { useFrame, useLoader } from "@react-three/fiber";
 import * as THREE from "three";
+import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader.js";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { Tree } from "@/src/lib/ez-tree";
 import { getTerrainHeight } from "./terrain-height";
@@ -49,12 +50,23 @@ const FOREST_TEXTURE_PATHS = [
 ] as const;
 
 const GRASS_MODEL_PATH = "/assets/ez-tree/models/grass.glb";
+const FLOWER_MODEL_PATHS = [
+  "/assets/ez-tree/models/flower_white.glb",
+  "/assets/ez-tree/models/flower_blue.glb",
+  "/assets/ez-tree/models/flower_yellow.glb",
+] as const;
+const ROCK_MODEL_PATHS = [
+  "/assets/ez-tree/models/rock1.glb",
+  "/assets/ez-tree/models/rock2.glb",
+  "/assets/ez-tree/models/rock3.glb",
+] as const;
 const GRASS_COUNT = 2900;
 const GRASS_MAX_COUNT = 5200;
 const GRASS_GROUND_OFFSET = 0.015;
 
 useLoader.preload(THREE.TextureLoader, FOREST_TEXTURE_PATHS);
 useLoader.preload(GLTFLoader, GRASS_MODEL_PATH);
+FLOWER_MODEL_PATHS.forEach((path) => useLoader.preload(GLTFLoader, path));
 
 type GrassShader = {
   uniforms: {
@@ -74,6 +86,12 @@ function seededNoise(value: number) {
 
 function seededRandom(seed: number) {
   return seededNoise(seed) - Math.floor(seededNoise(seed));
+}
+
+function configureDracoLoader(loader: GLTFLoader) {
+  const dracoLoader = new DRACOLoader();
+  dracoLoader.setDecoderPath("/assets/draco/");
+  loader.setDRACOLoader(dracoLoader);
 }
 
 function patchNoise(x: number, z: number) {
@@ -129,6 +147,34 @@ function findFirstMesh(object: THREE.Object3D): THREE.Mesh | null {
     }
   });
   return mesh;
+}
+
+function cloneSceneAsset(
+  source: THREE.Object3D,
+  {
+    position,
+    rotationY,
+    scale,
+    groundOffset = 0.02,
+  }: {
+    position: readonly [number, number];
+    rotationY: number;
+    scale: number;
+    groundOffset?: number;
+  },
+) {
+  const [x, z] = position;
+  const object = source.clone(true);
+  object.position.set(x, getTerrainHeight(x, z) + groundOffset, z);
+  object.rotation.y = rotationY;
+  object.scale.setScalar(scale);
+  object.traverse((child) => {
+    if (child instanceof THREE.Mesh) {
+      child.castShadow = true;
+      child.receiveShadow = true;
+    }
+  });
+  return object;
 }
 
 function getLeafTexture(preset: string, textures: EzTreeTextures) {
@@ -365,6 +411,76 @@ export function EzTreeGrass() {
   if (!grass) return null;
 
   return <primitive ref={grassRef} object={grass} />;
+}
+
+export function EzTreeFlowers() {
+  const flowerModels = useLoader(GLTFLoader, [...FLOWER_MODEL_PATHS]);
+
+  const flowers = useMemo(() => {
+    const group = new THREE.Group();
+    const flowerSpecs = [
+      { model: 2, position: [-4.85, 2.9], rotationY: 0.2, scale: 0.085 },
+      { model: 0, position: [-4.55, 3.18], rotationY: 1.7, scale: 0.078 },
+      { model: 1, position: [-3.9, 3.07], rotationY: 3.2, scale: 0.08 },
+      { model: 2, position: [-2.8, 3.42], rotationY: 5.4, scale: 0.072 },
+      { model: 0, position: [3.5, 3.16], rotationY: 0.8, scale: 0.082 },
+      { model: 1, position: [4.15, 2.84], rotationY: 2.6, scale: 0.074 },
+      { model: 2, position: [4.78, 3.34], rotationY: 4.7, scale: 0.086 },
+      { model: 0, position: [5.45, 2.18], rotationY: 1.2, scale: 0.076 },
+      { model: 1, position: [-6.25, -1.28], rotationY: 3.9, scale: 0.078 },
+      { model: 2, position: [6.35, -1.05], rotationY: 2.1, scale: 0.08 },
+    ] as const;
+
+    flowerSpecs.forEach(({ model, position, rotationY, scale }) => {
+      group.add(
+        cloneSceneAsset(flowerModels[model].scene, {
+          position,
+          rotationY,
+          scale,
+          groundOffset: 0.018,
+        }),
+      );
+    });
+
+    return group;
+  }, [flowerModels]);
+
+  return <primitive object={flowers} />;
+}
+
+export function EzTreeRocks() {
+  const rockModels = useLoader(
+    GLTFLoader,
+    [...ROCK_MODEL_PATHS],
+    configureDracoLoader,
+  );
+
+  const rocks = useMemo(() => {
+    const group = new THREE.Group();
+    const rockSpecs = [
+      { model: 0, position: [-5.75, 1.75], rotationY: 0.75, scale: 0.18 },
+      { model: 2, position: [-4.9, 2.18], rotationY: 2.3, scale: 0.14 },
+      { model: 1, position: [5.75, 1.36], rotationY: 3.75, scale: 0.17 },
+      { model: 0, position: [4.95, 2.02], rotationY: 5.35, scale: 0.13 },
+      { model: 2, position: [-6.75, -0.85], rotationY: 1.45, scale: 0.15 },
+      { model: 1, position: [6.95, -0.55], rotationY: 4.2, scale: 0.14 },
+    ] as const;
+
+    rockSpecs.forEach(({ model, position, rotationY, scale }) => {
+      group.add(
+        cloneSceneAsset(rockModels[model].scene, {
+          position,
+          rotationY,
+          scale,
+          groundOffset: 0.012,
+        }),
+      );
+    });
+
+    return group;
+  }, [rockModels]);
+
+  return <primitive object={rocks} />;
 }
 
 export function ForegroundShrubs() {
