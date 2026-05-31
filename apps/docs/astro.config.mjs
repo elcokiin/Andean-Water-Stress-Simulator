@@ -29,7 +29,7 @@ export default defineConfig({
           label: "Diagramas",
           items: [
             { label: "Resumen", slug: "diagrams" },
-            { label: "Flujo principal", slug: "diagrams/main-flow" },
+            { label: "Diagrama principal", slug: "diagrams/main-flow" },
             { label: "Impacto climatico", slug: "diagrams/climate-impact" },
             { label: "Gestion de demanda", slug: "diagrams/demand-management" },
             {
