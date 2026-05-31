@@ -1,11 +1,13 @@
 import { Canvas } from "@react-three/fiber";
 import { useMemo } from "react";
 
+import { useTheme } from "@/lib/theme-provider";
 import { useSimulationStore } from "@/lib/stores/simulation-store";
 import { scenarios } from "./model-data";
 import { TunjaScene } from "./TunjaScene";
 
 export function ModelViewport() {
+  const { theme } = useTheme();
   const isPlaying = useSimulationStore((s) => s.isPlaying);
   const scenario = useSimulationStore((s) => s.scenario);
   const selectedScenario = scenarios[scenario];
@@ -23,7 +25,11 @@ export function ModelViewport() {
         gl={{ antialias: true, alpha: false }}
         shadows
       >
-        <TunjaScene autoRotate={isPlaying} waterLevel={reservoirScale} />
+        <TunjaScene
+          autoRotate={isPlaying}
+          theme={theme}
+          waterLevel={reservoirScale}
+        />
       </Canvas>
     </div>
   );
