@@ -36,10 +36,25 @@ const BARK_TEXTURE_PATHS = [
   "/assets/ez-tree/textures/bark/Bark003_1K-JPG/Bark003_1K-JPG_Roughness.jpg",
 ] as const;
 
+const LEAF_TEXTURE_PATHS = [
+  "/assets/ez-tree/textures/leaves/ash.png",
+  "/assets/ez-tree/textures/leaves/pine.png",
+  "/assets/ez-tree/textures/leaves/aspen.png",
+  "/assets/ez-tree/textures/leaves/oak.png",
+] as const;
+
+const FOREST_TEXTURE_PATHS = [
+  ...BARK_TEXTURE_PATHS,
+  ...LEAF_TEXTURE_PATHS,
+] as const;
+
 const GRASS_MODEL_PATH = "/assets/ez-tree/models/grass.glb";
 const GRASS_COUNT = 2900;
 const GRASS_MAX_COUNT = 5200;
 const GRASS_GROUND_OFFSET = 0.015;
+
+useLoader.preload(THREE.TextureLoader, FOREST_TEXTURE_PATHS);
+useLoader.preload(GLTFLoader, GRASS_MODEL_PATH);
 
 type GrassShader = {
   uniforms: {
@@ -161,13 +176,7 @@ export function EzTreeForest() {
     pineLeaf,
     aspenLeaf,
     oakLeaf,
-  ] = useLoader(THREE.TextureLoader, [
-    ...BARK_TEXTURE_PATHS,
-    "/assets/ez-tree/textures/leaves/ash.png",
-    "/assets/ez-tree/textures/leaves/pine.png",
-    "/assets/ez-tree/textures/leaves/aspen.png",
-    "/assets/ez-tree/textures/leaves/oak.png",
-  ]);
+  ] = useLoader(THREE.TextureLoader, [...FOREST_TEXTURE_PATHS]);
 
   const forest = useMemo(() => {
     const group = new THREE.Group();
@@ -284,7 +293,7 @@ export function EzTreeGrass() {
         ? sourceMaterial.map
         : null;
     const geometry = sourceMesh.geometry.clone();
-    if (sourceMap) sourceMap.anisotropy = 4;
+    if (sourceMap) sourceMap.anisotropy = 2;
 
     const material = new THREE.MeshPhongMaterial({
       map: sourceMap,

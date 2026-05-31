@@ -10,6 +10,7 @@ export function TunjaEnvironment({ theme }: { theme: SkyTheme }) {
 
   return (
     <Environment
+      key={theme}
       background={false}
       environmentIntensity={isNight ? 0.18 : 0.42}
       environmentRotation={isNight ? [3.45, 5.9, 6.1] : [3.95, 6.64, 6.27]}
@@ -54,6 +55,7 @@ export function TunjaSky({ theme }: { theme: SkyTheme }) {
       <mesh renderOrder={-10}>
         <sphereGeometry args={[150, 64, 32]} />
         <shaderMaterial
+          key={theme}
           uniforms={uniforms}
           vertexShader={SKY_VERTEX_SHADER}
           fragmentShader={SKY_FRAGMENT_SHADER}
@@ -65,7 +67,7 @@ export function TunjaSky({ theme }: { theme: SkyTheme }) {
         <Stars
           radius={95}
           depth={42}
-          count={1400}
+          count={900}
           factor={3.1}
           saturation={0.15}
           fade
@@ -91,7 +93,7 @@ export function TunjaLighting({ theme }: { theme: SkyTheme }) {
         intensity={isNight ? 0.78 : 2.2}
         position={isNight ? [7, 9, -5] : [-9, 11, 7]}
         shadow-bias={-0.0001}
-        shadow-mapSize={[2048, 2048]}
+        shadow-mapSize={[1024, 1024]}
       />
       <directionalLight
         color={isNight ? "#5974c8" : "#7fc8ff"}

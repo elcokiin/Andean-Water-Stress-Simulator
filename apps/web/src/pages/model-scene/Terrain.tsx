@@ -3,7 +3,7 @@ import * as THREE from "three";
 import { EzTreeForest, EzTreeGrass, ForegroundShrubs } from "./Vegetation";
 import { getTerrainHeight } from "./terrain-height";
 
-const SEGMENTS = 100;
+const SEGMENTS = 80;
 
 export function TunjaTerrain() {
   const geometry = useMemo(() => {

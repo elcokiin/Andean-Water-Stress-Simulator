@@ -16,11 +16,11 @@ export function CloudGroup({
   return (
     <group position={position} scale={scale}>
       <mesh>
-        <sphereGeometry args={[0.7, 18, 10]} />
+        <sphereGeometry args={[0.7, 12, 8]} />
         <meshBasicMaterial color={colors[0]} transparent opacity={opacity} />
       </mesh>
       <mesh position={[0.55, 0.08, 0]}>
-        <sphereGeometry args={[0.5, 18, 10]} />
+        <sphereGeometry args={[0.5, 12, 8]} />
         <meshBasicMaterial
           color={colors[1]}
           transparent
@@ -28,7 +28,7 @@ export function CloudGroup({
         />
       </mesh>
       <mesh position={[-0.55, -0.02, 0]}>
-        <sphereGeometry args={[0.45, 18, 10]} />
+        <sphereGeometry args={[0.45, 12, 8]} />
         <meshBasicMaterial
           color={colors[2]}
           transparent

@@ -15,7 +15,7 @@ export function ReservoirWater({ level = 1 }: { level?: number }) {
     shape.bezierCurveTo(6.55, 1.38, 4.1, 2.18, 1.8, 2.22);
     shape.bezierCurveTo(-0.6, 2.24, -3.2, 1.85, -4.7, 1.0);
     shape.bezierCurveTo(-5.55, 0.52, -6.12, 0.22, -5.8, -0.2);
-    return new THREE.ShapeGeometry(shape, 96);
+    return new THREE.ShapeGeometry(shape, 64);
   }, []);
 
   return (

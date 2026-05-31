@@ -45,6 +45,8 @@ export function TunjaScene({
         opacity={isNight ? 0.12 : 0.24}
         blur={isNight ? 3.6 : 2.8}
         far={7}
+        frames={1}
+        resolution={256}
       />
       <OrbitControls
         makeDefault
