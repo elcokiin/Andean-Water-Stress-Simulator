@@ -22,9 +22,15 @@ export function getTerrainHeight(x: number, z: number) {
 
   const sideHill = gaussian(x, 6.5, 2.5, 0.4) * gaussian(z, -2.0, 2.5, 1.0);
 
+  const waterBasin = -(
+    0.7 *
+    gaussian(x, 0, 4.2, 1.0) *
+    gaussian(z, 0.3, 2.0, 1.0)
+  );
+
   const noise =
     0.06 * Math.sin(x * 3.7 + 1.2) * Math.cos(z * 2.9 + 0.8) +
     0.03 * Math.sin(x * 7.3 - 2.1) * Math.cos(z * 5.1 + 3.4);
 
-  return base + ridge1 + ridge2 + sideHill + noise;
+  return base + ridge1 + ridge2 + sideHill + waterBasin + noise;
 }
