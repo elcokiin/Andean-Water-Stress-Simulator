@@ -7,3 +7,4 @@
 - System Chromium is available at `/usr/bin/chromium`; headless WebGL screenshots need SwiftShader flags such as `--enable-unsafe-swiftshader --use-gl=swiftshader`.
 - Python Pillow is not installed in this environment; ImageMagick is available through `/usr/bin/magick` for screenshot pixel checks.
 - `apps/docs` can build after `bun install`, but `bun run typecheck` prompts for missing `@astrojs/check` instead of running a full Astro check.
+- `bunx prettier` cannot infer a parser for `.astro` files in this workspace because no Astro Prettier plugin is configured.

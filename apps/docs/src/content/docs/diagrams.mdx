@@ -4,28 +4,14 @@ description: Resumen de los diagramas movidos al proyecto de documentacion.
 ---
 
 import { CardGrid, LinkCard } from "@astrojs/starlight/components";
+import InsightModelEmbed from "../../components/InsightModelEmbed.astro";
 
 Los diagramas interactivos del proyecto se movieron al app de documentacion en `apps/docs` y comparten implementacion con `apps/web` mediante el paquete `@proyecto-final/diagrams`.
 
-<section class="insight-model-showcase" aria-labelledby="diagrama-principal-title">
-  <div class="insight-model-copy">
-    <p class="insight-model-eyebrow">Diagrama principal</p>
-    <h2 id="diagrama-principal-title">Modelo sistemico de la simulacion</h2>
-    <p>
-      Este es el mapa central del modelo en Insight Maker. Usa los controles
-      integrados para acercarte, navegar las relaciones y revisar la estructura
-      completa del sistema hidrico.
-    </p>
-  </div>
-  <div class="insight-model-shell">
-    <iframe
-      src="https://insightmaker.com/insight/2cilKnmdcyCHGiWHGzDy6c/embed?topBar=1&sideBar=1&zoom=1"
-      title="Embedded model"
-      loading="lazy"
-      allowfullscreen
-    ></iframe>
-  </div>
-</section>
+<InsightModelEmbed
+  id="diagrama-principal-resumen"
+  body="Este es el mapa central del modelo en Insight Maker. Usa los controles integrados para acercarte, navegar las relaciones y revisar la estructura completa del sistema hidrico."
+/>
 
 <CardGrid>
   <LinkCard

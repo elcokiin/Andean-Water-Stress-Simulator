@@ -1,0 +1,110 @@
+---
+interface Props {
+  body: string;
+  id: string;
+  page?: boolean;
+}
+
+const insightUrl =
+  "https://insightmaker.com/insight/2cilKnmdcyCHGiWHGzDy6c/embed?topBar=1&sideBar=1&zoom=1";
+const { body, id, page = false } = Astro.props;
+const titleId = `${id}-title`;
+const modalId = `${id}-modal`;
+const sectionClass = page
+  ? "insight-model-showcase insight-model-showcase--page"
+  : "insight-model-showcase";
+---
+
+<section class={sectionClass} aria-labelledby={titleId}>
+  <div class="insight-model-copy">
+    <p class="insight-model-eyebrow">Diagrama principal</p>
+    <h2 id={titleId}>Modelo sistemico de la simulacion</h2>
+    <p>{body}</p>
+  </div>
+  <div class="insight-model-shell">
+    <button
+      class="insight-model-expand"
+      type="button"
+      aria-controls={modalId}
+      data-insight-open
+    >
+      <span class="insight-model-expand-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" focusable="false">
+          <path d="M8 3H3v5h2V6.41l4.3 4.3 1.4-1.42L6.41 5H8V3Zm8 0v2h1.59l-4.3 4.29 1.42 1.42L19 6.41V8h2V3h-5ZM5 15H3v6h6v-2H6.41l4.3-4.29-1.42-1.42L5 17.59V15Zm13.59 4H16v2h5v-5h-2v1.59l-4.29-4.3-1.42 1.42 4.3 4.29Z"></path>
+        </svg>
+      </span>
+      <span>Ver completo</span>
+    </button>
+    <iframe
+      src={insightUrl}
+      title="Embedded model"
+      loading="lazy"
+      allowfullscreen
+    ></iframe>
+  </div>
+</section>
+
+<dialog class="insight-model-modal" id={modalId} aria-labelledby={`${modalId}-title`}>
+  <div class="insight-model-modal-panel">
+    <div class="insight-model-modal-bar">
+      <div>
+        <p class="insight-model-eyebrow">Vista completa</p>
+        <h2 id={`${modalId}-title`}>Modelo sistemico de la simulacion</h2>
+      </div>
+      <button class="insight-model-close" type="button" data-insight-close>
+        <span aria-hidden="true">×</span>
+        <span class="sr-only">Cerrar vista completa</span>
+      </button>
+    </div>
+    <iframe
+      src={insightUrl}
+      title="Embedded model en vista completa"
+      loading="lazy"
+      allowfullscreen
+    ></iframe>
+  </div>
+</dialog>
+
+<script>
+  const openButtons = document.querySelectorAll<HTMLButtonElement>(
+    "[data-insight-open]",
+  );
+
+  openButtons.forEach((button) => {
+    const dialogId = button.getAttribute("aria-controls");
+    const dialog = dialogId
+      ? document.getElementById(dialogId) as HTMLDialogElement | null
+      : null;
+
+    if (!dialog) return;
+
+    button.addEventListener("click", () => {
+      document.documentElement.classList.add("insight-modal-open");
+
+      if (typeof dialog.showModal === "function") {
+        dialog.showModal();
+        return;
+      }
+
+      dialog.setAttribute("open", "");
+    });
+  });
+
+  document
+    .querySelectorAll<HTMLDialogElement>(".insight-model-modal")
+    .forEach((dialog) => {
+      dialog.addEventListener("click", (event) => {
+        if (event.target === dialog) dialog.close();
+      });
+
+      dialog.addEventListener("close", () => {
+        document.documentElement.classList.remove("insight-modal-open");
+      });
+
+      dialog
+        .querySelectorAll<HTMLButtonElement>("[data-insight-close]")
+        .forEach((button) => {
+          button.addEventListener("click", () => dialog.close());
+        });
+    });
+</script>
