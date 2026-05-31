@@ -1,26 +1,11 @@
 import { useEffect } from "react";
-import type { Dispatch, SetStateAction } from "react";
+
+import { useSimulationStore } from "@/lib/stores/simulation-store";
 
 import { timeline } from "./model-data";
-import type { ConfigTab, ScenarioId, ShortcutAction } from "./model-data";
+import type { ShortcutAction } from "./model-data";
 
-export function useModelKeyboardShortcuts({
-  configOpen,
-  setConfigOpen,
-  setConfigTab,
-  setIsDialogExpanded,
-  setIsPlaying,
-  setScenario,
-  setStep,
-}: {
-  configOpen: boolean;
-  setConfigOpen: Dispatch<SetStateAction<boolean>>;
-  setConfigTab: Dispatch<SetStateAction<ConfigTab>>;
-  setIsDialogExpanded: Dispatch<SetStateAction<boolean>>;
-  setIsPlaying: Dispatch<SetStateAction<boolean>>;
-  setScenario: Dispatch<SetStateAction<ScenarioId>>;
-  setStep: Dispatch<SetStateAction<number>>;
-}) {
+export function useModelKeyboardShortcuts() {
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.repeat || event.altKey || event.metaKey) {
@@ -40,62 +25,64 @@ export function useModelKeyboardShortcuts({
         return;
       }
 
+      const store = useSimulationStore.getState();
+
       switch (action) {
         case "toggle-play":
-          setIsPlaying((value) => !value);
+          store.togglePlayback();
           event.preventDefault();
           break;
         case "step-forward":
-          setStep((value) => Math.min(value + 1, timeline.length - 1));
+          store.setStep(Math.min(store.step + 1, timeline.length - 1));
           event.preventDefault();
           break;
         case "step-back":
-          setStep((value) => Math.max(value - 1, 0));
+          store.setStep(Math.max(store.step - 1, 0));
           event.preventDefault();
           break;
         case "restart":
-          setIsPlaying(false);
-          setStep(0);
-          setScenario("baseline");
+          store.setStep(0);
+          store.setScenario("baseline");
+          store.setConfigOpen(false);
           event.preventDefault();
           break;
         case "open-config":
-          setConfigOpen((value) => !value);
+          store.setConfigOpen(!store.configOpen);
           event.preventDefault();
           break;
         case "close-config":
-          if (configOpen) {
-            setConfigOpen(false);
+          if (store.configOpen) {
+            store.setConfigOpen(false);
             event.preventDefault();
           }
           break;
         case "open-shortcuts-tab":
-          setConfigTab("shortcuts");
-          setConfigOpen(true);
+          store.setConfigTab("shortcuts");
+          store.setConfigOpen(true);
           event.preventDefault();
           break;
         case "tab-scenarios":
-          setConfigTab("scenarios");
-          setConfigOpen(true);
+          store.setConfigTab("scenarios");
+          store.setConfigOpen(true);
           event.preventDefault();
           break;
         case "tab-parameters":
-          setConfigTab("parameters");
-          setConfigOpen(true);
+          store.setConfigTab("parameters");
+          store.setConfigOpen(true);
           event.preventDefault();
           break;
         case "tab-shortcuts":
-          setConfigTab("shortcuts");
-          setConfigOpen(true);
+          store.setConfigTab("shortcuts");
+          store.setConfigOpen(true);
           event.preventDefault();
           break;
         case "toggle-expand":
-          setConfigOpen(true);
-          setIsDialogExpanded((value) => !value);
+          store.setConfigOpen(true);
+          store.toggleDialogExpanded();
           event.preventDefault();
           break;
         case "save-config":
-          setConfigOpen(false);
+          store.setConfigOpen(false);
           event.preventDefault();
           break;
       }
@@ -105,15 +92,7 @@ export function useModelKeyboardShortcuts({
     return () => {
       window.removeEventListener("keydown", onKeyDown);
     };
-  }, [
-    configOpen,
-    setConfigOpen,
-    setConfigTab,
-    setIsDialogExpanded,
-    setIsPlaying,
-    setScenario,
-    setStep,
-  ]);
+  }, []);
 }
 
 function resolveShortcutAction({

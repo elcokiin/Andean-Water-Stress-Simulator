@@ -1,16 +1,14 @@
 ---
-title: Flujo principal
-description: Diagrama principal del bucle de simulacion.
+title: Diagrama principal
+description: Modelo sistemico embebido desde Insight Maker.
 ---
 
-import { SimulationFlow } from "@proyecto-final/diagrams";
+import InsightModelEmbed from "../../../components/InsightModelEmbed.astro";
 
-El flujo principal coordina los tres subprocesos del modelo, actualiza el volumen del sistema y determina si la simulacion avanza o termina.
+El flujo principal coordina los tres subprocesos del modelo, actualiza el volumen del sistema y determina si la simulacion avanza o termina. El diagrama principal del proyecto vive en Insight Maker para permitir explorar las relaciones del sistema completo con controles de navegacion, zoom y panel lateral.
 
-<div class="diagram-frame">
-  <SimulationFlow
-    client:load
-    height="78vh"
-    title="Diagrama de Flujo Principal"
-  />
-</div>
+<InsightModelEmbed
+  id="diagrama-principal-pagina"
+  page
+  body="Explora el modelo embebido directamente desde la documentacion. El marco mantiene el area de trabajo amplia para navegar variables, conexiones y estructura del sistema hidrico."
+/>

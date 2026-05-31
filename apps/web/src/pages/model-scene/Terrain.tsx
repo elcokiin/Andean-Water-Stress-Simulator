@@ -1,100 +1,122 @@
-import { useMemo } from "react";
+import { Suspense, useMemo } from "react";
+import { useLoader } from "@react-three/fiber";
 import * as THREE from "three";
-import { EzTreeForest, ForegroundShrubs } from "./Vegetation";
+import {
+  EzTreeForest,
+  EzTreeFlowers,
+  EzTreeGrass,
+  EzTreeRocks,
+  ForegroundShrubs,
+} from "./Vegetation";
+import { getTerrainHeight } from "./terrain-height";
 
-type RidgeProps = {
-  color: string;
-  points: Array<[number, number]>;
-  position: [number, number, number];
-  scale?: [number, number, number];
-};
+const SEGMENTS = 80;
+const GROUND_TEXTURE_PATHS = [
+  "/assets/ez-tree/textures/ground/grass.jpg",
+  "/assets/ez-tree/textures/ground/dirt_color.jpg",
+  "/assets/ez-tree/textures/ground/dirt_normal.jpg",
+] as const;
 
-function MountainRidge({
-  color,
-  points,
-  position,
-  scale = [1, 1, 1],
-}: RidgeProps) {
-  const geometry = useMemo(() => {
-    const shape = new THREE.Shape();
-    shape.moveTo(points[0][0], 0);
-    points.forEach(([x, y]) => shape.lineTo(x, y));
-    shape.lineTo(points[points.length - 1][0], -0.08);
-    shape.lineTo(points[0][0], -0.08);
-    shape.closePath();
-    return new THREE.ShapeGeometry(shape);
-  }, [points]);
+useLoader.preload(THREE.TextureLoader, GROUND_TEXTURE_PATHS);
 
-  return (
-    <mesh position={position} scale={scale} receiveShadow>
-      <primitive object={geometry} attach="geometry" />
-      <meshStandardMaterial
-        color={color}
-        roughness={0.96}
-        metalness={0.01}
-        side={THREE.DoubleSide}
-      />
-    </mesh>
-  );
+function patchTerrainShader(material: THREE.MeshStandardMaterial) {
+  material.onBeforeCompile = (shader) => {
+    shader.uniforms.uGrassTexture = { value: material.userData.grassTexture };
+    shader.uniforms.uDirtTexture = { value: material.userData.dirtTexture };
+    shader.uniforms.uTextureScale = { value: 2.4 };
+
+    shader.vertexShader = `
+      varying vec3 vWorldPosition;
+    ${shader.vertexShader}`;
+
+    shader.vertexShader = shader.vertexShader.replace(
+      "#include <worldpos_vertex>",
+      `#include <worldpos_vertex>
+       vWorldPosition = worldPosition.xyz;`,
+    );
+
+    shader.fragmentShader = `
+      varying vec3 vWorldPosition;
+      uniform sampler2D uGrassTexture;
+      uniform sampler2D uDirtTexture;
+      uniform float uTextureScale;
+    ${shader.fragmentShader}`;
+
+    shader.fragmentShader = shader.fragmentShader.replace(
+      "#include <map_fragment>",
+      `
+        vec2 terrainUv = vWorldPosition.xz / uTextureScale;
+        vec3 grassColor = texture2D(uGrassTexture, terrainUv).rgb;
+        vec3 dirtColor = texture2D(uDirtTexture, terrainUv * 0.82).rgb;
+        float broadPatch = sin(vWorldPosition.x * 1.35 + vWorldPosition.z * 0.9) * 0.5 + 0.5;
+        float finePatch = sin(vWorldPosition.x * 3.7 - vWorldPosition.z * 2.6) * 0.5 + 0.5;
+        float dirtMix = smoothstep(0.48, 0.82, broadPatch * 0.72 + finePatch * 0.28);
+        vec3 groundColor = mix(grassColor, dirtColor, dirtMix * 0.38) * 1.28;
+        diffuseColor *= vec4(groundColor, 1.0);
+      `,
+    );
+  };
 }
 
 export function TunjaTerrain() {
-  const farRidge = useMemo(
-    () =>
-      [
-        [-7.5, 0.4],
-        [-6.0, 1.25],
-        [-4.4, 1.85],
-        [-2.8, 2.0],
-        [-1.2, 1.62],
-        [0.2, 1.35],
-        [1.8, 1.48],
-        [3.4, 1.18],
-        [5.1, 1.0],
-        [7.5, 0.72],
-      ] satisfies Array<[number, number]>,
-    [],
+  const [grassTexture, dirtTexture, dirtNormal] = useLoader(
+    THREE.TextureLoader,
+    [...GROUND_TEXTURE_PATHS],
   );
 
-  const nearRidge = useMemo(
-    () =>
-      [
-        [-7.5, 0.28],
-        [-6.0, 0.92],
-        [-4.7, 1.1],
-        [-3.2, 0.74],
-        [-1.6, 0.62],
-        [0.2, 0.83],
-        [2.0, 0.62],
-        [3.5, 0.78],
-        [5.4, 0.54],
-        [7.5, 0.44],
-      ] satisfies Array<[number, number]>,
-    [],
-  );
+  const geometry = useMemo(() => {
+    const width = 18;
+    const depth = 13;
+    const geo = new THREE.PlaneGeometry(width, depth, SEGMENTS, SEGMENTS);
+    geo.rotateX(-Math.PI / 2);
+
+    const pos = geo.attributes.position;
+    for (let i = 0; i < pos.count; i++) {
+      const x = pos.getX(i);
+      const z = pos.getZ(i);
+      pos.setY(i, getTerrainHeight(x, z));
+    }
+
+    pos.needsUpdate = true;
+    geo.computeVertexNormals();
+    return geo;
+  }, []);
+
+  const material = useMemo(() => {
+    [grassTexture, dirtTexture, dirtNormal].forEach((texture) => {
+      texture.wrapS = THREE.RepeatWrapping;
+      texture.wrapT = THREE.RepeatWrapping;
+      texture.anisotropy = 4;
+    });
+    grassTexture.colorSpace = THREE.SRGBColorSpace;
+    dirtTexture.colorSpace = THREE.SRGBColorSpace;
+
+    const terrainMaterial = new THREE.MeshStandardMaterial({
+      color: "#eef5d0",
+      normalMap: dirtNormal,
+      normalScale: new THREE.Vector2(0.28, 0.28),
+      roughness: 0.98,
+      metalness: 0.01,
+    });
+    terrainMaterial.userData.grassTexture = grassTexture;
+    terrainMaterial.userData.dirtTexture = dirtTexture;
+    patchTerrainShader(terrainMaterial);
+    return terrainMaterial;
+  }, [dirtNormal, dirtTexture, grassTexture]);
 
   return (
     <group>
-      <mesh rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
-        <planeGeometry args={[18, 13, 1, 1]} />
-        <meshStandardMaterial color="#47783e" roughness={0.96} />
-      </mesh>
+      <mesh geometry={geometry} material={material} receiveShadow castShadow />
 
-      <MountainRidge
-        color="#598b48"
-        points={farRidge}
-        position={[0, 0.08, -5.2]}
-        scale={[1.16, 1.4, 1]}
-      />
-      <MountainRidge
-        color="#315f3f"
-        points={nearRidge}
-        position={[0, 0.12, -3.9]}
-        scale={[1.08, 1.2, 1]}
-      />
-
+      <EzTreeGrass />
       <EzTreeForest />
       <ForegroundShrubs />
+      <Suspense fallback={null}>
+        <EzTreeFlowers />
+      </Suspense>
+      <Suspense fallback={null}>
+        <EzTreeRocks />
+      </Suspense>
     </group>
   );
 }

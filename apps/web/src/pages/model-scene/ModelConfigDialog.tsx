@@ -1,13 +1,17 @@
+import { useEffect } from "react";
 import {
   CalendarClock,
   Gauge,
   Maximize2,
   Minimize2,
   Waves,
+  CloudRain,
+  Users,
+  Zap,
+  Info,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -16,43 +20,69 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Slider } from "@/components/ui/slider";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
+import { useSimulationStore } from "@/lib/stores/simulation-store";
 
-import { Metric } from "./Metric";
 import { ShortcutsPanel } from "./ShortcutsPanel";
 import { scenarioIds, scenarios } from "./model-data";
-import type { ConfigTab, Scenario, ScenarioId } from "./model-data";
+import type { ConfigTab } from "./model-data";
 
-export function ModelConfigDialog({
-  configTab,
-  isExpanded,
-  open,
-  scenario,
-  selectedScenario,
-  onConfigTabChange,
-  onOpenChange,
-  onScenarioChange,
-  onToggleExpanded,
-}: {
-  configTab: ConfigTab;
-  isExpanded: boolean;
-  open: boolean;
-  scenario: ScenarioId;
-  selectedScenario: Scenario;
-  onConfigTabChange: (tab: ConfigTab) => void;
-  onOpenChange: (open: boolean) => void;
-  onScenarioChange: (scenario: ScenarioId) => void;
-  onToggleExpanded: () => void;
-}) {
+export function ModelConfigDialog() {
+  const configTab = useSimulationStore((s) => s.configTab);
+  const isExpanded = useSimulationStore((s) => s.isDialogExpanded);
+  const open = useSimulationStore((s) => s.configOpen);
+  const scenario = useSimulationStore((s) => s.scenario);
+  const oniValue = useSimulationStore((s) => s.oniValue);
+  const rainValue = useSimulationStore((s) => s.rainValue);
+  const demandValue = useSimulationStore((s) => s.demandValue);
+  const efficiencyValue = useSimulationStore((s) => s.efficiencyValue);
+  const rationingActive = useSimulationStore((s) => s.rationingActive);
+
+  const setConfigTab = useSimulationStore((s) => s.setConfigTab);
+  const setConfigOpen = useSimulationStore((s) => s.setConfigOpen);
+  const setScenario = useSimulationStore((s) => s.setScenario);
+  const toggleDialogExpanded = useSimulationStore(
+    (s) => s.toggleDialogExpanded,
+  );
+  const setOniValue = useSimulationStore((s) => s.setOniValue);
+  const setRainValue = useSimulationStore((s) => s.setRainValue);
+  const setDemandValue = useSimulationStore((s) => s.setDemandValue);
+  const setEfficiencyValue = useSimulationStore((s) => s.setEfficiencyValue);
+  const setRationingActive = useSimulationStore((s) => s.setRationingActive);
+
+  const selectedScenario = scenarios[scenario];
+
+  useEffect(() => {
+    setOniValue(parseFloat(selectedScenario.oni));
+  }, [selectedScenario, setOniValue]);
+
+  const sidebarItems = [
+    { id: "scenarios", icon: Gauge, label: "Escenarios Rápidos" },
+    { id: "climate", icon: CloudRain, label: "Clima y Entorno" },
+    { id: "demand", icon: Users, label: "Demanda Poblacional" },
+    { id: "infrastructure", icon: Zap, label: "Infraestructura" },
+    { id: "shortcuts", icon: CalendarClock, label: "Atajos y Atributos" },
+  ] as const;
+
+  const activeTab = configTab === "parameters" ? "climate" : configTab;
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={setConfigOpen}>
       <DialogContent
         className={cn(
           "flex flex-col gap-0 overflow-hidden p-0",
           isExpanded
             ? "!h-[calc(100vh-2rem)] !max-h-[calc(100vh-2rem)] !w-[calc(100vw-2rem)] !max-w-[calc(100vw-2rem)] sm:!max-w-[calc(100vw-2rem)]"
-            : "h-[min(720px,calc(100vh-2rem))] sm:max-w-2xl",
+            : "h-[min(760px,calc(100vh-2rem))] sm:max-w-4xl",
         )}
       >
         <DialogHeader className="shrink-0 border-b border-border px-6 py-4">
@@ -61,130 +91,337 @@ export function ModelConfigDialog({
               variant="ghost"
               size="icon"
               className="-ml-2"
-              onClick={onToggleExpanded}
-              aria-label={
-                isExpanded ? "Restaurar tamano del dialogo" : "Expandir dialogo"
-              }
-              title={isExpanded ? "Restaurar tamano" : "Expandir dialogo"}
+              onClick={toggleDialogExpanded}
             >
               {isExpanded ? <Minimize2 /> : <Maximize2 />}
             </Button>
             <div className="min-w-0">
-              <DialogTitle>Configuracion del modelo</DialogTitle>
+              <DialogTitle className="text-xl">
+                Configuración del Simulador
+              </DialogTitle>
               <DialogDescription>
-                Base inicial para conectar el modelo real de dinamica de
-                sistemas, sus escenarios y parametros de calibracion.
+                Ajusta las variables de la dinámica de sistemas para
+                previsualizar diferentes escenarios en tiempo real.
               </DialogDescription>
             </div>
           </div>
         </DialogHeader>
 
-        <Tabs
-          value={configTab}
-          onValueChange={(value) => onConfigTabChange(value as ConfigTab)}
-          className="min-h-0 flex-1 overflow-hidden"
-        >
-          <TabsList className="mx-6 mt-3 shrink-0">
-            <TabsTrigger value="scenarios">Escenarios</TabsTrigger>
-            <TabsTrigger value="parameters">Parametros</TabsTrigger>
-            <TabsTrigger value="shortcuts">Atajos</TabsTrigger>
-          </TabsList>
-
-          <div className="min-h-0 flex-1 overflow-y-auto px-6 py-4">
-            <TabsContent value="scenarios" className="mt-0">
-              <div className="grid gap-4 md:grid-cols-[1.1fr_0.9fr]">
-                <Card className="gap-3">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2 text-sm">
-                      <Gauge aria-hidden="true" />
-                      Escenario activo
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="flex flex-col gap-2">
-                    {scenarioIds.map((scenarioId) => (
-                      <Button
-                        key={scenarioId}
-                        variant={
-                          scenario === scenarioId ? "default" : "outline"
-                        }
-                        className="h-auto justify-start px-3 py-2 text-left"
-                        onClick={() => onScenarioChange(scenarioId)}
-                      >
-                        <span className="flex min-w-0 flex-col items-start gap-1">
-                          <span className="truncate text-sm font-semibold">
-                            {scenarios[scenarioId].name}
-                          </span>
-                          <span className="truncate text-xs font-normal opacity-80">
-                            Reserva {scenarios[scenarioId].reserve}% - ONI{" "}
-                            {scenarios[scenarioId].oni}
-                          </span>
-                        </span>
-                      </Button>
-                    ))}
-                  </CardContent>
-                </Card>
-
-                <Card className="gap-3">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2 text-sm">
-                      <Waves aria-hidden="true" />
-                      Lectura del escenario
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="flex flex-col gap-3">
-                    <Metric
-                      label="Reserva"
-                      value={`${selectedScenario.reserve}%`}
-                    />
-                    <Metric label="Entrada" value={selectedScenario.inflow} />
-                    <Metric label="Demanda" value={selectedScenario.demand} />
-                    <Metric label="ONI" value={selectedScenario.oni} />
-                  </CardContent>
-                </Card>
+        <div className="flex min-h-0 flex-1 overflow-hidden">
+          <div className="w-56 shrink-0 border-r border-border bg-muted/30">
+            <ScrollArea className="h-full">
+              <div className="flex flex-col gap-1 p-4">
+                {sidebarItems.map((item) => (
+                  <button
+                    key={item.id}
+                    onClick={() => setConfigTab(item.id as ConfigTab)}
+                    className={cn(
+                      "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground",
+                      activeTab === item.id
+                        ? "bg-accent text-accent-foreground"
+                        : "text-muted-foreground",
+                    )}
+                  >
+                    <item.icon className="h-4 w-4" />
+                    {item.label}
+                  </button>
+                ))}
               </div>
-            </TabsContent>
-
-            <TabsContent value="parameters" className="mt-0">
-              <div className="grid gap-4 md:grid-cols-[0.9fr_1.1fr]">
-                <Card className="gap-3">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2 text-sm">
-                      <CalendarClock aria-hidden="true" />
-                      Parametros pendientes
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="flex flex-col gap-3 text-sm">
-                    <Metric label="Reserva critica" value="15%" />
-                    <Metric label="Recarga critica" value="< 20%" />
-                    <Metric label="Eficiencia red" value="62%" />
-                    <Metric label="Escenario" value={selectedScenario.badge} />
-                  </CardContent>
-                </Card>
-
-                <div className="rounded-lg border border-border bg-muted/40 p-4 text-sm">
-                  <p className="font-medium text-foreground">
-                    Siguiente conexion
-                  </p>
-                  <p className="mt-1 leading-relaxed text-muted-foreground">
-                    Esta interfaz deja preparado el terreno visual para
-                    reemplazar los valores mock por la salida real del modelo:
-                    stocks, flujos, auxiliares, politicas y series temporales.
-                  </p>
-                </div>
-              </div>
-            </TabsContent>
-
-            <TabsContent value="shortcuts" className="mt-0">
-              <ShortcutsPanel />
-            </TabsContent>
+            </ScrollArea>
           </div>
-        </Tabs>
 
-        <DialogFooter className="shrink-0">
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Cerrar
+          <div className="flex-1 bg-background">
+            <ScrollArea className="h-full">
+              <div className="p-6">
+                {activeTab === "scenarios" && (
+                  <div className="animate-in fade-in-50 space-y-6">
+                    <div>
+                      <h3 className="mb-1 text-lg font-semibold">
+                        Escenarios Predefinidos
+                      </h3>
+                      <p className="mb-4 text-sm text-muted-foreground">
+                        Selecciona una configuración rápida para cargar los
+                        parámetros preestablecidos.
+                      </p>
+                      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+                        {scenarioIds.map((scenarioId) => (
+                          <button
+                            key={scenarioId}
+                            onClick={() => setScenario(scenarioId)}
+                            className={cn(
+                              "flex flex-col items-start gap-2 rounded-lg border p-4 text-left transition-all hover:bg-accent/50",
+                              scenario === scenarioId
+                                ? "border-primary ring-1 ring-primary/20"
+                                : "border-border",
+                            )}
+                          >
+                            <div className="flex items-center gap-2">
+                              <span
+                                className="h-3 w-3 rounded-full"
+                                style={{
+                                  backgroundColor: scenarios[scenarioId].color,
+                                }}
+                              />
+                              <span className="font-medium">
+                                {scenarios[scenarioId].name}
+                              </span>
+                            </div>
+                            <span className="text-xs text-muted-foreground">
+                              Reserva: {scenarios[scenarioId].reserve}% | ONI:{" "}
+                              {scenarios[scenarioId].oni}
+                            </span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="rounded-lg border bg-muted/20 p-4">
+                      <h4 className="mb-3 flex items-center gap-2 font-medium">
+                        <Waves className="h-4 w-4 text-primary" />
+                        Lectura actual
+                      </h4>
+                      <div className="grid grid-cols-2 gap-4 text-sm md:grid-cols-4">
+                        <div>
+                          <p className="text-muted-foreground">Reserva</p>
+                          <p className="text-lg font-semibold">
+                            {selectedScenario.reserve}%
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-muted-foreground">Entrada</p>
+                          <p className="text-lg font-semibold">
+                            {selectedScenario.inflow}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-muted-foreground">Demanda</p>
+                          <p className="text-lg font-semibold">
+                            {selectedScenario.demand}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-muted-foreground">Índice ONI</p>
+                          <p className="text-lg font-semibold">
+                            {selectedScenario.oni}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {activeTab === "climate" && (
+                  <div className="animate-in fade-in-50 space-y-8">
+                    <div>
+                      <h3 className="mb-1 text-lg font-semibold">
+                        Clima y Entorno Ambiental
+                      </h3>
+                      <p className="mb-6 text-sm text-muted-foreground">
+                        Ajusta las variables de la naturaleza que afectan la
+                        entrada de agua al embalse.
+                      </p>
+                    </div>
+
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <Label
+                          htmlFor="oni"
+                          className="flex items-center gap-2 text-base"
+                        >
+                          Índice Oceánico del Niño (ONI)
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Info className="h-4 w-4 cursor-help text-muted-foreground" />
+                            </TooltipTrigger>
+                            <TooltipContent className="max-w-xs">
+                              <p>
+                                Valores positivos (+0.5 en adelante) indican
+                                presencia del Fenómeno de El Niño (sequía en la
+                                región). Valores negativos indican La Niña
+                                (lluvias).
+                              </p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </Label>
+                        <span className="font-mono text-sm text-muted-foreground">
+                          {oniValue > 0 ? `+${oniValue}` : oniValue}
+                        </span>
+                      </div>
+                      <Slider
+                        value={[oniValue]}
+                        onValueChange={(val) => setOniValue(val[0])}
+                        max={3}
+                        min={-3}
+                        step={0.1}
+                        className="w-full"
+                      />
+                      <div className="flex justify-between text-xs text-muted-foreground">
+                        <span>Fuerte La Niña (-3)</span>
+                        <span>Neutral (0)</span>
+                        <span>Fuerte El Niño (+3)</span>
+                      </div>
+                    </div>
+
+                    <div className="space-y-4 pt-4">
+                      <div className="flex items-center justify-between">
+                        <Label
+                          htmlFor="rain"
+                          className="flex items-center gap-2 text-base"
+                        >
+                          Precipitación Base
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Info className="h-4 w-4 cursor-help text-muted-foreground" />
+                            </TooltipTrigger>
+                            <TooltipContent className="max-w-xs">
+                              <p>
+                                Precipitación mensual promedio que recarga el
+                                embalse mediante escorrentía en la cuenca.
+                              </p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </Label>
+                        <span className="font-mono text-sm text-muted-foreground">
+                          {rainValue} mm/mes
+                        </span>
+                      </div>
+                      <Slider
+                        value={[rainValue]}
+                        onValueChange={(val) => setRainValue(val[0])}
+                        max={300}
+                        min={0}
+                        step={5}
+                        className="w-full"
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {activeTab === "demand" && (
+                  <div className="animate-in fade-in-50 space-y-8">
+                    <div>
+                      <h3 className="mb-1 text-lg font-semibold">
+                        Demanda y Consumo
+                      </h3>
+                      <p className="mb-6 text-sm text-muted-foreground">
+                        Ajusta las métricas de consumo de la población y las
+                        políticas de racionamiento.
+                      </p>
+                    </div>
+
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <Label className="flex items-center gap-2 text-base">
+                          Consumo per cápita (L/día)
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Info className="h-4 w-4 cursor-help text-muted-foreground" />
+                            </TooltipTrigger>
+                            <TooltipContent className="max-w-xs">
+                              <p>
+                                Consumo diario estimado por habitante en la
+                                región, considerando usos residenciales y
+                                comerciales básicos.
+                              </p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </Label>
+                        <span className="font-mono text-sm text-muted-foreground">
+                          {demandValue} L
+                        </span>
+                      </div>
+                      <Slider
+                        value={[demandValue]}
+                        onValueChange={(val) => setDemandValue(val[0])}
+                        max={250}
+                        min={50}
+                        step={1}
+                        className="w-full"
+                      />
+                    </div>
+
+                    <div className="mt-6 flex flex-row items-center justify-between rounded-lg border p-4">
+                      <div className="space-y-0.5">
+                        <Label className="text-base font-semibold">
+                          Política de Racionamiento Activa
+                        </Label>
+                        <p className="text-sm text-muted-foreground">
+                          Fuerza la reducción de la demanda en un 30% si la
+                          reserva baja del 20%.
+                        </p>
+                      </div>
+                      <Switch
+                        checked={rationingActive}
+                        onCheckedChange={setRationingActive}
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {activeTab === "infrastructure" && (
+                  <div className="animate-in fade-in-50 space-y-8">
+                    <div>
+                      <h3 className="mb-1 text-lg font-semibold">
+                        Infraestructura
+                      </h3>
+                      <p className="mb-6 text-sm text-muted-foreground">
+                        Parámetros físicos del sistema de acueducto.
+                      </p>
+                    </div>
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <Label className="flex items-center gap-2 text-base">
+                          Eficiencia de la red (fugas)
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Info className="h-4 w-4 cursor-help text-muted-foreground" />
+                            </TooltipTrigger>
+                            <TooltipContent className="max-w-xs">
+                              <p>
+                                Porcentaje de agua que llega efectivamente a los
+                                hogares. El resto se pierde en fugas de la red
+                                de acueducto.
+                              </p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </Label>
+                        <span className="font-mono text-sm text-muted-foreground">
+                          {efficiencyValue}%
+                        </span>
+                      </div>
+                      <Slider
+                        value={[efficiencyValue]}
+                        onValueChange={(val) => setEfficiencyValue(val[0])}
+                        max={100}
+                        min={30}
+                        step={1}
+                        className="w-full"
+                      />
+                      <p className="text-xs text-muted-foreground">
+                        El restante 38% se asume como pérdida técnica (fugas en
+                        tuberías).
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {activeTab === "shortcuts" && (
+                  <div className="animate-in fade-in-50">
+                    <ShortcutsPanel />
+                  </div>
+                )}
+              </div>
+            </ScrollArea>
+          </div>
+        </div>
+
+        <DialogFooter className="shrink-0 border-t border-border bg-muted/10 px-6 py-4">
+          <Button variant="outline" onClick={() => setConfigOpen(false)}>
+            Descartar cambios
           </Button>
-          <Button onClick={() => onOpenChange(false)}>Guardar base</Button>
+          <Button onClick={() => setConfigOpen(false)}>
+            Guardar y Simular
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

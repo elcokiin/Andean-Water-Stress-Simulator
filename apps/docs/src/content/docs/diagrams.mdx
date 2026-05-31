@@ -4,14 +4,20 @@ description: Resumen de los diagramas movidos al proyecto de documentacion.
 ---
 
 import { CardGrid, LinkCard } from "@astrojs/starlight/components";
+import InsightModelEmbed from "../../components/InsightModelEmbed.astro";
 
 Los diagramas interactivos del proyecto se movieron al app de documentacion en `apps/docs` y comparten implementacion con `apps/web` mediante el paquete `@proyecto-final/diagrams`.
 
+<InsightModelEmbed
+  id="diagrama-principal-resumen"
+  body="Este es el mapa central del modelo en Insight Maker. Usa los controles integrados para acercarte, navegar las relaciones y revisar la estructura completa del sistema hidrico."
+/>
+
 <CardGrid>
   <LinkCard
-    title="Flujo principal"
+    title="Diagrama principal"
     href="/diagrams/main-flow"
-    description="Bucle principal de simulacion desde condiciones iniciales hasta reportes."
+    description="Modelo sistemico embebido desde Insight Maker con controles de navegacion."
   />
   <LinkCard
     title="Impacto climatico"

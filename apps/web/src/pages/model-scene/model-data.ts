@@ -1,5 +1,11 @@
 export type ScenarioId = "baseline" | "moderate" | "extreme";
-export type ConfigTab = "scenarios" | "parameters" | "shortcuts";
+export type ConfigTab =
+  | "scenarios"
+  | "parameters"
+  | "shortcuts"
+  | "climate"
+  | "demand"
+  | "infrastructure";
 
 export type ShortcutAction =
   | "toggle-play"

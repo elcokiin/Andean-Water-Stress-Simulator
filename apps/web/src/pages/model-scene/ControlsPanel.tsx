@@ -3,28 +3,21 @@ import { Pause, Play, Settings } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useSimulationStore } from "@/lib/stores/simulation-store";
 
 import { Metric } from "./Metric";
 import { scenarioIds, scenarios, timeline } from "./model-data";
-import type { Scenario, ScenarioId } from "./model-data";
 
-export function ControlsPanel({
-  isPlaying,
-  scenario,
-  selectedScenario,
-  step,
-  onConfigOpen,
-  onScenarioChange,
-  onTogglePlayback,
-}: {
-  isPlaying: boolean;
-  scenario: ScenarioId;
-  selectedScenario: Scenario;
-  step: number;
-  onConfigOpen: () => void;
-  onScenarioChange: (scenario: ScenarioId) => void;
-  onTogglePlayback: () => void;
-}) {
+export function ControlsPanel() {
+  const isPlaying = useSimulationStore((s) => s.isPlaying);
+  const scenario = useSimulationStore((s) => s.scenario);
+  const step = useSimulationStore((s) => s.step);
+  const setScenario = useSimulationStore((s) => s.setScenario);
+  const setConfigOpen = useSimulationStore((s) => s.setConfigOpen);
+  const togglePlayback = useSimulationStore((s) => s.togglePlayback);
+
+  const selectedScenario = scenarios[scenario];
+
   return (
     <Card className="absolute right-3 bottom-3 left-3 z-10 gap-3 rounded-[10px] border-border/80 bg-background/90 p-3 shadow-xl backdrop-blur-sm sm:right-auto sm:left-4 sm:w-[340px]">
       <CardHeader className="flex items-center justify-between gap-3 p-0">
@@ -38,7 +31,7 @@ export function ControlsPanel({
           variant="outline"
           size="icon"
           className="rounded-[8px]"
-          onClick={onConfigOpen}
+          onClick={() => setConfigOpen(true)}
           aria-label="Configurar modelo"
         >
           <Settings />
@@ -53,7 +46,7 @@ export function ControlsPanel({
               variant={scenario === scenarioId ? "default" : "outline"}
               size="sm"
               className="h-11 flex-col items-start gap-0.5 rounded-[8px] px-2 text-left"
-              onClick={() => onScenarioChange(scenarioId)}
+              onClick={() => setScenario(scenarioId)}
             >
               <span className="w-full truncate text-xs">
                 {scenarios[scenarioId].badge}
@@ -101,7 +94,7 @@ export function ControlsPanel({
             variant={isPlaying ? "secondary" : "default"}
             size="icon"
             className="size-10 rounded-[8px]"
-            onClick={onTogglePlayback}
+            onClick={togglePlayback}
             aria-label={isPlaying ? "Pausar simulacion" : "Iniciar simulacion"}
           >
             {isPlaying ? <Pause /> : <Play />}
