@@ -419,16 +419,16 @@ export function EzTreeFlowers() {
   const flowers = useMemo(() => {
     const group = new THREE.Group();
     const flowerSpecs = [
-      { model: 2, position: [-4.85, 2.9], rotationY: 0.2, scale: 0.085 },
-      { model: 0, position: [-4.55, 3.18], rotationY: 1.7, scale: 0.078 },
-      { model: 1, position: [-3.9, 3.07], rotationY: 3.2, scale: 0.08 },
-      { model: 2, position: [-2.8, 3.42], rotationY: 5.4, scale: 0.072 },
-      { model: 0, position: [3.5, 3.16], rotationY: 0.8, scale: 0.082 },
-      { model: 1, position: [4.15, 2.84], rotationY: 2.6, scale: 0.074 },
-      { model: 2, position: [4.78, 3.34], rotationY: 4.7, scale: 0.086 },
-      { model: 0, position: [5.45, 2.18], rotationY: 1.2, scale: 0.076 },
-      { model: 1, position: [-6.25, -1.28], rotationY: 3.9, scale: 0.078 },
-      { model: 2, position: [6.35, -1.05], rotationY: 2.1, scale: 0.08 },
+      { model: 2, position: [-2.65, 2.9], rotationY: 0.2, scale: 0.085 },
+      { model: 0, position: [-2.18, 3.18], rotationY: 1.7, scale: 0.078 },
+      { model: 1, position: [-1.55, 3.02], rotationY: 3.2, scale: 0.08 },
+      { model: 2, position: [-0.88, 3.36], rotationY: 5.4, scale: 0.072 },
+      { model: 0, position: [1.25, 3.12], rotationY: 0.8, scale: 0.082 },
+      { model: 1, position: [1.92, 2.78], rotationY: 2.6, scale: 0.074 },
+      { model: 2, position: [2.58, 3.24], rotationY: 4.7, scale: 0.086 },
+      { model: 0, position: [3.28, 2.62], rotationY: 1.2, scale: 0.076 },
+      { model: 1, position: [-3.42, -2.28], rotationY: 3.9, scale: 0.078 },
+      { model: 2, position: [3.55, -2.18], rotationY: 2.1, scale: 0.08 },
     ] as const;
 
     flowerSpecs.forEach(({ model, position, rotationY, scale }) => {
@@ -458,12 +458,12 @@ export function EzTreeRocks() {
   const rocks = useMemo(() => {
     const group = new THREE.Group();
     const rockSpecs = [
-      { model: 0, position: [-5.75, 1.75], rotationY: 0.75, scale: 0.18 },
-      { model: 2, position: [-4.9, 2.18], rotationY: 2.3, scale: 0.14 },
-      { model: 1, position: [5.75, 1.36], rotationY: 3.75, scale: 0.17 },
-      { model: 0, position: [4.95, 2.02], rotationY: 5.35, scale: 0.13 },
-      { model: 2, position: [-6.75, -0.85], rotationY: 1.45, scale: 0.15 },
-      { model: 1, position: [6.95, -0.55], rotationY: 4.2, scale: 0.14 },
+      { model: 0, position: [-3.75, 2.28], rotationY: 0.75, scale: 0.18 },
+      { model: 2, position: [-2.85, 2.75], rotationY: 2.3, scale: 0.14 },
+      { model: 1, position: [4.45, 2.55], rotationY: 3.75, scale: 0.17 },
+      { model: 0, position: [2.95, 2.95], rotationY: 5.35, scale: 0.13 },
+      { model: 2, position: [-3.85, -2.12], rotationY: 1.45, scale: 0.15 },
+      { model: 1, position: [4.1, -2.05], rotationY: 4.2, scale: 0.14 },
     ] as const;
 
     rockSpecs.forEach(({ model, position, rotationY, scale }) => {
