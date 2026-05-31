@@ -8,8 +8,11 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useSimulationStore } from "@/lib/stores/simulation-store";
 
-export function TitleBar({ onOpenHelp }: { onOpenHelp: () => void }) {
+export function TitleBar() {
+  const setConfigOpen = useSimulationStore((s) => s.setConfigOpen);
+
   return (
     <div className="absolute top-4 left-1/2 z-10 -translate-x-1/2">
       <div className="flex items-center gap-2 rounded-[10px] border border-border bg-background/85 px-3 py-2 shadow-lg backdrop-blur-sm sm:px-5">
@@ -30,7 +33,7 @@ export function TitleBar({ onOpenHelp }: { onOpenHelp: () => void }) {
             <Button
               variant="ghost"
               size="icon-sm"
-              onClick={onOpenHelp}
+              onClick={() => setConfigOpen(true)}
               aria-label="Abrir guia del modelo"
             >
               <HelpCircle />

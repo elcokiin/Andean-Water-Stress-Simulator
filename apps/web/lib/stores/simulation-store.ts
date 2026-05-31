@@ -1,0 +1,55 @@
+import { create } from "zustand";
+import type { ConfigTab, ScenarioId } from "@/src/pages/model-scene/model-data";
+
+interface SimulationState {
+  scenario: ScenarioId;
+  isPlaying: boolean;
+  step: number;
+  configOpen: boolean;
+  configTab: ConfigTab;
+  isDialogExpanded: boolean;
+  oniValue: number;
+  rainValue: number;
+  demandValue: number;
+  efficiencyValue: number;
+  rationingActive: boolean;
+
+  setScenario: (scenario: ScenarioId) => void;
+  togglePlayback: () => void;
+  setStep: (step: number) => void;
+  setConfigOpen: (open: boolean) => void;
+  setConfigTab: (tab: ConfigTab) => void;
+  toggleDialogExpanded: () => void;
+  setOniValue: (value: number) => void;
+  setRainValue: (value: number) => void;
+  setDemandValue: (value: number) => void;
+  setEfficiencyValue: (value: number) => void;
+  setRationingActive: (active: boolean) => void;
+}
+
+export const useSimulationStore = create<SimulationState>((set) => ({
+  scenario: "baseline",
+  isPlaying: false,
+  step: 1,
+  configOpen: false,
+  configTab: "scenarios",
+  isDialogExpanded: false,
+  oniValue: 0,
+  rainValue: 85,
+  demandValue: 120,
+  efficiencyValue: 62,
+  rationingActive: false,
+
+  setScenario: (scenario) => set({ scenario }),
+  togglePlayback: () => set((state) => ({ isPlaying: !state.isPlaying })),
+  setStep: (step) => set({ step }),
+  setConfigOpen: (configOpen) => set({ configOpen }),
+  setConfigTab: (configTab) => set({ configTab }),
+  toggleDialogExpanded: () =>
+    set((state) => ({ isDialogExpanded: !state.isDialogExpanded })),
+  setOniValue: (oniValue) => set({ oniValue }),
+  setRainValue: (rainValue) => set({ rainValue }),
+  setDemandValue: (demandValue) => set({ demandValue }),
+  setEfficiencyValue: (efficiencyValue) => set({ efficiencyValue }),
+  setRationingActive: (rationingActive) => set({ rationingActive }),
+}));

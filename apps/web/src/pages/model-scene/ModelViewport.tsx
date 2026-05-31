@@ -1,16 +1,15 @@
 import { Canvas } from "@react-three/fiber";
 import { useMemo } from "react";
 
-import type { Scenario } from "./model-data";
+import { useSimulationStore } from "@/lib/stores/simulation-store";
+import { scenarios } from "./model-data";
 import { TunjaScene } from "./TunjaScene";
 
-export function ModelViewport({
-  isPlaying,
-  selectedScenario,
-}: {
-  isPlaying: boolean;
-  selectedScenario: Scenario;
-}) {
+export function ModelViewport() {
+  const isPlaying = useSimulationStore((s) => s.isPlaying);
+  const scenario = useSimulationStore((s) => s.scenario);
+  const selectedScenario = scenarios[scenario];
+
   const reservoirScale = useMemo(
     () => Math.max(selectedScenario.reserve / 68, 0.24),
     [selectedScenario.reserve],

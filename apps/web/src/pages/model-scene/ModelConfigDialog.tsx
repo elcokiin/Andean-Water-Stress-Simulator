@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import {
   CalendarClock,
   Gauge,
@@ -30,40 +30,40 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
+import { useSimulationStore } from "@/lib/stores/simulation-store";
 
 import { ShortcutsPanel } from "./ShortcutsPanel";
 import { scenarioIds, scenarios } from "./model-data";
-import type { ConfigTab, Scenario, ScenarioId } from "./model-data";
+import type { ConfigTab } from "./model-data";
 
-export function ModelConfigDialog({
-  configTab,
-  isExpanded,
-  open,
-  scenario,
-  selectedScenario,
-  onConfigTabChange,
-  onOpenChange,
-  onScenarioChange,
-  onToggleExpanded,
-}: {
-  configTab: ConfigTab;
-  isExpanded: boolean;
-  open: boolean;
-  scenario: ScenarioId;
-  selectedScenario: Scenario;
-  onConfigTabChange: (tab: ConfigTab) => void;
-  onOpenChange: (open: boolean) => void;
-  onScenarioChange: (scenario: ScenarioId) => void;
-  onToggleExpanded: () => void;
-}) {
-  const [oniValue, setOniValue] = useState(parseFloat(selectedScenario.oni));
-  const [rainValue, setRainValue] = useState(85);
-  const [demandValue, setDemandValue] = useState(120);
-  const [efficiencyValue, setEfficiencyValue] = useState(62);
+export function ModelConfigDialog() {
+  const configTab = useSimulationStore((s) => s.configTab);
+  const isExpanded = useSimulationStore((s) => s.isDialogExpanded);
+  const open = useSimulationStore((s) => s.configOpen);
+  const scenario = useSimulationStore((s) => s.scenario);
+  const oniValue = useSimulationStore((s) => s.oniValue);
+  const rainValue = useSimulationStore((s) => s.rainValue);
+  const demandValue = useSimulationStore((s) => s.demandValue);
+  const efficiencyValue = useSimulationStore((s) => s.efficiencyValue);
+  const rationingActive = useSimulationStore((s) => s.rationingActive);
+
+  const setConfigTab = useSimulationStore((s) => s.setConfigTab);
+  const setConfigOpen = useSimulationStore((s) => s.setConfigOpen);
+  const setScenario = useSimulationStore((s) => s.setScenario);
+  const toggleDialogExpanded = useSimulationStore(
+    (s) => s.toggleDialogExpanded,
+  );
+  const setOniValue = useSimulationStore((s) => s.setOniValue);
+  const setRainValue = useSimulationStore((s) => s.setRainValue);
+  const setDemandValue = useSimulationStore((s) => s.setDemandValue);
+  const setEfficiencyValue = useSimulationStore((s) => s.setEfficiencyValue);
+  const setRationingActive = useSimulationStore((s) => s.setRationingActive);
+
+  const selectedScenario = scenarios[scenario];
 
   useEffect(() => {
     setOniValue(parseFloat(selectedScenario.oni));
-  }, [selectedScenario]);
+  }, [selectedScenario, setOniValue]);
 
   const sidebarItems = [
     { id: "scenarios", icon: Gauge, label: "Escenarios Rápidos" },
@@ -73,13 +73,10 @@ export function ModelConfigDialog({
     { id: "shortcuts", icon: CalendarClock, label: "Atajos y Atributos" },
   ] as const;
 
-  // Usa configTab como estado de navegación del Sidebar.
-  // Mapeamos los viejos tabs ('parameters') a los nuevos por ahora,
-  // o los tratamos como pestañas adicionales en este rediseño.
   const activeTab = configTab === "parameters" ? "climate" : configTab;
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={setConfigOpen}>
       <DialogContent
         className={cn(
           "flex flex-col gap-0 overflow-hidden p-0",
@@ -94,7 +91,7 @@ export function ModelConfigDialog({
               variant="ghost"
               size="icon"
               className="-ml-2"
-              onClick={onToggleExpanded}
+              onClick={toggleDialogExpanded}
             >
               {isExpanded ? <Minimize2 /> : <Maximize2 />}
             </Button>
@@ -110,16 +107,14 @@ export function ModelConfigDialog({
           </div>
         </DialogHeader>
 
-        {/* Layout Maestro-Detalle (Sidebar a la izquierda, Contenido a la derecha) */}
         <div className="flex min-h-0 flex-1 overflow-hidden">
-          {/* Menú Lateral */}
           <div className="w-56 shrink-0 border-r border-border bg-muted/30">
             <ScrollArea className="h-full">
               <div className="flex flex-col gap-1 p-4">
                 {sidebarItems.map((item) => (
                   <button
                     key={item.id}
-                    onClick={() => onConfigTabChange(item.id as ConfigTab)}
+                    onClick={() => setConfigTab(item.id as ConfigTab)}
                     className={cn(
                       "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground",
                       activeTab === item.id
@@ -135,11 +130,9 @@ export function ModelConfigDialog({
             </ScrollArea>
           </div>
 
-          {/* Área de Contenido Principal */}
           <div className="flex-1 bg-background">
             <ScrollArea className="h-full">
               <div className="p-6">
-                {/* 1. SECCIÓN DE ESCENARIOS */}
                 {activeTab === "scenarios" && (
                   <div className="animate-in fade-in-50 space-y-6">
                     <div>
@@ -154,7 +147,7 @@ export function ModelConfigDialog({
                         {scenarioIds.map((scenarioId) => (
                           <button
                             key={scenarioId}
-                            onClick={() => onScenarioChange(scenarioId)}
+                            onClick={() => setScenario(scenarioId)}
                             className={cn(
                               "flex flex-col items-start gap-2 rounded-lg border p-4 text-left transition-all hover:bg-accent/50",
                               scenario === scenarioId
@@ -217,7 +210,6 @@ export function ModelConfigDialog({
                   </div>
                 )}
 
-                {/* 2. SECCIÓN CLIMA (NUEVO DISEÑO CON SLIDERS) */}
                 {activeTab === "climate" && (
                   <div className="animate-in fade-in-50 space-y-8">
                     <div>
@@ -230,7 +222,6 @@ export function ModelConfigDialog({
                       </p>
                     </div>
 
-                    {/* Slider 1: Índice ONI */}
                     <div className="space-y-4">
                       <div className="flex items-center justify-between">
                         <Label
@@ -271,7 +262,6 @@ export function ModelConfigDialog({
                       </div>
                     </div>
 
-                    {/* Slider 2: Precipitaciones */}
                     <div className="space-y-4 pt-4">
                       <div className="flex items-center justify-between">
                         <Label
@@ -307,7 +297,6 @@ export function ModelConfigDialog({
                   </div>
                 )}
 
-                {/* 3. DEMANDA POBLACIONAL */}
                 {activeTab === "demand" && (
                   <div className="animate-in fade-in-50 space-y-8">
                     <div>
@@ -351,7 +340,6 @@ export function ModelConfigDialog({
                       />
                     </div>
 
-                    {/* Switch Policy */}
                     <div className="mt-6 flex flex-row items-center justify-between rounded-lg border p-4">
                       <div className="space-y-0.5">
                         <Label className="text-base font-semibold">
@@ -362,12 +350,14 @@ export function ModelConfigDialog({
                           reserva baja del 20%.
                         </p>
                       </div>
-                      <Switch defaultChecked={scenario === "extreme"} />
+                      <Switch
+                        checked={rationingActive}
+                        onCheckedChange={setRationingActive}
+                      />
                     </div>
                   </div>
                 )}
 
-                {/* INFRAESTRUCTURA (Ejemplo rápido) */}
                 {activeTab === "infrastructure" && (
                   <div className="animate-in fade-in-50 space-y-8">
                     <div>
@@ -415,7 +405,6 @@ export function ModelConfigDialog({
                   </div>
                 )}
 
-                {/* 5. ATAJOS */}
                 {activeTab === "shortcuts" && (
                   <div className="animate-in fade-in-50">
                     <ShortcutsPanel />
@@ -427,10 +416,12 @@ export function ModelConfigDialog({
         </div>
 
         <DialogFooter className="shrink-0 border-t border-border bg-muted/10 px-6 py-4">
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
+          <Button variant="outline" onClick={() => setConfigOpen(false)}>
             Descartar cambios
           </Button>
-          <Button onClick={() => onOpenChange(false)}>Guardar y Simular</Button>
+          <Button onClick={() => setConfigOpen(false)}>
+            Guardar y Simular
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
