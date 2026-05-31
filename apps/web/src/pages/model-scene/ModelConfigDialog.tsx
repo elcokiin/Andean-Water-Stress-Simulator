@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import {
   CalendarClock,
   Gauge,
@@ -55,6 +56,15 @@ export function ModelConfigDialog({
   onScenarioChange: (scenario: ScenarioId) => void;
   onToggleExpanded: () => void;
 }) {
+  const [oniValue, setOniValue] = useState(parseFloat(selectedScenario.oni));
+  const [rainValue, setRainValue] = useState(85);
+  const [demandValue, setDemandValue] = useState(120);
+  const [efficiencyValue, setEfficiencyValue] = useState(62);
+
+  useEffect(() => {
+    setOniValue(parseFloat(selectedScenario.oni));
+  }, [selectedScenario]);
+
   const sidebarItems = [
     { id: "scenarios", icon: Gauge, label: "Escenarios Rápidos" },
     { id: "climate", icon: CloudRain, label: "Clima y Entorno" },
@@ -243,11 +253,12 @@ export function ModelConfigDialog({
                           </Tooltip>
                         </Label>
                         <span className="font-mono text-sm text-muted-foreground">
-                          {selectedScenario.oni}
+                          {oniValue > 0 ? `+${oniValue}` : oniValue}
                         </span>
                       </div>
                       <Slider
-                        defaultValue={[parseFloat(selectedScenario.oni)]}
+                        value={[oniValue]}
+                        onValueChange={(val) => setOniValue(val[0])}
                         max={3}
                         min={-3}
                         step={0.1}
@@ -263,15 +274,30 @@ export function ModelConfigDialog({
                     {/* Slider 2: Precipitaciones */}
                     <div className="space-y-4 pt-4">
                       <div className="flex items-center justify-between">
-                        <Label htmlFor="rain" className="text-base">
+                        <Label
+                          htmlFor="rain"
+                          className="flex items-center gap-2 text-base"
+                        >
                           Precipitación Base
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Info className="h-4 w-4 cursor-help text-muted-foreground" />
+                            </TooltipTrigger>
+                            <TooltipContent className="max-w-xs">
+                              <p>
+                                Precipitación mensual promedio que recarga el
+                                embalse mediante escorrentía en la cuenca.
+                              </p>
+                            </TooltipContent>
+                          </Tooltip>
                         </Label>
                         <span className="font-mono text-sm text-muted-foreground">
-                          85 mm/mes
+                          {rainValue} mm/mes
                         </span>
                       </div>
                       <Slider
-                        defaultValue={[85]}
+                        value={[rainValue]}
+                        onValueChange={(val) => setRainValue(val[0])}
                         max={300}
                         min={0}
                         step={5}
@@ -296,15 +322,28 @@ export function ModelConfigDialog({
 
                     <div className="space-y-4">
                       <div className="flex items-center justify-between">
-                        <Label className="text-base">
+                        <Label className="flex items-center gap-2 text-base">
                           Consumo per cápita (L/día)
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Info className="h-4 w-4 cursor-help text-muted-foreground" />
+                            </TooltipTrigger>
+                            <TooltipContent className="max-w-xs">
+                              <p>
+                                Consumo diario estimado por habitante en la
+                                región, considerando usos residenciales y
+                                comerciales básicos.
+                              </p>
+                            </TooltipContent>
+                          </Tooltip>
                         </Label>
                         <span className="font-mono text-sm text-muted-foreground">
-                          120 L
+                          {demandValue} L
                         </span>
                       </div>
                       <Slider
-                        defaultValue={[120]}
+                        value={[demandValue]}
+                        onValueChange={(val) => setDemandValue(val[0])}
                         max={250}
                         min={50}
                         step={1}
@@ -341,15 +380,28 @@ export function ModelConfigDialog({
                     </div>
                     <div className="space-y-4">
                       <div className="flex items-center justify-between">
-                        <Label className="text-base">
+                        <Label className="flex items-center gap-2 text-base">
                           Eficiencia de la red (fugas)
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Info className="h-4 w-4 cursor-help text-muted-foreground" />
+                            </TooltipTrigger>
+                            <TooltipContent className="max-w-xs">
+                              <p>
+                                Porcentaje de agua que llega efectivamente a los
+                                hogares. El resto se pierde en fugas de la red
+                                de acueducto.
+                              </p>
+                            </TooltipContent>
+                          </Tooltip>
                         </Label>
                         <span className="font-mono text-sm text-muted-foreground">
-                          62%
+                          {efficiencyValue}%
                         </span>
                       </div>
                       <Slider
-                        defaultValue={[62]}
+                        value={[efficiencyValue]}
+                        onValueChange={(val) => setEfficiencyValue(val[0])}
                         max={100}
                         min={30}
                         step={1}
