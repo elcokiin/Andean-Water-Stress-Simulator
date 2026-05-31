@@ -11,7 +11,7 @@ import {
   Sun,
   ArrowRight,
   Activity,
-  ChevronRight
+  ChevronRight,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 
@@ -139,7 +139,7 @@ function App() {
     <div className="landing-shell min-h-screen font-sans selection:bg-primary/30 relative">
       {/* Decorative Grid Background */}
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none" />
-      
+
       {/* Header */}
       <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/60 backdrop-blur-xl transition-all">
         <div className="mx-auto flex h-16 max-w-[1200px] items-center justify-between px-6">
@@ -147,21 +147,49 @@ function App() {
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-sm">
               <Activity size={18} strokeWidth={2.5} />
             </div>
-            <span className="text-lg font-bold tracking-tight text-foreground">HydroSim</span>
+            <span className="text-lg font-bold tracking-tight text-foreground">
+              HydroSim
+            </span>
           </div>
           <nav className="flex items-center gap-4">
-            <Button variant="ghost" size="sm" asChild className="hidden text-muted-foreground hover:text-foreground md:flex">
-              <a href={`${import.meta.env.VITE_DOCS_URL}/metodologia-hipotesis`} target="_blank" rel="noreferrer">Metodología</a>
+            <Button
+              variant="ghost"
+              size="sm"
+              asChild
+              className="hidden text-muted-foreground hover:text-foreground md:flex"
+            >
+              <a
+                href={`${import.meta.env.VITE_DOCS_URL}/metodologia-hipotesis`}
+                target="_blank"
+                rel="noreferrer"
+              >
+                Metodología
+              </a>
             </Button>
-            <Button variant="ghost" size="sm" asChild className="hidden text-muted-foreground hover:text-foreground md:flex">
-              <a href={`${import.meta.env.VITE_DOCS_URL}/simulacion-hidrica`} target="_blank" rel="noreferrer">Documentación</a>
+            <Button
+              variant="ghost"
+              size="sm"
+              asChild
+              className="hidden text-muted-foreground hover:text-foreground md:flex"
+            >
+              <a
+                href={`${import.meta.env.VITE_DOCS_URL}/simulacion-hidrica`}
+                target="_blank"
+                rel="noreferrer"
+              >
+                Documentación
+              </a>
             </Button>
             <Button
               variant="ghost"
               size="icon"
               onClick={toggle}
               className="rounded-full text-muted-foreground hover:bg-muted/50 hover:text-foreground"
-              aria-label={theme === "dark" ? "Cambiar a modo claro" : "Cambiar a modo oscuro"}
+              aria-label={
+                theme === "dark"
+                  ? "Cambiar a modo claro"
+                  : "Cambiar a modo oscuro"
+              }
             >
               {theme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
             </Button>
@@ -182,17 +210,33 @@ function App() {
             Colapso hídrico en Boyacá bajo estrés extremo.
           </h1>
           <p className="max-w-[42rem] text-lg md:text-xl leading-relaxed text-muted-foreground font-medium mb-10 text-balance">
-            Modelo de Dinámica de Sistemas (Forrester) diseñado para anticipar el punto de no retorno hídrico en el corredor urbano-industrial bajo escenarios del Fenómeno de El Niño.
+            Modelo de Dinámica de Sistemas (Forrester) diseñado para anticipar
+            el punto de no retorno hídrico en el corredor urbano-industrial bajo
+            escenarios del Fenómeno de El Niño.
           </p>
           <div className="flex flex-col sm:flex-row items-center gap-4">
-            <Button size="lg" asChild className="rounded-full px-8 h-12 text-base font-semibold shadow-lg shadow-primary/20 hover:shadow-primary/40 hover:-translate-y-0.5 transition-all">
+            <Button
+              size="lg"
+              asChild
+              className="rounded-full px-8 h-12 text-base font-semibold shadow-lg shadow-primary/20 hover:shadow-primary/40 hover:-translate-y-0.5 transition-all"
+            >
               <Link to="/model">
                 Explorar Modelo <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
             </Button>
-            <Button size="lg" variant="outline" asChild className="rounded-full px-8 h-12 text-base font-semibold border-border/50 bg-background/50 backdrop-blur-sm hover:bg-muted/50 transition-all">
-              <a href={`${import.meta.env.VITE_DOCS_URL}/metodologia-hipotesis`} target="_blank" rel="noreferrer">
-                Leer Hipótesis <ChevronRight className="ml-1 h-4 w-4 text-muted-foreground" />
+            <Button
+              size="lg"
+              variant="outline"
+              asChild
+              className="rounded-full px-8 h-12 text-base font-semibold border-border/50 bg-background/50 backdrop-blur-sm hover:bg-muted/50 transition-all"
+            >
+              <a
+                href={`${import.meta.env.VITE_DOCS_URL}/metodologia-hipotesis`}
+                target="_blank"
+                rel="noreferrer"
+              >
+                Leer Hipótesis{" "}
+                <ChevronRight className="ml-1 h-4 w-4 text-muted-foreground" />
               </a>
             </Button>
           </div>
@@ -203,19 +247,36 @@ function App() {
           <div className="rounded-2xl border border-border/50 bg-card/40 backdrop-blur-xl shadow-xl shadow-black/5 p-2 mx-auto max-w-[1000px]">
             <div className="grid grid-cols-1 divide-y divide-border/50 md:grid-cols-3 md:divide-y-0 md:divide-x">
               <div className="flex flex-col items-center justify-center p-6 text-center transition-colors hover:bg-muted/20 rounded-t-xl md:rounded-l-xl md:rounded-tr-none">
-                <div className="text-4xl font-black tracking-tight text-foreground mb-1">3 <span className="text-2xl text-muted-foreground font-semibold">ciudades</span></div>
-                <p className="text-xs font-semibold uppercase tracking-widest text-primary/80">Corredor analizado</p>
+                <div className="text-4xl font-black tracking-tight text-foreground mb-1">
+                  3{" "}
+                  <span className="text-2xl text-muted-foreground font-semibold">
+                    ciudades
+                  </span>
+                </div>
+                <p className="text-xs font-semibold uppercase tracking-widest text-primary/80">
+                  Corredor analizado
+                </p>
               </div>
               <div className="flex flex-col items-center justify-center p-6 text-center transition-colors hover:bg-muted/20">
-                <div className="text-4xl font-black tracking-tight text-foreground mb-1">2000<span className="text-muted-foreground/50">-</span>23</div>
-                <p className="text-xs font-semibold uppercase tracking-widest text-primary/80">Calibración base</p>
+                <div className="text-4xl font-black tracking-tight text-foreground mb-1">
+                  2000<span className="text-muted-foreground/50">-</span>23
+                </div>
+                <p className="text-xs font-semibold uppercase tracking-widest text-primary/80">
+                  Calibración base
+                </p>
               </div>
               <div className="flex flex-col items-center justify-center p-6 text-center transition-colors hover:bg-muted/20 rounded-b-xl md:rounded-r-xl md:rounded-bl-none">
                 <div className="flex items-start">
-                  <div className="text-4xl font-black tracking-tight text-destructive">15</div>
-                  <span className="text-2xl font-bold text-destructive mt-0.5">%</span>
+                  <div className="text-4xl font-black tracking-tight text-destructive">
+                    15
+                  </div>
+                  <span className="text-2xl font-bold text-destructive mt-0.5">
+                    %
+                  </span>
                 </div>
-                <p className="text-xs font-semibold uppercase tracking-widest text-destructive/80 mt-1">Umbral crítico</p>
+                <p className="text-xs font-semibold uppercase tracking-widest text-destructive/80 mt-1">
+                  Umbral crítico
+                </p>
               </div>
             </div>
           </div>
@@ -236,7 +297,8 @@ function App() {
                 Sogamoso bajo escenarios de sequía extrema?
               </h3>
               <p className="text-muted-foreground text-lg font-medium">
-                Y más importante aún: ¿qué políticas pueden retrasarlo o evitarlo estructuralmente?
+                Y más importante aún: ¿qué políticas pueden retrasarlo o
+                evitarlo estructuralmente?
               </p>
             </CardContent>
           </Card>
@@ -267,7 +329,9 @@ function App() {
             </CardHeader>
             <CardContent className="px-8 pb-8">
               <p className="leading-relaxed text-muted-foreground">
-                Un colapso suave precede a un colapso abrupto cuando las reservas bajan del 15%, activando bucles que impiden la recuperación.
+                Un colapso suave precede a un colapso abrupto cuando las
+                reservas bajan del 15%, activando bucles que impiden la
+                recuperación.
               </p>
             </CardContent>
           </Card>
@@ -278,7 +342,9 @@ function App() {
               <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary transition-transform group-hover:scale-110 group-hover:bg-primary group-hover:text-primary-foreground duration-300">
                 <LineChart size={24} />
               </div>
-              <CardTitle className="text-xl">¿Por qué Dinámica de Sistemas?</CardTitle>
+              <CardTitle className="text-xl">
+                ¿Por qué Dinámica de Sistemas?
+              </CardTitle>
             </CardHeader>
             <CardContent className="px-8 pb-8">
               <p className="leading-relaxed text-muted-foreground text-lg">
@@ -296,7 +362,10 @@ function App() {
         {/* City Systems */}
         <section>
           <div className="mb-10 flex flex-col items-center text-center">
-            <Badge variant="secondary" className="mb-3 bg-secondary/20 text-secondary-foreground hover:bg-secondary/30 transition-colors">
+            <Badge
+              variant="secondary"
+              className="mb-3 bg-secondary/20 text-secondary-foreground hover:bg-secondary/30 transition-colors"
+            >
               Subsistemas Urbanos
             </Badge>
             <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-foreground flex items-center justify-center gap-3">
@@ -306,10 +375,15 @@ function App() {
           </div>
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
             {citySystems.map((system) => (
-              <Card key={system.city} className="border-border/50 bg-card/40 backdrop-blur-sm shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 group">
+              <Card
+                key={system.city}
+                className="border-border/50 bg-card/40 backdrop-blur-sm shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 group"
+              >
                 <CardHeader className="pb-4 border-b border-border/30 bg-muted/10">
                   <div className="flex justify-between items-center mb-2">
-                    <CardTitle className="text-2xl font-bold">{system.city}</CardTitle>
+                    <CardTitle className="text-2xl font-bold">
+                      {system.city}
+                    </CardTitle>
                     <div className="h-2 w-2 rounded-full bg-primary/60 group-hover:bg-primary transition-colors" />
                   </div>
                   <p className="text-sm font-semibold text-primary/90 flex items-center gap-1.5">
@@ -363,8 +437,12 @@ function App() {
                   <BarChart3 size={22} />
                 </div>
                 <div>
-                  <CardTitle className="text-xl">Estructura Forrester</CardTitle>
-                  <p className="text-sm text-muted-foreground mt-1">Variables y arquitectura del modelo</p>
+                  <CardTitle className="text-xl">
+                    Estructura Forrester
+                  </CardTitle>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Variables y arquitectura del modelo
+                  </p>
                 </div>
               </div>
             </CardHeader>
@@ -378,7 +456,10 @@ function App() {
                     </h3>
                     <ul className="grid gap-3 text-sm text-foreground/80">
                       {group.items.map((item) => (
-                        <li key={item} className="flex items-center gap-3 bg-muted/20 px-4 py-2.5 rounded-lg border border-border/30 hover:border-primary/20 transition-colors">
+                        <li
+                          key={item}
+                          className="flex items-center gap-3 bg-muted/20 px-4 py-2.5 rounded-lg border border-border/30 hover:border-primary/20 transition-colors"
+                        >
                           <div className="h-1.5 w-1.5 shrink-0 rounded-full bg-primary/60" />
                           <span className="font-medium">{item}</span>
                         </li>
@@ -398,15 +479,22 @@ function App() {
                   <AlertTriangle size={22} />
                 </div>
                 <div>
-                  <CardTitle className="text-xl text-destructive">Señales críticas</CardTitle>
-                  <p className="text-sm text-destructive/70 mt-1">Indicadores de colapso en el sistema</p>
+                  <CardTitle className="text-xl text-destructive">
+                    Señales críticas
+                  </CardTitle>
+                  <p className="text-sm text-destructive/70 mt-1">
+                    Indicadores de colapso en el sistema
+                  </p>
                 </div>
               </div>
             </CardHeader>
             <CardContent className="pt-6 relative z-10">
               <ul className="grid gap-4 text-sm text-foreground/90">
                 {keySignals.map((item) => (
-                  <li key={item} className="flex items-start gap-4 rounded-xl bg-background/50 p-4 border border-destructive/10 shadow-sm hover:border-destructive/30 transition-colors">
+                  <li
+                    key={item}
+                    className="flex items-start gap-4 rounded-xl bg-background/50 p-4 border border-destructive/10 shadow-sm hover:border-destructive/30 transition-colors"
+                  >
                     <div className="mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-destructive/10">
                       <span className="block h-2 w-2 rounded-full bg-destructive animate-pulse" />
                     </div>
@@ -423,23 +511,36 @@ function App() {
           <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent pointer-events-none" />
           <div className="relative z-10">
             <div className="mb-10 flex flex-col items-center text-center max-w-2xl mx-auto">
-              <Badge variant="outline" className="mb-4 bg-background/50 backdrop-blur-md border-border text-foreground">
+              <Badge
+                variant="outline"
+                className="mb-4 bg-background/50 backdrop-blur-md border-border text-foreground"
+              >
                 Escenarios de simulación
               </Badge>
               <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-foreground flex items-center justify-center gap-3 mb-4">
                 <Waves className="text-primary h-8 w-8" />
                 Estrés del Sistema
               </h2>
-              <p className="text-muted-foreground text-lg">Proyecciones basadas en el Índice Oceánico del Niño (ONI) para evaluar la resiliencia hídrica futura.</p>
+              <p className="text-muted-foreground text-lg">
+                Proyecciones basadas en el Índice Oceánico del Niño (ONI) para
+                evaluar la resiliencia hídrica futura.
+              </p>
             </div>
-            
+
             <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
               {scenarios.map((scenario, i) => (
-                <Card key={scenario.name} className="border-border/50 bg-background/80 backdrop-blur-sm shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 relative overflow-hidden group">
+                <Card
+                  key={scenario.name}
+                  className="border-border/50 bg-background/80 backdrop-blur-sm shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 relative overflow-hidden group"
+                >
                   <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary/40 to-transparent transform origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-500" />
                   <CardHeader className="pb-4">
-                    <div className="text-5xl font-black text-muted mb-4 opacity-50 group-hover:text-primary/20 transition-colors">0{i + 1}</div>
-                    <CardTitle className="text-xl leading-tight font-bold">{scenario.name}</CardTitle>
+                    <div className="text-5xl font-black text-muted mb-4 opacity-50 group-hover:text-primary/20 transition-colors">
+                      0{i + 1}
+                    </div>
+                    <CardTitle className="text-xl leading-tight font-bold">
+                      {scenario.name}
+                    </CardTitle>
                   </CardHeader>
                   <CardContent>
                     <p className="leading-relaxed text-muted-foreground text-sm font-medium">
@@ -455,7 +556,10 @@ function App() {
         {/* Feedback Loops */}
         <section className="w-[100vw] relative left-1/2 -translate-x-1/2 overflow-hidden py-10 -my-10">
           <div className="mb-10 flex flex-col items-center text-center">
-            <Badge variant="secondary" className="mb-3 bg-secondary/20 text-secondary-foreground">
+            <Badge
+              variant="secondary"
+              className="mb-3 bg-secondary/20 text-secondary-foreground"
+            >
               Dinámica Causal
             </Badge>
             <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-foreground flex items-center justify-center gap-3">
@@ -463,7 +567,7 @@ function App() {
               Lazos de Retroalimentación
             </h2>
           </div>
-          
+
           <div className="relative w-full max-w-[100vw] overflow-hidden [mask-image:_linear-gradient(to_right,transparent_0,_black_15%,_black_85%,transparent_100%)] flex items-center">
             <div className="flex w-max animate-scroll gap-6 py-4 hover:[animation-play-state:paused]">
               {[...loops, ...loops].map((loop, idx) => (
@@ -475,10 +579,14 @@ function App() {
                       : "hover:border-chart-3/40"
                   }`}
                 >
-                  <div className={`h-1.5 w-full ${loop.kind === "reinforcing" ? "bg-destructive/80" : "bg-chart-3/80"}`} />
+                  <div
+                    className={`h-1.5 w-full ${loop.kind === "reinforcing" ? "bg-destructive/80" : "bg-chart-3/80"}`}
+                  />
                   <CardHeader className="pb-4">
                     <div className="flex items-start justify-between gap-4">
-                      <CardTitle className="text-xl font-bold">{loop.name}</CardTitle>
+                      <CardTitle className="text-xl font-bold">
+                        {loop.name}
+                      </CardTitle>
                       <Badge
                         variant="outline"
                         className={`shrink-0 font-bold border-2 ${
@@ -508,28 +616,37 @@ function App() {
           <Card className="relative overflow-hidden border-primary/20 bg-background/80 backdrop-blur-xl text-center shadow-2xl rounded-3xl">
             <div className="absolute top-0 right-0 p-32 bg-primary/5 rounded-full blur-3xl" />
             <div className="absolute bottom-0 left-0 p-32 bg-secondary/5 rounded-full blur-3xl" />
-            
+
             <CardContent className="p-12 md:p-20 flex flex-col items-center gap-6 relative z-10">
               <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary shadow-lg shadow-primary/30 text-primary-foreground mb-2">
                 <MapPinned size={32} />
               </div>
-              <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight">Objetivo de la simulación</h2>
+              <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight">
+                Objetivo de la simulación
+              </h2>
               <p className="max-w-[48rem] text-lg md:text-xl leading-relaxed text-muted-foreground font-medium mb-4">
-                Determinar el momento exacto y las condiciones bajo las cuales el
-                sistema hídrico de Boyacá cruza un umbral irreversible,
+                Determinar el momento exacto y las condiciones bajo las cuales
+                el sistema hídrico de Boyacá cruza un umbral irreversible,
                 configurando un colapso. Evaluando su resiliencia bajo el Índice
                 ONI.
               </p>
-              <Button size="lg" asChild className="rounded-full px-10 h-14 text-lg font-bold shadow-xl shadow-primary/20 hover:shadow-primary/40 hover:-translate-y-1 transition-all mt-4">
+              <Button
+                size="lg"
+                asChild
+                className="rounded-full px-10 h-14 text-lg font-bold shadow-xl shadow-primary/20 hover:shadow-primary/40 hover:-translate-y-1 transition-all mt-4"
+              >
                 <Link to="/model">Comenzar Análisis</Link>
               </Button>
             </CardContent>
           </Card>
         </section>
-        
+
         {/* Simple Footer */}
         <footer className="border-t border-border/40 py-8 mt-10 text-center text-sm text-muted-foreground">
-          <p>© {new Date().getFullYear()} Simulación Hídrica Regional Boyacá. Modelo Forrester.</p>
+          <p>
+            © {new Date().getFullYear()} Simulación Hídrica Regional Boyacá.
+            Modelo Forrester.
+          </p>
         </footer>
       </main>
     </div>
