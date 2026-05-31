@@ -22,6 +22,7 @@ type EzTreeTextures = {
     roughness: THREE.Texture;
   };
   leaves: {
+    ash: THREE.Texture;
     pine: THREE.Texture;
     aspen: THREE.Texture;
     oak: THREE.Texture;
@@ -115,6 +116,7 @@ function findFirstMesh(object: THREE.Object3D): THREE.Mesh | null {
 }
 
 function getLeafTexture(preset: string, textures: EzTreeTextures) {
+  if (preset.includes("Ash")) return textures.leaves.ash;
   if (preset.includes("Aspen")) return textures.leaves.aspen;
   if (preset.includes("Oak")) return textures.leaves.oak;
   return textures.leaves.pine;
@@ -154,11 +156,13 @@ export function EzTreeForest() {
     barkAo,
     barkNormal,
     barkRoughness,
+    ashLeaf,
     pineLeaf,
     aspenLeaf,
     oakLeaf,
   ] = useLoader(THREE.TextureLoader, [
     ...BARK_TEXTURE_PATHS,
+    "/assets/ez-tree/textures/leaves/ash.png",
     "/assets/ez-tree/textures/leaves/pine.png",
     "/assets/ez-tree/textures/leaves/aspen.png",
     "/assets/ez-tree/textures/leaves/oak.png",
@@ -173,7 +177,7 @@ export function EzTreeForest() {
         normal: barkNormal,
         roughness: barkRoughness,
       },
-      leaves: { pine: pineLeaf, aspen: aspenLeaf, oak: oakLeaf },
+      leaves: { ash: ashLeaf, pine: pineLeaf, aspen: aspenLeaf, oak: oakLeaf },
     };
     const makeConfig = (
       index: number,
@@ -182,16 +186,14 @@ export function EzTreeForest() {
       scaleBoost = 1,
     ): EzTreeConfig => {
       const preset =
-        index % 11 === 0
-          ? "Oak Small"
-          : index % 7 === 0
-            ? "Ash Small"
-            : index % 4 === 0
-              ? "Pine Small"
-              : index % 5 === 0
-                ? "Aspen Small"
-                : "Pine Medium";
-      const scale = preset === "Pine Medium" ? 0.021 : 0.024;
+        index % 6 === 0
+          ? "Oak Medium"
+          : index % 4 === 0
+            ? "Ash Medium"
+            : index % 2 === 0
+              ? "Oak Small"
+              : "Ash Small";
+      const scale = preset.includes("Medium") ? 0.018 : 0.023;
 
       return {
         preset,
@@ -200,12 +202,12 @@ export function EzTreeForest() {
         scale: scale * scaleBoost * (0.84 + ((index * 13) % 8) * 0.035),
         seed: 1240 + index * 73,
         leafTint:
-          index % 11 === 0
+          index % 9 === 0
             ? 0x7e9a3d
-            : index % 9 === 0
-              ? 0x9a8f38
-              : index % 5 === 0
-                ? 0x6fa15d
+            : index % 5 === 0
+              ? 0x6fa15d
+              : index % 3 === 0
+                ? 0x4f7f48
                 : 0x2f7a46,
       };
     };
@@ -243,6 +245,7 @@ export function EzTreeForest() {
     return group;
   }, [
     aspenLeaf,
+    ashLeaf,
     barkAo,
     barkColor,
     barkNormal,
@@ -368,7 +371,7 @@ export function ForegroundShrubs() {
         normal: barkNormal,
         roughness: barkRoughness,
       },
-      leaves: { pine: oakLeaf, aspen: oakLeaf, oak: oakLeaf },
+      leaves: { ash: oakLeaf, pine: oakLeaf, aspen: oakLeaf, oak: oakLeaf },
     };
     const configs: EzTreeConfig[] = [
       {
@@ -401,7 +404,7 @@ export function ForegroundShrubs() {
         rotationY: 4.2,
         scale: 0.028,
         seed: 1044,
-        leafTint: 0xc33f2c,
+        leafTint: 0x536f3b,
       },
       {
         preset: "Bush 2",
@@ -425,7 +428,7 @@ export function ForegroundShrubs() {
         rotationY: 5.3,
         scale: 0.029,
         seed: 1408,
-        leafTint: 0xd04b2d,
+        leafTint: 0x6f7540,
       },
     ];
 
