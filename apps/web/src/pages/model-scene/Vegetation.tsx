@@ -39,6 +39,7 @@ const BARK_TEXTURE_PATHS = [
 const GRASS_MODEL_PATH = "/assets/ez-tree/models/grass.glb";
 const GRASS_COUNT = 2900;
 const GRASS_MAX_COUNT = 5200;
+const GRASS_GROUND_OFFSET = 0.015;
 
 type GrassShader = {
   uniforms: {
@@ -317,7 +318,7 @@ export function EzTreeGrass() {
       const heightScale = 0.09 + noise * 0.09 + sizeJitter * 0.08;
       const widthScale = 0.09 + seededRandom(index * 11.9) * 0.08;
 
-      dummy.position.set(x, 0.035, z);
+      dummy.position.set(x, getTerrainHeight(x, z) + GRASS_GROUND_OFFSET, z);
       dummy.rotation.set(0, seededRandom(index * 13.23) * Math.PI * 2, 0);
       dummy.scale.set(widthScale, heightScale, widthScale);
       dummy.updateMatrix();
@@ -340,6 +341,8 @@ export function EzTreeGrass() {
     mesh.receiveShadow = false;
     mesh.instanceMatrix.needsUpdate = true;
     if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
+    mesh.computeBoundingBox();
+    mesh.computeBoundingSphere();
 
     return mesh;
   }, [grassModel]);
