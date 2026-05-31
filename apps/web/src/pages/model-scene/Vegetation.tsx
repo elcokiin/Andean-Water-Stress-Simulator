@@ -286,18 +286,17 @@ export function EzTreeGrass() {
     if (sourceMap) sourceMap.anisotropy = 4;
 
     const material = new THREE.MeshPhongMaterial({
-      color: 0xffffff,
       map: sourceMap,
-      emissive: new THREE.Color(0x3c6f25),
-      emissiveIntensity: 0.14,
-      shininess: 0.12,
+      emissive: new THREE.Color(0x308040),
+      emissiveIntensity: 0.05,
       transparent: false,
-      alphaTest: 0.36,
+      alphaTest: 0.5,
+      depthTest: true,
       depthWrite: true,
       side: THREE.DoubleSide,
-      vertexColors: true,
     }) as GrassMaterial;
 
+    material.color.multiplyScalar(0.6);
     appendGrassWindShader(material);
 
     const mesh = new THREE.InstancedMesh(geometry, material, GRASS_MAX_COUNT);
@@ -324,9 +323,9 @@ export function EzTreeGrass() {
       dummy.updateMatrix();
 
       const color = new THREE.Color(
-        0.72 + seededRandom(index * 1.7) * 0.28,
-        0.92 + noise * 0.38,
-        0.32 + seededRandom(index * 2.9) * 0.22,
+        0.25 + seededRandom(index * 1.7) * 0.1,
+        0.3 + noise * 0.3,
+        0.1,
       );
 
       mesh.setMatrixAt(count, dummy.matrix);
