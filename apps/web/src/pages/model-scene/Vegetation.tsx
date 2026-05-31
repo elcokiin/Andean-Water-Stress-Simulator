@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useRef } from "react";
 import { useFrame, useLoader } from "@react-three/fiber";
 import * as THREE from "three";
 import { Tree } from "@/src/lib/ez-tree";
@@ -33,6 +33,116 @@ const BARK_TEXTURE_PATHS = [
   "/assets/ez-tree/textures/bark/Bark003_1K-JPG/Bark003_1K-JPG_NormalGL.jpg",
   "/assets/ez-tree/textures/bark/Bark003_1K-JPG/Bark003_1K-JPG_Roughness.jpg",
 ] as const;
+
+const GRASS_COUNT = 5200;
+const GRASS_MAX_COUNT = 7800;
+const GRASS_WIDTH = 0.075;
+const GRASS_HEIGHT = 0.42;
+
+type GrassShader = {
+  uniforms: {
+    uTime: { value: number };
+  };
+};
+
+type GrassMaterial = THREE.MeshPhongMaterial & {
+  userData: {
+    grassShader?: GrassShader;
+  };
+};
+
+function seededNoise(value: number) {
+  return Math.sin(value * 12.9898) * 43758.5453;
+}
+
+function seededRandom(seed: number) {
+  return seededNoise(seed) - Math.floor(seededNoise(seed));
+}
+
+function patchNoise(x: number, z: number) {
+  const broad = Math.sin(x * 1.35 + z * 0.82) * 0.5 + 0.5;
+  const fine = Math.sin(x * 4.2 - z * 3.1 + Math.sin(z * 1.7)) * 0.5 + 0.5;
+  return broad * 0.72 + fine * 0.28;
+}
+
+function isReservoirFootprint(x: number, z: number) {
+  const normalizedX = x / 5.95;
+  const normalizedZ = (z - 0.3) / 2.45;
+  return normalizedX * normalizedX + normalizedZ * normalizedZ < 1.02;
+}
+
+function createGrassBladeGeometry() {
+  const geometry = new THREE.BufferGeometry();
+  const halfWidth = GRASS_WIDTH / 2;
+  const height = GRASS_HEIGHT;
+
+  const positions = new Float32Array([
+    -halfWidth,
+    0,
+    0,
+    halfWidth,
+    0,
+    0,
+    0,
+    height,
+    0,
+    0,
+    0,
+    -halfWidth,
+    0,
+    0,
+    halfWidth,
+    0,
+    height,
+    0,
+  ]);
+  const normals = new Float32Array([
+    0, 0, 1, 0, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 0, 1, 0, 0,
+  ]);
+  const uvs = new Float32Array([0, 0, 1, 0, 0.5, 1, 0, 0, 1, 0, 0.5, 1]);
+  const indices = new Uint16Array([0, 1, 2, 3, 4, 5]);
+
+  geometry.setAttribute("position", new THREE.BufferAttribute(positions, 3));
+  geometry.setAttribute("normal", new THREE.BufferAttribute(normals, 3));
+  geometry.setAttribute("uv", new THREE.BufferAttribute(uvs, 2));
+  geometry.setIndex(new THREE.BufferAttribute(indices, 1));
+  geometry.computeBoundingSphere();
+
+  return geometry;
+}
+
+function appendGrassWindShader(material: GrassMaterial) {
+  material.onBeforeCompile = (shader) => {
+    shader.uniforms.uTime = { value: 0 };
+    shader.uniforms.uWindStrength = { value: new THREE.Vector3(0.11, 0, 0.08) };
+    shader.uniforms.uWindFrequency = { value: 1.35 };
+    shader.uniforms.uWindScale = { value: 3.8 };
+
+    shader.vertexShader = `
+      uniform float uTime;
+      uniform vec3 uWindStrength;
+      uniform float uWindFrequency;
+      uniform float uWindScale;
+    ${shader.vertexShader}`;
+
+    shader.vertexShader = shader.vertexShader.replace(
+      "#include <project_vertex>",
+      `
+        vec4 instancedPosition = instanceMatrix * vec4(transformed, 1.0);
+        float windPhase = sin((instancedPosition.x + instancedPosition.z) * uWindScale + uTime * uWindFrequency);
+        float windCurl = cos((instancedPosition.x - instancedPosition.z) * 2.1 + uTime * 1.7);
+        vec3 windSway = position.y * uWindStrength * windPhase * windCurl;
+
+        instancedPosition.xyz += windSway;
+        vec4 mvPosition = modelViewMatrix * instancedPosition;
+        vViewPosition = -mvPosition.xyz;
+        gl_Position = projectionMatrix * mvPosition;
+      `,
+    );
+
+    material.userData.grassShader = shader as unknown as GrassShader;
+  };
+}
 
 function getLeafTexture(preset: string, textures: EzTreeTextures) {
   if (preset.includes("Aspen")) return textures.leaves.aspen;
@@ -95,17 +205,25 @@ export function EzTreeForest() {
       },
       leaves: { pine: pineLeaf, aspen: aspenLeaf, oak: oakLeaf },
     };
-    const configs: EzTreeConfig[] = Array.from({ length: 30 }, (_, index) => {
-      const row = index % 3;
-      const x = -6.25 + index * 0.43 + Math.sin(index * 1.7) * 0.12;
-      const z = -3.0 - row * 0.24 + Math.cos(index * 0.8) * 0.08;
+    const configs: EzTreeConfig[] = Array.from({ length: 58 }, (_, index) => {
+      const row = index % 5;
+      const column = Math.floor(index / 5);
+      const side = index % 2 === 0 ? -1 : 1;
+      const x =
+        side * (2.9 + column * 0.32 + Math.sin(index * 1.7) * 0.18) +
+        Math.cos(index * 0.53) * 0.12;
+      const z = -3.22 - row * 0.26 + Math.cos(index * 0.8) * 0.11;
       const preset =
-        index % 4 === 0
-          ? "Pine Small"
-          : index % 5 === 0
-            ? "Aspen Small"
-            : "Pine Medium";
-      const scale = preset === "Pine Medium" ? 0.021 : 0.026;
+        index % 7 === 0
+          ? "Ash Small"
+          : index % 4 === 0
+            ? "Pine Small"
+            : index % 5 === 0
+              ? "Aspen Small"
+              : index % 9 === 0
+                ? "Oak Small"
+                : "Pine Medium";
+      const scale = preset === "Pine Medium" ? 0.021 : 0.024;
 
       return {
         preset,
@@ -113,7 +231,8 @@ export function EzTreeForest() {
         rotationY: (index * 2.399963) % (Math.PI * 2),
         scale: scale * (0.84 + ((index * 13) % 8) * 0.035),
         seed: 1240 + index * 73,
-        leafTint: index % 5 === 0 ? 0x6fa15d : 0x2f7a46,
+        leafTint:
+          index % 9 === 0 ? 0x9a8f38 : index % 5 === 0 ? 0x6fa15d : 0x2f7a46,
       };
     });
 
@@ -138,6 +257,77 @@ export function EzTreeForest() {
   });
 
   return <primitive object={forest} />;
+}
+
+export function EzTreeGrass() {
+  const grassRef = useRef<THREE.InstancedMesh>(null);
+  const grass = useMemo(() => {
+    const geometry = createGrassBladeGeometry();
+    const material = new THREE.MeshPhongMaterial({
+      color: 0x5f8f3d,
+      emissive: new THREE.Color(0x244817),
+      emissiveIntensity: 0.045,
+      shininess: 0.08,
+      alphaTest: 0.45,
+      side: THREE.DoubleSide,
+      vertexColors: true,
+    }) as GrassMaterial;
+
+    material.color.multiplyScalar(0.78);
+    appendGrassWindShader(material);
+
+    const mesh = new THREE.InstancedMesh(geometry, material, GRASS_MAX_COUNT);
+    const dummy = new THREE.Object3D();
+    let count = 0;
+
+    for (let index = 0; index < GRASS_MAX_COUNT; index += 1) {
+      const rx = seededRandom(index * 9.17 + 14.3);
+      const rz = seededRandom(index * 5.71 + 91.4);
+      const x = -8.6 + rx * 17.2;
+      const z = -6.0 + rz * 12.0;
+      const noise = patchNoise(x, z);
+      const keepThreshold = 0.22 + seededRandom(index * 3.31) * 0.18;
+
+      if (noise < keepThreshold || isReservoirFootprint(x, z)) continue;
+
+      const sizeJitter = seededRandom(index * 7.43);
+      const heightScale = 0.38 + noise * 0.78 + sizeJitter * 0.24;
+      const widthScale = 0.62 + seededRandom(index * 11.9) * 0.9;
+
+      dummy.position.set(x, 0.025, z);
+      dummy.rotation.set(0, seededRandom(index * 13.23) * Math.PI * 2, 0);
+      dummy.scale.set(widthScale, heightScale, widthScale);
+      dummy.updateMatrix();
+
+      const color = new THREE.Color(
+        0.2 + seededRandom(index * 1.7) * 0.08,
+        0.36 + noise * 0.22,
+        0.12 + seededRandom(index * 2.9) * 0.08,
+      );
+
+      mesh.setMatrixAt(count, dummy.matrix);
+      mesh.setColorAt(count, color);
+      count += 1;
+
+      if (count >= GRASS_COUNT) break;
+    }
+
+    mesh.count = count;
+    mesh.castShadow = true;
+    mesh.receiveShadow = true;
+    mesh.instanceMatrix.needsUpdate = true;
+    if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
+
+    return mesh;
+  }, []);
+
+  useFrame(({ clock }) => {
+    const material = grassRef.current?.material as GrassMaterial | undefined;
+    const shader = material?.userData.grassShader;
+    if (shader) shader.uniforms.uTime.value = clock.elapsedTime;
+  });
+
+  return <primitive ref={grassRef} object={grass} />;
 }
 
 export function ForegroundShrubs() {

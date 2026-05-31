@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import * as THREE from "three";
-import { EzTreeForest, ForegroundShrubs } from "./Vegetation";
+import { EzTreeForest, EzTreeGrass, ForegroundShrubs } from "./Vegetation";
 import { getTerrainHeight } from "./terrain-height";
 
 const SEGMENTS = 100;
@@ -34,6 +34,7 @@ export function TunjaTerrain() {
         />
       </mesh>
 
+      <EzTreeGrass />
       <EzTreeForest />
       <ForegroundShrubs />
     </group>
