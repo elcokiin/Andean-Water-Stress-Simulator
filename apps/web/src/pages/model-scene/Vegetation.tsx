@@ -100,17 +100,6 @@ function appendGrassWindShader(material: GrassMaterial) {
       `,
     );
 
-    shader.fragmentShader = shader.fragmentShader.replace(
-      "#include <map_fragment>",
-      `
-        vec4 sampledDiffuseColor = texture2D(map, vMapUv);
-        float bladeShade = smoothstep(0.08, 0.92, sampledDiffuseColor.r);
-        vec3 bladeLight = mix(vec3(0.54, 0.72, 0.22), vec3(1.08, 1.16, 0.46), bladeShade);
-        diffuseColor.rgb *= bladeLight;
-        diffuseColor.a *= sampledDiffuseColor.a;
-      `,
-    );
-
     material.userData.grassShader = shader as unknown as GrassShader;
   };
 }
@@ -258,11 +247,13 @@ export function EzTreeGrass() {
         ? sourceMaterial.map
         : null;
     const geometry = sourceMesh.geometry.clone();
+    if (sourceMap) sourceMap.anisotropy = 4;
+
     const material = new THREE.MeshPhongMaterial({
       color: 0xffffff,
       map: sourceMap,
-      emissive: new THREE.Color(0x5f8f32),
-      emissiveIntensity: 0.26,
+      emissive: new THREE.Color(0x3c6f25),
+      emissiveIntensity: 0.14,
       shininess: 0.12,
       transparent: false,
       alphaTest: 0.36,
@@ -297,9 +288,9 @@ export function EzTreeGrass() {
       dummy.updateMatrix();
 
       const color = new THREE.Color(
-        0.42 + seededRandom(index * 1.7) * 0.16,
-        0.62 + noise * 0.28,
-        0.18 + seededRandom(index * 2.9) * 0.12,
+        0.72 + seededRandom(index * 1.7) * 0.28,
+        0.92 + noise * 0.38,
+        0.32 + seededRandom(index * 2.9) * 0.22,
       );
 
       mesh.setMatrixAt(count, dummy.matrix);
