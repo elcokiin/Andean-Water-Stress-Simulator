@@ -100,6 +100,17 @@ function appendGrassWindShader(material: GrassMaterial) {
       `,
     );
 
+    shader.fragmentShader = shader.fragmentShader.replace(
+      "#include <map_fragment>",
+      `
+        vec4 sampledDiffuseColor = texture2D(map, vMapUv);
+        float bladeShade = smoothstep(0.08, 0.92, sampledDiffuseColor.r);
+        vec3 bladeLight = mix(vec3(0.54, 0.72, 0.22), vec3(1.08, 1.16, 0.46), bladeShade);
+        diffuseColor.rgb *= bladeLight;
+        diffuseColor.a *= sampledDiffuseColor.a;
+      `,
+    );
+
     material.userData.grassShader = shader as unknown as GrassShader;
   };
 }
@@ -248,19 +259,18 @@ export function EzTreeGrass() {
         : null;
     const geometry = sourceMesh.geometry.clone();
     const material = new THREE.MeshPhongMaterial({
-      color: 0x5f8f3d,
+      color: 0xffffff,
       map: sourceMap,
-      emissive: new THREE.Color(0x244817),
-      emissiveIntensity: 0.035,
+      emissive: new THREE.Color(0x426f24),
+      emissiveIntensity: 0.075,
       shininess: 0.12,
       transparent: false,
-      alphaTest: 0.42,
+      alphaTest: 0.36,
       depthWrite: true,
       side: THREE.DoubleSide,
       vertexColors: true,
     }) as GrassMaterial;
 
-    material.color.multiplyScalar(0.88);
     appendGrassWindShader(material);
 
     const mesh = new THREE.InstancedMesh(geometry, material, GRASS_MAX_COUNT);
@@ -287,9 +297,9 @@ export function EzTreeGrass() {
       dummy.updateMatrix();
 
       const color = new THREE.Color(
-        0.46 + seededRandom(index * 1.7) * 0.12,
-        0.62 + noise * 0.22,
-        0.24 + seededRandom(index * 2.9) * 0.09,
+        0.42 + seededRandom(index * 1.7) * 0.16,
+        0.62 + noise * 0.28,
+        0.18 + seededRandom(index * 2.9) * 0.12,
       );
 
       mesh.setMatrixAt(count, dummy.matrix);
