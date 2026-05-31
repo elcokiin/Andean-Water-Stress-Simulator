@@ -1,6 +1,7 @@
 import { useMemo, useRef } from "react";
 import { useFrame, useLoader } from "@react-three/fiber";
 import * as THREE from "three";
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { Tree } from "@/src/lib/ez-tree";
 import { getTerrainHeight } from "./terrain-height";
 
@@ -34,10 +35,9 @@ const BARK_TEXTURE_PATHS = [
   "/assets/ez-tree/textures/bark/Bark003_1K-JPG/Bark003_1K-JPG_Roughness.jpg",
 ] as const;
 
-const GRASS_COUNT = 5200;
-const GRASS_MAX_COUNT = 7800;
-const GRASS_WIDTH = 0.075;
-const GRASS_HEIGHT = 0.42;
+const GRASS_MODEL_PATH = "/assets/ez-tree/models/grass.glb";
+const GRASS_COUNT = 2900;
+const GRASS_MAX_COUNT = 5200;
 
 type GrassShader = {
   uniforms: {
@@ -71,46 +71,6 @@ function isReservoirFootprint(x: number, z: number) {
   return normalizedX * normalizedX + normalizedZ * normalizedZ < 1.02;
 }
 
-function createGrassBladeGeometry() {
-  const geometry = new THREE.BufferGeometry();
-  const halfWidth = GRASS_WIDTH / 2;
-  const height = GRASS_HEIGHT;
-
-  const positions = new Float32Array([
-    -halfWidth,
-    0,
-    0,
-    halfWidth,
-    0,
-    0,
-    0,
-    height,
-    0,
-    0,
-    0,
-    -halfWidth,
-    0,
-    0,
-    halfWidth,
-    0,
-    height,
-    0,
-  ]);
-  const normals = new Float32Array([
-    0, 0, 1, 0, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 0, 1, 0, 0,
-  ]);
-  const uvs = new Float32Array([0, 0, 1, 0, 0.5, 1, 0, 0, 1, 0, 0.5, 1]);
-  const indices = new Uint16Array([0, 1, 2, 3, 4, 5]);
-
-  geometry.setAttribute("position", new THREE.BufferAttribute(positions, 3));
-  geometry.setAttribute("normal", new THREE.BufferAttribute(normals, 3));
-  geometry.setAttribute("uv", new THREE.BufferAttribute(uvs, 2));
-  geometry.setIndex(new THREE.BufferAttribute(indices, 1));
-  geometry.computeBoundingSphere();
-
-  return geometry;
-}
-
 function appendGrassWindShader(material: GrassMaterial) {
   material.onBeforeCompile = (shader) => {
     shader.uniforms.uTime = { value: 0 };
@@ -142,6 +102,16 @@ function appendGrassWindShader(material: GrassMaterial) {
 
     material.userData.grassShader = shader as unknown as GrassShader;
   };
+}
+
+function findFirstMesh(object: THREE.Object3D): THREE.Mesh | null {
+  let mesh: THREE.Mesh | null = null;
+  object.traverse((child) => {
+    if (!mesh && child instanceof THREE.Mesh) {
+      mesh = child as THREE.Mesh;
+    }
+  });
+  return mesh;
 }
 
 function getLeafTexture(preset: string, textures: EzTreeTextures) {
@@ -261,19 +231,36 @@ export function EzTreeForest() {
 
 export function EzTreeGrass() {
   const grassRef = useRef<THREE.InstancedMesh>(null);
+  const grassModel = useLoader(GLTFLoader, GRASS_MODEL_PATH);
+
   const grass = useMemo(() => {
-    const geometry = createGrassBladeGeometry();
+    const sourceMesh = findFirstMesh(grassModel.scene);
+    if (!sourceMesh) return null;
+
+    const sourceMaterial = Array.isArray(sourceMesh.material)
+      ? sourceMesh.material[0]
+      : sourceMesh.material;
+    const sourceMap =
+      sourceMaterial instanceof THREE.MeshStandardMaterial ||
+      sourceMaterial instanceof THREE.MeshBasicMaterial ||
+      sourceMaterial instanceof THREE.MeshPhongMaterial
+        ? sourceMaterial.map
+        : null;
+    const geometry = sourceMesh.geometry.clone();
     const material = new THREE.MeshPhongMaterial({
       color: 0x5f8f3d,
+      map: sourceMap,
       emissive: new THREE.Color(0x244817),
-      emissiveIntensity: 0.045,
-      shininess: 0.08,
-      alphaTest: 0.45,
+      emissiveIntensity: 0.035,
+      shininess: 0.12,
+      transparent: false,
+      alphaTest: 0.42,
+      depthWrite: true,
       side: THREE.DoubleSide,
       vertexColors: true,
     }) as GrassMaterial;
 
-    material.color.multiplyScalar(0.78);
+    material.color.multiplyScalar(0.88);
     appendGrassWindShader(material);
 
     const mesh = new THREE.InstancedMesh(geometry, material, GRASS_MAX_COUNT);
@@ -286,23 +273,23 @@ export function EzTreeGrass() {
       const x = -8.6 + rx * 17.2;
       const z = -6.0 + rz * 12.0;
       const noise = patchNoise(x, z);
-      const keepThreshold = 0.22 + seededRandom(index * 3.31) * 0.18;
+      const keepThreshold = 0.34 + seededRandom(index * 3.31) * 0.22;
 
       if (noise < keepThreshold || isReservoirFootprint(x, z)) continue;
 
       const sizeJitter = seededRandom(index * 7.43);
-      const heightScale = 0.38 + noise * 0.78 + sizeJitter * 0.24;
-      const widthScale = 0.62 + seededRandom(index * 11.9) * 0.9;
+      const heightScale = 0.09 + noise * 0.09 + sizeJitter * 0.08;
+      const widthScale = 0.09 + seededRandom(index * 11.9) * 0.08;
 
-      dummy.position.set(x, 0.025, z);
+      dummy.position.set(x, 0.035, z);
       dummy.rotation.set(0, seededRandom(index * 13.23) * Math.PI * 2, 0);
       dummy.scale.set(widthScale, heightScale, widthScale);
       dummy.updateMatrix();
 
       const color = new THREE.Color(
-        0.2 + seededRandom(index * 1.7) * 0.08,
-        0.36 + noise * 0.22,
-        0.12 + seededRandom(index * 2.9) * 0.08,
+        0.46 + seededRandom(index * 1.7) * 0.12,
+        0.62 + noise * 0.22,
+        0.24 + seededRandom(index * 2.9) * 0.09,
       );
 
       mesh.setMatrixAt(count, dummy.matrix);
@@ -319,13 +306,15 @@ export function EzTreeGrass() {
     if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
 
     return mesh;
-  }, []);
+  }, [grassModel]);
 
   useFrame(({ clock }) => {
     const material = grassRef.current?.material as GrassMaterial | undefined;
     const shader = material?.userData.grassShader;
     if (shader) shader.uniforms.uTime.value = clock.elapsedTime;
   });
+
+  if (!grass) return null;
 
   return <primitive ref={grassRef} object={grass} />;
 }
