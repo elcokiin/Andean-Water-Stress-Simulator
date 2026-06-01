@@ -14,8 +14,8 @@ export const citySceneConfigs = {
     name: "Tunja",
     title: "HydroSim - Tunja",
     terrain: {
-      width: 18,
-      depth: 13,
+      width: 24,
+      depth: 18,
       segments: 80,
       baseAmplitude: 0.04,
       baseFrequency: [0.5, 0.3],

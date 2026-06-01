@@ -24,6 +24,8 @@ export function ModelScene({
   waterLevel?: number;
 }) {
   const isNight = theme === "dark";
+  const fogColor = isNight ? "#14253f" : "#9fd3ed";
+  const fogDensity = isNight ? 0.045 : 0.04;
   const terrainSampler = useMemo(
     () =>
       createTerrainSampler({
@@ -35,6 +37,7 @@ export function ModelScene({
 
   return (
     <>
+      <fogExp2 attach="fog" args={[fogColor, fogDensity]} />
       <ModelEnvironment theme={theme} />
       <ModelSky theme={theme} />
       <ModelLighting theme={theme} />

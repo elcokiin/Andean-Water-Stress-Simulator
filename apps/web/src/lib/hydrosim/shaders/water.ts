@@ -6,6 +6,7 @@ export const WATER_SURFACE_VERTEX = `
   varying vec3 vWorldPosition;
   varying vec3 vLocalPosition;
   varying float vShore;
+  #include <fog_pars_vertex>
 
   void main() {
     vUv = uv;
@@ -13,7 +14,9 @@ export const WATER_SURFACE_VERTEX = `
     vec4 worldPosition = modelMatrix * vec4(position, 1.0);
     vWorldPosition = worldPosition.xyz;
     vShore = aShore;
-    gl_Position = projectionMatrix * viewMatrix * worldPosition;
+    vec4 mvPosition = viewMatrix * worldPosition;
+    gl_Position = projectionMatrix * mvPosition;
+    #include <fog_vertex>
   }
 `;
 
@@ -35,6 +38,7 @@ export const WATER_SURFACE_FRAGMENT = `
   varying vec3 vWorldPosition;
   varying vec3 vLocalPosition;
   varying float vShore;
+  #include <fog_pars_fragment>
 
   float rippleHeight(vec2 pos) {
     float height = 0.0;
@@ -73,6 +77,7 @@ export const WATER_SURFACE_FRAGMENT = `
 
     float alpha = uOpacity * (0.6 + fresnel * 0.4);
     gl_FragColor = vec4(waterColor, alpha);
+    #include <fog_fragment>
   }
 `;
 
@@ -80,6 +85,7 @@ export const BED_VERTEX = `
   varying vec2 vUv;
   varying vec3 vLocalPosition;
   varying float vDepth;
+  #include <fog_pars_vertex>
 
   uniform float uDepth;
   uniform vec2 uBounds;
@@ -94,7 +100,9 @@ export const BED_VERTEX = `
     displaced.z -= depth;
     vDepth = depth;
     vLocalPosition = displaced;
-    gl_Position = projectionMatrix * modelViewMatrix * vec4(displaced, 1.0);
+    vec4 mvPosition = modelViewMatrix * vec4(displaced, 1.0);
+    gl_Position = projectionMatrix * mvPosition;
+    #include <fog_vertex>
   }
 `;
 
@@ -108,6 +116,7 @@ export const BED_FRAGMENT = `
   varying vec2 vUv;
   varying vec3 vLocalPosition;
   varying float vDepth;
+  #include <fog_pars_fragment>
 
   float caustics(vec2 p) {
     float t = uTime * 0.8;
@@ -129,5 +138,6 @@ export const BED_FRAGMENT = `
     vec3 causticColor = uCausticsColor * causticMask * uCausticsStrength;
 
     gl_FragColor = vec4(baseColor + causticColor, 1.0);
+    #include <fog_fragment>
   }
 `;
