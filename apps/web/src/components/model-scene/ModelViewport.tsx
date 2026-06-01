@@ -3,8 +3,8 @@ import { useMemo } from "react";
 
 import { useTheme } from "@/lib/theme-provider";
 import { useSimulationStore } from "@/lib/stores/simulation-store";
-import { scenarios } from "./model-data";
-import { TunjaScene } from "./TunjaScene";
+import { scenarios } from "@/src/lib/hydrosim/scenarios";
+import { TunjaScene } from "./scene/TunjaScene";
 
 export function ModelViewport() {
   const { theme } = useTheme();

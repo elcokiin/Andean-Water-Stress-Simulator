@@ -1,14 +1,15 @@
 import { Suspense, useMemo } from "react";
 import { useLoader } from "@react-three/fiber";
 import * as THREE from "three";
+
+import { getTerrainHeight } from "@/src/lib/hydrosim/terrain-height";
 import {
   EzTreeForest,
   EzTreeFlowers,
   EzTreeGrass,
   EzTreeRocks,
   ForegroundShrubs,
-} from "./Vegetation";
-import { getTerrainHeight } from "./terrain-height";
+} from "./vegetation";
 
 const SEGMENTS = 80;
 const GROUND_TEXTURE_PATHS = [
@@ -82,15 +83,15 @@ export function TunjaTerrain() {
     return geo;
   }, []);
 
-  const material = useMemo(() => {
-    [grassTexture, dirtTexture, dirtNormal].forEach((texture) => {
-      texture.wrapS = THREE.RepeatWrapping;
-      texture.wrapT = THREE.RepeatWrapping;
-      texture.anisotropy = 4;
-    });
-    grassTexture.colorSpace = THREE.SRGBColorSpace;
-    dirtTexture.colorSpace = THREE.SRGBColorSpace;
+  [grassTexture, dirtTexture, dirtNormal].forEach((texture) => {
+    texture.wrapS = THREE.RepeatWrapping;
+    texture.wrapT = THREE.RepeatWrapping;
+    texture.anisotropy = 4;
+  });
+  grassTexture.colorSpace = THREE.SRGBColorSpace; // eslint-disable-line react-hooks/immutability
+  dirtTexture.colorSpace = THREE.SRGBColorSpace; // eslint-disable-line react-hooks/immutability
 
+  const material = useMemo(() => {
     const terrainMaterial = new THREE.MeshStandardMaterial({
       color: "#eef5d0",
       normalMap: dirtNormal,

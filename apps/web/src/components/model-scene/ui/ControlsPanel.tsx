@@ -4,9 +4,9 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useSimulationStore } from "@/lib/stores/simulation-store";
+import { scenarioIds, scenarios, timeline } from "@/src/lib/hydrosim/scenarios";
 
 import { Metric } from "./Metric";
-import { scenarioIds, scenarios, timeline } from "./model-data";
 
 export function ControlsPanel() {
   const isPlaying = useSimulationStore((s) => s.isPlaying);

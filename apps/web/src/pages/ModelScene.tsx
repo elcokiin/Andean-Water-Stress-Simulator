@@ -1,10 +1,12 @@
 import { TooltipProvider } from "@/components/ui/tooltip";
 
-import { ControlsPanel } from "./model-scene/ControlsPanel";
-import { ModelConfigDialog } from "./model-scene/ModelConfigDialog";
-import { ModelViewport } from "./model-scene/ModelViewport";
-import { TitleBar } from "./model-scene/TitleBar";
-import { useModelKeyboardShortcuts } from "./model-scene/use-model-keyboard-shortcuts";
+import {
+  ControlsPanel,
+  ModelConfigDialog,
+  ModelViewport,
+  TitleBar,
+  useModelKeyboardShortcuts,
+} from "@/src/components/model-scene";
 
 export default function ModelScene() {
   useModelKeyboardShortcuts();

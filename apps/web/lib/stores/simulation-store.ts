@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import type { ConfigTab, ScenarioId } from "@/src/pages/model-scene/model-data";
+import type { ConfigTab, ScenarioId } from "@/src/lib/hydrosim/types";
 
 interface SimulationState {
   scenario: ScenarioId;

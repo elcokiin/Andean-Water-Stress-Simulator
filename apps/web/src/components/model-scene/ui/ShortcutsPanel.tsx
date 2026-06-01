@@ -2,7 +2,7 @@ import { Keyboard } from "lucide-react";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-import { shortcutGroups } from "./model-data";
+import { shortcutGroups } from "@/src/lib/hydrosim/shortcuts";
 
 export function ShortcutsPanel() {
   return (
