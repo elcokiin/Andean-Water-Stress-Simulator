@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { ShortcutBadge, ShortcutFlag } from "@/components/ui/shortcut-flag";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import {
   Tooltip,
@@ -19,6 +20,10 @@ const reservoirOptions: { id: ReservoirId; label: string }[] = [
   { id: "duitama", label: "Duitama" },
   { id: "sogamoso", label: "Sogamoso" },
 ];
+
+const CONFIG_HOTKEY = "C";
+const SHORTCUTS_HOTKEY = "Shift+/";
+const compactFlagClassName = "h-4 min-w-4 rounded-[4px] px-1 text-[0.6rem]";
 
 export function TitleBar() {
   const { theme, toggle } = useTheme();
@@ -77,13 +82,21 @@ export function TitleBar() {
             <Button
               variant="ghost"
               size="icon-sm"
+              className="relative"
               onClick={() => setConfigOpen(true)}
               aria-label="Abrir guia del modelo"
             >
+              <ShortcutFlag
+                className={compactFlagClassName}
+                hotkey={CONFIG_HOTKEY}
+              />
               <HelpCircle />
             </Button>
           </TooltipTrigger>
-          <TooltipContent>Guia del modelo</TooltipContent>
+          <TooltipContent>
+            Guia del modelo <ShortcutBadge hotkey={CONFIG_HOTKEY} />
+            <ShortcutBadge hotkey={SHORTCUTS_HOTKEY} />
+          </TooltipContent>
         </Tooltip>
         <Separator orientation="vertical" className="h-5" />
         <Tooltip>

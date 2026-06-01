@@ -15,6 +15,9 @@ import { scenarioIds, scenarios, timeline } from "@/src/lib/hydrosim/scenarios";
 import { Metric } from "./Metric";
 
 const CONTROLS_PANEL_HOTKEY = "M";
+const CONFIG_HOTKEY = "C";
+const PLAYBACK_HOTKEY = "Space";
+const compactFlagClassName = "h-4 min-w-4 rounded-[4px] px-1 text-[0.6rem]";
 
 export function ControlsPanel() {
   const isPlaying = useSimulationStore((s) => s.isPlaying);
@@ -40,17 +43,22 @@ export function ControlsPanel() {
               <Button
                 variant={isPlaying ? "secondary" : "default"}
                 size="icon"
-                className="size-10 rounded-[8px]"
+                className="relative size-10 rounded-[8px]"
                 onClick={togglePlayback}
                 aria-label={
                   isPlaying ? "Pausar simulacion" : "Iniciar simulacion"
                 }
               >
+                <ShortcutFlag
+                  className={compactFlagClassName}
+                  hotkey={PLAYBACK_HOTKEY}
+                />
                 {isPlaying ? <Pause /> : <Play />}
               </Button>
             </TooltipTrigger>
             <TooltipContent>
-              {isPlaying ? "Pausar simulacion" : "Iniciar simulacion"}
+              {isPlaying ? "Pausar simulacion" : "Iniciar simulacion"}{" "}
+              <ShortcutBadge hotkey={PLAYBACK_HOTKEY} />
             </TooltipContent>
           </Tooltip>
 
@@ -59,14 +67,20 @@ export function ControlsPanel() {
               <Button
                 variant="outline"
                 size="icon"
-                className="size-10 rounded-[8px]"
+                className="relative size-10 rounded-[8px]"
                 onClick={() => setConfigOpen(true)}
                 aria-label="Configurar modelo"
               >
+                <ShortcutFlag
+                  className={compactFlagClassName}
+                  hotkey={CONFIG_HOTKEY}
+                />
                 <Settings />
               </Button>
             </TooltipTrigger>
-            <TooltipContent>Configurar modelo</TooltipContent>
+            <TooltipContent>
+              Configurar modelo <ShortcutBadge hotkey={CONFIG_HOTKEY} />
+            </TooltipContent>
           </Tooltip>
         </CardContent>
       </Card>
@@ -88,10 +102,14 @@ export function ControlsPanel() {
               <Button
                 variant="outline"
                 size="icon"
-                className="rounded-[8px]"
+                className="relative rounded-[8px]"
                 onClick={toggleControlsPanelMinimized}
                 aria-label="Minimizar panel de control"
               >
+                <ShortcutFlag
+                  className={compactFlagClassName}
+                  hotkey={CONTROLS_PANEL_HOTKEY}
+                />
                 <Minimize2 />
               </Button>
             </TooltipTrigger>
@@ -105,14 +123,20 @@ export function ControlsPanel() {
               <Button
                 variant="outline"
                 size="icon"
-                className="rounded-[8px]"
+                className="relative rounded-[8px]"
                 onClick={() => setConfigOpen(true)}
                 aria-label="Configurar modelo"
               >
+                <ShortcutFlag
+                  className={compactFlagClassName}
+                  hotkey={CONFIG_HOTKEY}
+                />
                 <Settings />
               </Button>
             </TooltipTrigger>
-            <TooltipContent>Configurar modelo</TooltipContent>
+            <TooltipContent>
+              Configurar modelo <ShortcutBadge hotkey={CONFIG_HOTKEY} />
+            </TooltipContent>
           </Tooltip>
         </div>
       </CardHeader>
@@ -172,10 +196,14 @@ export function ControlsPanel() {
           <Button
             variant={isPlaying ? "secondary" : "default"}
             size="icon"
-            className="size-10 rounded-[8px]"
+            className="relative size-10 rounded-[8px]"
             onClick={togglePlayback}
             aria-label={isPlaying ? "Pausar simulacion" : "Iniciar simulacion"}
           >
+            <ShortcutFlag
+              className={compactFlagClassName}
+              hotkey={PLAYBACK_HOTKEY}
+            />
             {isPlaying ? <Pause /> : <Play />}
           </Button>
         </div>
