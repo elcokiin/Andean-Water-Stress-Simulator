@@ -5,10 +5,10 @@ import { Kbd } from "@/components/ui/kbd";
 import { cn } from "@/lib/utils";
 
 const cornerClassNames = {
-  "top-left": "top-1 left-1",
-  "top-right": "top-1 right-1",
-  "bottom-left": "bottom-1 left-1",
-  "bottom-right": "right-1 bottom-1",
+  "top-left": "top-0 left-0",
+  "top-right": "top-0 right-0",
+  "bottom-left": "bottom-0 left-0",
+  "bottom-right": "right-0 bottom-0",
 } as const;
 
 type ShortcutCorner = keyof typeof cornerClassNames;

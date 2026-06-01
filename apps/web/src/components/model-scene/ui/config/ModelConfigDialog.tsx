@@ -34,7 +34,8 @@ import { InfrastructureTab } from "./infrastructure-tab";
 const EXPAND_DIALOG_HOTKEY = "Mod+E";
 const DISCARD_HOTKEY = "Escape";
 const SAVE_HOTKEY = "Mod+Enter";
-const compactFlagClassName = "h-4 min-w-4 rounded-[4px] px-1 text-[0.6rem]";
+const compactFlagClassName =
+  "h-3.5 min-w-3.5 rounded-[3px] px-0.5 text-[0.5rem]";
 
 export function ModelConfigDialog() {
   const configTab = useSimulationStore((s) => s.configTab);

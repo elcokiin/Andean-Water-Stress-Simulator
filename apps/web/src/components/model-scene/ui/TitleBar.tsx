@@ -23,7 +23,8 @@ const reservoirOptions: { id: ReservoirId; label: string }[] = [
 
 const CONFIG_HOTKEY = "C";
 const SHORTCUTS_HOTKEY = "Shift+/";
-const compactFlagClassName = "h-4 min-w-4 rounded-[4px] px-1 text-[0.6rem]";
+const compactFlagClassName =
+  "h-3.5 min-w-3.5 rounded-[3px] px-0.5 text-[0.5rem]";
 
 export function TitleBar() {
   const { theme, toggle } = useTheme();
