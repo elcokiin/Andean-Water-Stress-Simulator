@@ -51,7 +51,7 @@ export const useSimulationStore = create<SimulationState>((set) => ({
   demandValue: 120,
   efficiencyValue: 62,
   rationingActive: false,
-  fogIntensity: 1,
+  fogIntensity: 0.8,
 
   setScenario: (scenario) => set({ scenario }),
   setReservoir: (reservoir) => set({ reservoir }),

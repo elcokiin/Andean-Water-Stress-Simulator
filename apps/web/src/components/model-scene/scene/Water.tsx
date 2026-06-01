@@ -275,7 +275,6 @@ export function ReservoirWater({
     const material = new THREE.ShaderMaterial({
       vertexShader: WATER_SURFACE_VERTEX,
       fragmentShader: WATER_SURFACE_FRAGMENT,
-      fog: true,
       transparent: true,
       depthWrite: false,
       side: THREE.DoubleSide,
@@ -303,7 +302,6 @@ export function ReservoirWater({
     return new THREE.ShaderMaterial({
       vertexShader: BED_VERTEX,
       fragmentShader: BED_FRAGMENT,
-      fog: true,
       side: THREE.DoubleSide,
       uniforms: {
         uTime: { value: 0 },

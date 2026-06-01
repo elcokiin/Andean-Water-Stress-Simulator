@@ -49,7 +49,7 @@ export function ModelViewport() {
         className={`model-viewport-mist ${
           theme === "dark" ? "model-viewport-mist-dark" : ""
         }`}
-        style={{ opacity: Math.min(Math.max(fogIntensity / 1.15, 0), 1) }}
+        style={{ opacity: Math.min(Math.max(fogIntensity, 0), 1) }}
       />
     </div>
   );

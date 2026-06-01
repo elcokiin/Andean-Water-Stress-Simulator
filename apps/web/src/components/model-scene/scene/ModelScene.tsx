@@ -27,7 +27,7 @@ export function ModelScene({
 }) {
   const isNight = theme === "dark";
   const fogColor = isNight ? "#10243d" : "#a9d9ef";
-  const fogDensity = (isNight ? 0.058 : 0.052) * fogIntensity;
+  const fogDensity = (isNight ? 0.026 : 0.022) * fogIntensity;
   const terrainSampler = useMemo(
     () =>
       createTerrainSampler({
