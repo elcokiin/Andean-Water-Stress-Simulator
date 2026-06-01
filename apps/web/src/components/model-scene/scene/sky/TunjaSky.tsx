@@ -9,7 +9,7 @@ import {
 
 type SkyTheme = "light" | "dark";
 
-export function TunjaEnvironment({ theme }: { theme: SkyTheme }) {
+export function ModelEnvironment({ theme }: { theme: SkyTheme }) {
   const isNight = theme === "dark";
 
   return (
@@ -24,7 +24,7 @@ export function TunjaEnvironment({ theme }: { theme: SkyTheme }) {
   );
 }
 
-export function TunjaSky({ theme }: { theme: SkyTheme }) {
+export function ModelSky({ theme }: { theme: SkyTheme }) {
   const isNight = theme === "dark";
   const uniforms = useMemo(
     () => ({
@@ -82,7 +82,7 @@ export function TunjaSky({ theme }: { theme: SkyTheme }) {
   );
 }
 
-export function TunjaLighting({ theme }: { theme: SkyTheme }) {
+export function ModelLighting({ theme }: { theme: SkyTheme }) {
   const isNight = theme === "dark";
 
   return (
@@ -112,3 +112,9 @@ export function TunjaLighting({ theme }: { theme: SkyTheme }) {
     </>
   );
 }
+
+export {
+  ModelEnvironment as TunjaEnvironment,
+  ModelLighting as TunjaLighting,
+  ModelSky as TunjaSky,
+};

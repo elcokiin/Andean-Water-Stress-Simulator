@@ -8,7 +8,11 @@ import {
   WATER_SURFACE_FRAGMENT,
   WATER_SURFACE_VERTEX,
 } from "@/src/lib/hydrosim/shaders/water";
-import { getTerrainHeight } from "@/src/lib/hydrosim/terrain-height";
+import type { TerrainSampler } from "@/src/lib/hydrosim/terrain-sampler";
+import type {
+  ReservoirPathCommand,
+  ReservoirProfile,
+} from "@/src/lib/hydrosim/types";
 
 const INITIAL_RIPPLE_CENTERS = Array.from(
   { length: MAX_RIPPLES },
@@ -22,11 +26,54 @@ interface TerrainStats {
   avgH: number;
 }
 
-export function ReservoirWater({ level = 1 }: { level?: number }) {
+function createReservoirShape(path: ReservoirPathCommand[]) {
+  const shape = new THREE.Shape();
+
+  path.forEach((command) => {
+    switch (command[0]) {
+      case "moveTo":
+        shape.moveTo(command[1], command[2]);
+        break;
+      case "lineTo":
+        shape.lineTo(command[1], command[2]);
+        break;
+      case "bezierCurveTo":
+        shape.bezierCurveTo(
+          command[1],
+          command[2],
+          command[3],
+          command[4],
+          command[5],
+          command[6],
+        );
+        break;
+      case "quadraticCurveTo":
+        shape.quadraticCurveTo(command[1], command[2], command[3], command[4]);
+        break;
+    }
+  });
+
+  return shape;
+}
+
+export function ReservoirWater({
+  level = 1,
+  reservoir,
+  terrainSampler,
+}: {
+  level?: number;
+  reservoir: ReservoirProfile;
+  terrainSampler: TerrainSampler;
+}) {
   const normalizedLevel = Math.min(Math.max(level, 0.24), 1);
-  const waterScaleX = 0.82 + normalizedLevel * 0.23;
-  const waterScaleY = 1.12 + normalizedLevel * 0.33;
-  const waterElevation = 0.035 + normalizedLevel * 0.025;
+  const waterScaleX =
+    reservoir.minScale[0] +
+    normalizedLevel * (reservoir.maxScale[0] - reservoir.minScale[0]);
+  const waterScaleY =
+    reservoir.minScale[1] +
+    normalizedLevel * (reservoir.maxScale[1] - reservoir.minScale[1]);
+  const waterElevation =
+    reservoir.elevationBase + normalizedLevel * reservoir.elevationRange;
 
   const waterMeshRef = useRef<THREE.Mesh>(null);
   const rippleIndexRef = useRef(0);
@@ -36,17 +83,13 @@ export function ReservoirWater({ level = 1 }: { level?: number }) {
   const rippleTimes = useRef(INITIAL_RIPPLE_TIMES);
 
   const waterGeometry = useMemo(() => {
-    const shape = new THREE.Shape();
-    shape.moveTo(-5.8, -0.2);
-    shape.bezierCurveTo(-4.8, -1.5, -2.3, -1.9, 0.3, -1.55);
-    shape.bezierCurveTo(2.7, -1.28, 5.5, -0.8, 6.0, 0.25);
-    shape.bezierCurveTo(6.55, 1.38, 4.1, 2.18, 1.8, 2.22);
-    shape.bezierCurveTo(-0.6, 2.24, -3.2, 1.85, -4.7, 1.0);
-    shape.bezierCurveTo(-5.55, 0.52, -6.12, 0.22, -5.8, -0.2);
-    const geometry = new THREE.ShapeGeometry(shape, 64);
+    const geometry = new THREE.ShapeGeometry(
+      createReservoirShape(reservoir.path),
+      reservoir.segments,
+    );
     geometry.computeBoundingBox();
     return geometry;
-  }, []);
+  }, [reservoir.path, reservoir.segments]);
 
   const waterBounds = useMemo(() => {
     const bounds = waterGeometry.boundingBox;
@@ -71,7 +114,7 @@ export function ReservoirWater({ level = 1 }: { level?: number }) {
     for (let i = 0; i < positions.count; i++) {
       const x = positions.getX(i);
       const y = positions.getY(i);
-      const terrainHeight = getTerrainHeight(x, y);
+      const terrainHeight = terrainSampler.getHeight(x, y);
       positions.setZ(i, terrainHeight);
       if (terrainHeight < minH) minH = terrainHeight;
       if (terrainHeight > maxH) maxH = terrainHeight;
@@ -88,8 +131,7 @@ export function ReservoirWater({ level = 1 }: { level?: number }) {
     (geometry as unknown as { __terrainStats: TerrainStats }).__terrainStats =
       stats;
     return geometry;
-  }, [waterGeometry]);
-  const bedScale = 1.08;
+  }, [terrainSampler, waterGeometry]);
 
   const bedPositionY = useMemo(() => {
     const stats = (bedGeometry as unknown as { __terrainStats?: TerrainStats })
@@ -102,17 +144,16 @@ export function ReservoirWater({ level = 1 }: { level?: number }) {
     const geom = waterGeometry;
     const count = geom.attributes.position.count;
     const shore = new Float32Array(count);
-    const foamWidth = 0.22;
     for (let i = 0; i < count; i++) {
       const x = geom.attributes.position.getX(i);
       const y = geom.attributes.position.getY(i);
-      const terrainH = getTerrainHeight(x, y);
+      const terrainH = terrainSampler.getHeight(x, y);
       const depth = waterElevation - terrainH;
-      const t = Math.max(0, Math.min(1, depth / foamWidth));
+      const t = Math.max(0, Math.min(1, depth / reservoir.foamWidth));
       shore[i] = 1.0 - t;
     }
     geom.setAttribute("aShore", new THREE.BufferAttribute(shore, 1));
-  }, [waterGeometry, waterElevation]);
+  }, [reservoir.foamWidth, terrainSampler, waterElevation, waterGeometry]);
 
   const waterMaterial = useMemo(() => {
     const material = new THREE.ShaderMaterial({
@@ -130,16 +171,16 @@ export function ReservoirWater({ level = 1 }: { level?: number }) {
         uWaveAmp: { value: 0.03 },
         uFresnelStrength: { value: 0.55 },
         uBounds: { value: waterBounds },
-        uBaseColor: { value: new THREE.Color("#2a8ccc") },
-        uDeepColor: { value: new THREE.Color("#0b3654") },
+        uBaseColor: { value: new THREE.Color(reservoir.waterColors.base) },
+        uDeepColor: { value: new THREE.Color(reservoir.waterColors.deep) },
         uRippleCenters: { value: INITIAL_RIPPLE_CENTERS },
         uRippleTimes: { value: INITIAL_RIPPLE_TIMES },
-        uFoamColor: { value: new THREE.Color("#f8fbfd") },
+        uFoamColor: { value: new THREE.Color(reservoir.waterColors.foam) },
         uFoamStrength: { value: 1.0 },
       },
     });
     return material;
-  }, [waterBounds]);
+  }, [reservoir.waterColors, waterBounds]);
 
   const bedMaterial = useMemo(() => {
     return new THREE.ShaderMaterial({
@@ -151,11 +192,13 @@ export function ReservoirWater({ level = 1 }: { level?: number }) {
         uCausticsStrength: { value: 0.4 },
         uDepth: { value: 0.26 },
         uBounds: { value: waterBounds },
-        uBedColor: { value: new THREE.Color("#4f6b3a") },
-        uCausticsColor: { value: new THREE.Color("#b5f5f0") },
+        uBedColor: { value: new THREE.Color(reservoir.waterColors.bed) },
+        uCausticsColor: {
+          value: new THREE.Color(reservoir.waterColors.caustics),
+        },
       },
     });
-  }, [waterBounds]);
+  }, [reservoir.waterColors, waterBounds]);
 
   /* eslint-disable react-hooks/immutability */
   useFrame((state) => {
@@ -199,10 +242,14 @@ export function ReservoirWater({ level = 1 }: { level?: number }) {
 
   return (
     <group
-      position={[0, waterElevation, 0.3]}
-      rotation={[-Math.PI / 2, 0, -0.08]}
+      position={[
+        reservoir.position[0],
+        reservoir.position[1] + waterElevation,
+        reservoir.position[2],
+      ]}
+      rotation={[-Math.PI / 2, 0, reservoir.rotationZ]}
     >
-      <group scale={[bedScale, bedScale, 1]}>
+      <group scale={[reservoir.bedScale, reservoir.bedScale, 1]}>
         <mesh
           receiveShadow
           geometry={bedGeometry}

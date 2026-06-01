@@ -3,14 +3,17 @@ import { useMemo } from "react";
 
 import { useTheme } from "@/lib/theme-provider";
 import { useSimulationStore } from "@/lib/stores/simulation-store";
+import { getCitySceneConfig } from "@/src/lib/hydrosim/city-scenes";
 import { scenarios } from "@/src/lib/hydrosim/scenarios";
-import { TunjaScene } from "./scene/TunjaScene";
+import { ModelScene } from "./scene/ModelScene";
 
 export function ModelViewport() {
   const { theme } = useTheme();
   const isPlaying = useSimulationStore((s) => s.isPlaying);
   const scenario = useSimulationStore((s) => s.scenario);
+  const reservoir = useSimulationStore((s) => s.reservoir);
   const selectedScenario = scenarios[scenario];
+  const city = getCitySceneConfig(reservoir);
 
   const reservoirScale = useMemo(
     () => Math.max(selectedScenario.reserve / 68, 0.24),
@@ -20,7 +23,8 @@ export function ModelViewport() {
   return (
     <div className="absolute inset-0">
       <Canvas
-        camera={{ position: [6.8, 3.3, 6.8], fov: 42 }}
+        key={city.id}
+        camera={{ position: city.camera.position, fov: city.camera.fov }}
         dpr={[1, 1.5]}
         gl={{
           antialias: true,
@@ -29,8 +33,9 @@ export function ModelViewport() {
         }}
         shadows
       >
-        <TunjaScene
+        <ModelScene
           autoRotate={isPlaying}
+          city={city}
           theme={theme}
           waterLevel={reservoirScale}
         />

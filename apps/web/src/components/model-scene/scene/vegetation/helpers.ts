@@ -2,8 +2,8 @@ import * as THREE from "three";
 import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader.js";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 
-import { getTerrainHeight } from "@/src/lib/hydrosim/terrain-height";
 import { Tree } from "@/src/lib/ez-tree";
+import type { TerrainSampler } from "@/src/lib/hydrosim/terrain-sampler";
 import type { EzTreeTextures } from "./textures";
 
 export type EzTreeConfig = {
@@ -101,17 +101,19 @@ export function cloneSceneAsset(
     position,
     rotationY,
     scale,
+    terrainSampler,
     groundOffset = 0.02,
   }: {
     position: readonly [number, number];
     rotationY: number;
     scale: number;
+    terrainSampler: TerrainSampler;
     groundOffset?: number;
   },
 ) {
   const [x, z] = position;
   const object = source.clone(true);
-  object.position.set(x, getTerrainHeight(x, z) + groundOffset, z);
+  object.position.set(x, terrainSampler.getHeight(x, z) + groundOffset, z);
   object.rotation.y = rotationY;
   object.scale.setScalar(scale);
   object.traverse((child) => {

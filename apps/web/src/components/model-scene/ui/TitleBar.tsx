@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/tooltip";
 import { useTheme } from "@/lib/theme-provider";
 import { useSimulationStore } from "@/lib/stores/simulation-store";
+import { getCitySceneConfig } from "@/src/lib/hydrosim/city-scenes";
 import type { ReservoirId } from "@/src/lib/hydrosim/types";
 
 const reservoirOptions: { id: ReservoirId; label: string }[] = [
@@ -24,6 +25,7 @@ export function TitleBar() {
   const reservoir = useSimulationStore((s) => s.reservoir);
   const setReservoir = useSimulationStore((s) => s.setReservoir);
   const setConfigOpen = useSimulationStore((s) => s.setConfigOpen);
+  const city = getCitySceneConfig(reservoir);
 
   return (
     <div className="absolute top-4 left-1/2 z-10 -translate-x-1/2">
@@ -37,7 +39,7 @@ export function TitleBar() {
         <div className="flex min-w-0 items-center gap-2">
           <Waves className="shrink-0 text-primary" aria-hidden="true" />
           <h1 className="truncate text-sm font-bold tracking-tight text-foreground sm:text-base">
-            HydroSim - Modelo hidrico de Boyaca
+            {city.title}
           </h1>
         </div>
         <Separator orientation="vertical" className="hidden h-5 sm:block" />
