@@ -41,7 +41,7 @@ export function useModelKeyboardShortcuts() {
     useSimulationStore.getState().toggleAmbientAudio();
   });
 
-  useHotkey("H", () => {
+  useHotkey("K", () => {
     useSimulationStore.getState().toggleShowShortcutHints();
   });
 

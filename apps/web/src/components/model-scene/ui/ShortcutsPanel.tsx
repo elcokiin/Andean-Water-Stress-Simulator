@@ -8,7 +8,7 @@ import { useSimulationStore } from "@/lib/stores/simulation-store";
 
 import { shortcutGroups } from "@/src/lib/hydrosim/shortcuts";
 
-const SHORTCUT_HINTS_HOTKEY = "H";
+const SHORTCUT_HINTS_HOTKEY = "K";
 
 export function ShortcutsPanel() {
   const showShortcutHints = useSimulationStore((s) => s.showShortcutHints);

@@ -9,7 +9,7 @@ export const shortcutGroups = [
       ["C", "Abre o cierra la configuracion"],
       ["P", "Minimiza o restaura el panel de control"],
       ["M", "Activa o desactiva el audio ambiente"],
-      ["H", "Muestra u oculta los badges de atajos"],
+      ["K", "Muestra u oculta los badges de atajos"],
       ["D", "Alterna el tema claro u oscuro"],
       ["Escape", "Cierra la configuracion"],
     ],

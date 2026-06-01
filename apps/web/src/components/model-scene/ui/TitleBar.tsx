@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { ArrowLeft, HelpCircle, Moon, Music, Sun, Waves } from "lucide-react";
+import { ArrowLeft, HelpCircle, Moon, Music, Sun, VolumeOff, Waves } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 
 import { Button } from "@/components/ui/button";
@@ -28,9 +28,13 @@ const THEME_HOTKEY = "D";
 const AUDIO_HOTKEY = "M";
 const compactFlagClassName =
   "h-3.5 min-w-3.5 rounded-[3px] px-0.5 text-[0.5rem]";
+const AMBIENT_AUDIO_FADE_IN_START = 0.4;
+const AMBIENT_AUDIO_FADE_IN_DURATION_MS = 2000;
+const AMBIENT_AUDIO_LOOP_END_TRIM_S = 0.3;
 
 export function TitleBar() {
   const audioRef = useRef<HTMLAudioElement>(null);
+  const fadeFrameRef = useRef<number | null>(null);
   const { theme, toggle } = useTheme();
   const navigate = useNavigate();
   const reservoir = useSimulationStore((s) => s.reservoir);
@@ -48,14 +52,56 @@ export function TitleBar() {
     const audio = audioRef.current;
     if (!audio) return;
 
+    if (fadeFrameRef.current !== null) {
+      cancelAnimationFrame(fadeFrameRef.current);
+      fadeFrameRef.current = null;
+    }
+
     if (!ambientAudioEnabled) {
       audio.pause();
       return;
     }
 
+    audio.volume = AMBIENT_AUDIO_FADE_IN_START;
+    const fadeStart = performance.now();
+
+    const stepVolume = (now: number) => {
+      const elapsed = now - fadeStart;
+      const progress = Math.min(elapsed / AMBIENT_AUDIO_FADE_IN_DURATION_MS, 1);
+      audio.volume =
+        AMBIENT_AUDIO_FADE_IN_START +
+        (1 - AMBIENT_AUDIO_FADE_IN_START) * progress;
+
+      if (progress < 1) {
+        fadeFrameRef.current = requestAnimationFrame(stepVolume);
+      } else {
+        fadeFrameRef.current = null;
+      }
+    };
+
+    fadeFrameRef.current = requestAnimationFrame(stepVolume);
+
+    const handleTimeUpdate = () => {
+      if (
+        Number.isFinite(audio.duration) &&
+        audio.currentTime >= audio.duration - AMBIENT_AUDIO_LOOP_END_TRIM_S
+      ) {
+        audio.currentTime = 0;
+      }
+    };
+    audio.addEventListener("timeupdate", handleTimeUpdate);
+
     void audio.play().catch(() => {
       setAmbientAudioEnabled(false);
     });
+
+    return () => {
+      if (fadeFrameRef.current !== null) {
+        cancelAnimationFrame(fadeFrameRef.current);
+        fadeFrameRef.current = null;
+      }
+      audio.removeEventListener("timeupdate", handleTimeUpdate);
+    };
   }, [ambientAudioEnabled, setAmbientAudioEnabled]);
 
   return (
@@ -63,7 +109,6 @@ export function TitleBar() {
       <audio
         ref={audioRef}
         src="/nature.mp3"
-        loop
         preload="auto"
         onError={() => setAmbientAudioEnabled(false)}
       />
@@ -155,7 +200,7 @@ export function TitleBar() {
                 hidden={!showShortcutHints}
                 hotkey={AUDIO_HOTKEY}
               />
-              <Music />
+              {ambientAudioEnabled ? <Music /> : <VolumeOff />}
             </Button>
           </TooltipTrigger>
           <TooltipContent>
