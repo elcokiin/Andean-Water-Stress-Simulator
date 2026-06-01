@@ -1,3 +1,4 @@
+import { formatForDisplay } from "@tanstack/react-hotkeys";
 import { Minimize2, Pause, Play, Settings } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
@@ -12,6 +13,8 @@ import { useSimulationStore } from "@/lib/stores/simulation-store";
 import { scenarioIds, scenarios, timeline } from "@/src/lib/hydrosim/scenarios";
 
 import { Metric } from "./Metric";
+
+const CONTROLS_PANEL_HOTKEY = "M";
 
 export function ControlsPanel() {
   const isPlaying = useSimulationStore((s) => s.isPlaying);
@@ -30,6 +33,9 @@ export function ControlsPanel() {
   if (isMinimized) {
     return (
       <Card className="absolute right-3 bottom-3 z-10 rounded-[10px] border-border/80 bg-background/90 p-2 shadow-xl backdrop-blur-sm sm:right-auto sm:left-4">
+        <kbd className="pointer-events-none absolute -top-2 -right-2 rounded-[6px] border border-border bg-background px-1.5 py-0.5 font-mono text-[0.64rem] font-medium leading-none text-muted-foreground shadow-sm">
+          {formatForDisplay(CONTROLS_PANEL_HOTKEY)}
+        </kbd>
         <CardContent className="flex items-center gap-1.5 p-0">
           <Tooltip>
             <TooltipTrigger asChild>
@@ -91,7 +97,9 @@ export function ControlsPanel() {
                 <Minimize2 />
               </Button>
             </TooltipTrigger>
-            <TooltipContent>Minimizar panel (M)</TooltipContent>
+            <TooltipContent>
+              Minimizar panel ({formatForDisplay(CONTROLS_PANEL_HOTKEY)})
+            </TooltipContent>
           </Tooltip>
 
           <Tooltip>
