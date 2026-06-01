@@ -316,13 +316,13 @@ export const citySceneConfigs = {
         bed: "#59673f",
       },
       aquaticVegetation: {
-        count: 520,
+        count: 460,
         maxCount: 1100,
         seed: 441,
-        color: "#547a48",
-        secondaryColor: "#7f9f5c",
-        scale: [0.045, 0.115],
-        opacity: 0.78,
+        color: "#7fa66a",
+        secondaryColor: "#a8bf7c",
+        scale: [0.035, 0.095],
+        opacity: 0.52,
       },
     },
     vegetation: {

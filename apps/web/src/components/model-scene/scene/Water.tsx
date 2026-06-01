@@ -66,7 +66,7 @@ function AquaticVegetation({
   const vegetation = useMemo(() => {
     const geometry = new THREE.CircleGeometry(1, 10);
     const material = new THREE.MeshBasicMaterial({
-      color: profile.color,
+      color: "#ffffff",
       side: THREE.DoubleSide,
       transparent: true,
       opacity: profile.opacity,
@@ -110,6 +110,7 @@ function AquaticVegetation({
     }
 
     mesh.count = count;
+    mesh.renderOrder = 2;
     mesh.instanceMatrix.needsUpdate = true;
     if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
     mesh.computeBoundingBox();
