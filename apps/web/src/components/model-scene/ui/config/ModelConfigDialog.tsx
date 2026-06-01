@@ -19,7 +19,12 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { ShortcutBadge, ShortcutFlag } from "@/components/ui/shortcut-flag";
+import { ShortcutBadge } from "@/components/ui/shortcut-flag";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { useSimulationStore } from "@/lib/stores/simulation-store";
 import { scenarios } from "@/src/lib/hydrosim/scenarios";
@@ -34,8 +39,6 @@ import { InfrastructureTab } from "./infrastructure-tab";
 const EXPAND_DIALOG_HOTKEY = "Mod+E";
 const DISCARD_HOTKEY = "Escape";
 const SAVE_HOTKEY = "Mod+Enter";
-const compactFlagClassName =
-  "h-3.5 min-w-3.5 rounded-[3px] px-0.5 text-[0.5rem]";
 
 export function ModelConfigDialog() {
   const configTab = useSimulationStore((s) => s.configTab);
@@ -119,19 +122,25 @@ export function ModelConfigDialog() {
       >
         <DialogHeader className="shrink-0 border-b border-border px-6 py-4">
           <div className="flex items-start gap-3 pr-8">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="relative -ml-2"
-              onClick={toggleDialogExpanded}
-              aria-label={isExpanded ? "Restaurar dialogo" : "Expandir dialogo"}
-            >
-              <ShortcutFlag
-                className={compactFlagClassName}
-                hotkey={EXPAND_DIALOG_HOTKEY}
-              />
-              {isExpanded ? <Minimize2 /> : <Maximize2 />}
-            </Button>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="-ml-2"
+                  onClick={toggleDialogExpanded}
+                  aria-label={
+                    isExpanded ? "Restaurar dialogo" : "Expandir dialogo"
+                  }
+                >
+                  {isExpanded ? <Minimize2 /> : <Maximize2 />}
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                {isExpanded ? "Restaurar dialogo" : "Expandir dialogo"}{" "}
+                <ShortcutBadge hotkey={EXPAND_DIALOG_HOTKEY} />
+              </TooltipContent>
+            </Tooltip>
             <div className="min-w-0">
               <DialogTitle className="text-xl">
                 Configuración del Simulador
@@ -153,7 +162,7 @@ export function ModelConfigDialog() {
                     key={item.id}
                     onClick={() => setConfigTab(item.id as ConfigTab)}
                     className={cn(
-                      "flex items-center justify-between gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground",
+                      "flex w-full items-center justify-between gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground",
                       activeTab === item.id
                         ? "bg-accent text-accent-foreground"
                         : "text-muted-foreground",
