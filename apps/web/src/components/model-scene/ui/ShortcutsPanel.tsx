@@ -8,6 +8,8 @@ import { useSimulationStore } from "@/lib/stores/simulation-store";
 
 import { shortcutGroups } from "@/src/lib/hydrosim/shortcuts";
 
+const SHORTCUT_HINTS_HOTKEY = "H";
+
 export function ShortcutsPanel() {
   const showShortcutHints = useSimulationStore((s) => s.showShortcutHints);
   const setShowShortcutHints = useSimulationStore(
@@ -36,11 +38,14 @@ export function ShortcutsPanel() {
             Muestra las ayudas de teclado sobre controles y acciones.
           </p>
         </div>
-        <Switch
-          id="shortcut-hints"
-          checked={showShortcutHints}
-          onCheckedChange={setShowShortcutHints}
-        />
+        <div className="flex shrink-0 items-center gap-2">
+          <ShortcutBadge hotkey={SHORTCUT_HINTS_HOTKEY} />
+          <Switch
+            id="shortcut-hints"
+            checked={showShortcutHints}
+            onCheckedChange={setShowShortcutHints}
+          />
+        </div>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">

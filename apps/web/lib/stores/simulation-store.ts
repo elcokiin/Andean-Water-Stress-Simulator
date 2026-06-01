@@ -32,6 +32,7 @@ interface SimulationState {
   setConfigTab: (tab: ConfigTab) => void;
   toggleControlsPanelMinimized: () => void;
   setShowShortcutHints: (show: boolean) => void;
+  toggleShowShortcutHints: () => void;
   toggleDialogExpanded: () => void;
   setOniValue: (value: number) => void;
   setRainValue: (value: number) => void;
@@ -77,6 +78,8 @@ export const useSimulationStore = create<SimulationState>((set) => ({
       controlsPanelMinimized: !state.controlsPanelMinimized,
     })),
   setShowShortcutHints: (showShortcutHints) => set({ showShortcutHints }),
+  toggleShowShortcutHints: () =>
+    set((state) => ({ showShortcutHints: !state.showShortcutHints })),
   toggleDialogExpanded: () =>
     set((state) => ({ isDialogExpanded: !state.isDialogExpanded })),
   setOniValue: (oniValue) => set({ oniValue }),

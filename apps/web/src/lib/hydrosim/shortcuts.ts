@@ -8,6 +8,7 @@ export const shortcutGroups = [
       ["R", "Reinicia al escenario base"],
       ["C", "Abre o cierra la configuracion"],
       ["M", "Minimiza o restaura el panel de control"],
+      ["H", "Muestra u oculta los badges de atajos"],
       ["Escape", "Cierra la configuracion"],
     ],
   },
