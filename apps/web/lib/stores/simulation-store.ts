@@ -19,6 +19,7 @@ interface SimulationState {
   demandValue: number;
   efficiencyValue: number;
   rationingActive: boolean;
+  fogIntensity: number;
 
   setScenario: (scenario: ScenarioId) => void;
   setReservoir: (reservoir: ReservoirId) => void;
@@ -33,6 +34,7 @@ interface SimulationState {
   setDemandValue: (value: number) => void;
   setEfficiencyValue: (value: number) => void;
   setRationingActive: (active: boolean) => void;
+  setFogIntensity: (value: number) => void;
 }
 
 export const useSimulationStore = create<SimulationState>((set) => ({
@@ -49,6 +51,7 @@ export const useSimulationStore = create<SimulationState>((set) => ({
   demandValue: 120,
   efficiencyValue: 62,
   rationingActive: false,
+  fogIntensity: 1,
 
   setScenario: (scenario) => set({ scenario }),
   setReservoir: (reservoir) => set({ reservoir }),
@@ -70,4 +73,5 @@ export const useSimulationStore = create<SimulationState>((set) => ({
   setDemandValue: (demandValue) => set({ demandValue }),
   setEfficiencyValue: (efficiencyValue) => set({ efficiencyValue }),
   setRationingActive: (rationingActive) => set({ rationingActive }),
+  setFogIntensity: (fogIntensity) => set({ fogIntensity }),
 }));

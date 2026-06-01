@@ -10,6 +10,7 @@ import { ModelScene } from "./scene/ModelScene";
 export function ModelViewport() {
   const { theme } = useTheme();
   const isPlaying = useSimulationStore((s) => s.isPlaying);
+  const fogIntensity = useSimulationStore((s) => s.fogIntensity);
   const scenario = useSimulationStore((s) => s.scenario);
   const reservoir = useSimulationStore((s) => s.reservoir);
   const waterVisibility = useSimulationStore((s) => s.waterVisibility);
@@ -39,6 +40,7 @@ export function ModelViewport() {
           autoRotate={isPlaying}
           city={city}
           showWater={showWater}
+          fogIntensity={fogIntensity}
           theme={theme}
           waterLevel={reservoirScale}
         />
@@ -47,6 +49,7 @@ export function ModelViewport() {
         className={`model-viewport-mist ${
           theme === "dark" ? "model-viewport-mist-dark" : ""
         }`}
+        style={{ opacity: Math.min(Math.max(fogIntensity / 1.15, 0), 1) }}
       />
     </div>
   );

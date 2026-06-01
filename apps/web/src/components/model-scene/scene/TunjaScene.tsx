@@ -5,10 +5,12 @@ type SceneTheme = "light" | "dark";
 
 export function TunjaScene({
   autoRotate = false,
+  fogIntensity = 1,
   theme,
   waterLevel = 1,
 }: {
   autoRotate?: boolean;
+  fogIntensity?: number;
   theme: SceneTheme;
   waterLevel?: number;
 }) {
@@ -16,6 +18,7 @@ export function TunjaScene({
     <ModelScene
       autoRotate={autoRotate}
       city={citySceneConfigs.tunja}
+      fogIntensity={fogIntensity}
       showWater={citySceneConfigs.tunja.reservoir.visible}
       theme={theme}
       waterLevel={waterLevel}

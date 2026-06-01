@@ -13,19 +13,21 @@ type SceneTheme = "light" | "dark";
 export function ModelScene({
   autoRotate = false,
   city,
+  fogIntensity = 1,
   showWater = city.reservoir.visible,
   theme,
   waterLevel = 1,
 }: {
   autoRotate?: boolean;
   city: CitySceneConfig;
+  fogIntensity?: number;
   showWater?: boolean;
   theme: SceneTheme;
   waterLevel?: number;
 }) {
   const isNight = theme === "dark";
   const fogColor = isNight ? "#10243d" : "#a9d9ef";
-  const fogDensity = isNight ? 0.058 : 0.052;
+  const fogDensity = (isNight ? 0.058 : 0.052) * fogIntensity;
   const terrainSampler = useMemo(
     () =>
       createTerrainSampler({
@@ -37,7 +39,9 @@ export function ModelScene({
 
   return (
     <>
-      <fogExp2 attach="fog" args={[fogColor, fogDensity]} />
+      {fogIntensity > 0 ? (
+        <fogExp2 attach="fog" args={[fogColor, fogDensity]} />
+      ) : null}
       <ModelEnvironment theme={theme} />
       <ModelSky theme={theme} />
       <ModelLighting theme={theme} />
