@@ -1,9 +1,12 @@
 import { useHotkey } from "@tanstack/react-hotkeys";
 
+import { useTheme } from "@/lib/theme-provider";
 import { useSimulationStore } from "@/lib/stores/simulation-store";
 import { timeline } from "@/src/lib/hydrosim/scenarios";
 
 export function useModelKeyboardShortcuts() {
+  const { toggle: toggleTheme } = useTheme();
+
   useHotkey("Space", () => {
     useSimulationStore.getState().togglePlayback();
   });
@@ -36,6 +39,10 @@ export function useModelKeyboardShortcuts() {
 
   useHotkey("H", () => {
     useSimulationStore.getState().toggleShowShortcutHints();
+  });
+
+  useHotkey("D", () => {
+    toggleTheme();
   });
 
   useHotkey("Escape", () => {

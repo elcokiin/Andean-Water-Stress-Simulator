@@ -23,6 +23,7 @@ const reservoirOptions: { id: ReservoirId; label: string }[] = [
 
 const CONFIG_HOTKEY = "C";
 const SHORTCUTS_HOTKEY = "Shift+/";
+const THEME_HOTKEY = "D";
 const compactFlagClassName =
   "h-3.5 min-w-3.5 rounded-[3px] px-0.5 text-[0.5rem]";
 
@@ -111,6 +112,7 @@ export function TitleBar() {
             <Button
               variant="ghost"
               size="icon-sm"
+              className="relative"
               onClick={toggle}
               aria-label={
                 theme === "dark"
@@ -118,11 +120,17 @@ export function TitleBar() {
                   : "Cambiar a modo oscuro"
               }
             >
+              <ShortcutFlag
+                className={compactFlagClassName}
+                hidden={!showShortcutHints}
+                hotkey={THEME_HOTKEY}
+              />
               {theme === "dark" ? <Sun /> : <Moon />}
             </Button>
           </TooltipTrigger>
           <TooltipContent>
-            {theme === "dark" ? "Modo claro" : "Modo oscuro"}
+            {theme === "dark" ? "Modo claro" : "Modo oscuro"}{" "}
+            <ShortcutBadge hidden={!showShortcutHints} hotkey={THEME_HOTKEY} />
           </TooltipContent>
         </Tooltip>
       </div>

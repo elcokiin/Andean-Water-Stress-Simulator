@@ -9,6 +9,7 @@ export const shortcutGroups = [
       ["C", "Abre o cierra la configuracion"],
       ["M", "Minimiza o restaura el panel de control"],
       ["H", "Muestra u oculta los badges de atajos"],
+      ["D", "Alterna el tema claro u oscuro"],
       ["Escape", "Cierra la configuracion"],
     ],
   },
