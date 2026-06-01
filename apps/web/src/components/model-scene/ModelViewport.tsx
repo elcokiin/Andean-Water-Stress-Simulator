@@ -43,6 +43,11 @@ export function ModelViewport() {
           waterLevel={reservoirScale}
         />
       </Canvas>
+      <div
+        className={`model-viewport-mist ${
+          theme === "dark" ? "model-viewport-mist-dark" : ""
+        }`}
+      />
     </div>
   );
 }

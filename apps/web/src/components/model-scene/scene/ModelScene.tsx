@@ -24,8 +24,8 @@ export function ModelScene({
   waterLevel?: number;
 }) {
   const isNight = theme === "dark";
-  const fogColor = isNight ? "#14253f" : "#9fd3ed";
-  const fogDensity = isNight ? 0.045 : 0.04;
+  const fogColor = isNight ? "#10243d" : "#a9d9ef";
+  const fogDensity = isNight ? 0.058 : 0.052;
   const terrainSampler = useMemo(
     () =>
       createTerrainSampler({
