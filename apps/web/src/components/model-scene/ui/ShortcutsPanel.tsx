@@ -1,7 +1,7 @@
-import { formatForDisplay } from "@tanstack/react-hotkeys";
 import { Keyboard } from "lucide-react";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ShortcutBadge } from "@/components/ui/shortcut-flag";
 
 import { shortcutGroups } from "@/src/lib/hydrosim/shortcuts";
 
@@ -31,9 +31,7 @@ export function ShortcutsPanel() {
                   key={keys}
                   className="grid grid-cols-[8.5rem_1fr] items-center gap-3 rounded-lg border border-border bg-card/70 px-3 py-2 text-sm"
                 >
-                  <kbd className="truncate rounded-md border border-border bg-muted px-2 py-1 font-mono text-xs text-foreground">
-                    {formatForDisplay(keys)}
-                  </kbd>
+                  <ShortcutBadge className="truncate" hotkey={keys} />
                   <span className="min-w-0 text-xs text-muted-foreground">
                     {description}
                   </span>
