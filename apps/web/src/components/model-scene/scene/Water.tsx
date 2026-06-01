@@ -1,5 +1,5 @@
 import { useMemo, useRef } from "react";
-import { useFrame, type ThreeEvent } from "@react-three/fiber";
+import { useFrame, useThree, type ThreeEvent } from "@react-three/fiber";
 import * as THREE from "three";
 import {
   BED_FRAGMENT,
@@ -9,6 +9,7 @@ import {
   WATER_SURFACE_VERTEX,
 } from "@/src/lib/hydrosim/shaders/water";
 import { getTerrainHeight } from "@/src/lib/hydrosim/terrain-height";
+import { WaterSimulation, Caustics } from "@/src/lib/hydrosim/gpu-water";
 
 const INITIAL_RIPPLE_CENTERS = Array.from(
   { length: MAX_RIPPLES },
@@ -23,6 +24,7 @@ interface TerrainStats {
 }
 
 export function ReservoirWater({ level = 1 }: { level?: number }) {
+  const { gl } = useThree();
   const normalizedLevel = Math.min(Math.max(level, 0.24), 1);
   const waterScaleX = 0.82 + normalizedLevel * 0.23;
   const waterScaleY = 1.12 + normalizedLevel * 0.33;
@@ -98,6 +100,9 @@ export function ReservoirWater({ level = 1 }: { level?: number }) {
     return stats.avgH - 0.02;
   }, [bedGeometry]);
 
+  const sim = useMemo(() => new WaterSimulation(256), []);
+  const caustics = useMemo(() => new Caustics(1024), []);
+
   useMemo(() => {
     const geom = waterGeometry;
     const count = geom.attributes.position.count;
@@ -124,9 +129,9 @@ export function ReservoirWater({ level = 1 }: { level?: number }) {
       uniforms: {
         uTime: { value: 0 },
         uOpacity: { value: 0.7 },
-        uRippleLife: { value: 2.6 },
-        uRippleStrength: { value: 0.22 },
-        uRippleSpeed: { value: 1.5 },
+        uRippleLife: { value: 4.0 },
+        uRippleStrength: { value: 0.18 },
+        uRippleSpeed: { value: 1.0 },
         uWaveAmp: { value: 0.03 },
         uFresnelStrength: { value: 0.55 },
         uBounds: { value: waterBounds },
@@ -136,8 +141,10 @@ export function ReservoirWater({ level = 1 }: { level?: number }) {
         uRippleTimes: { value: INITIAL_RIPPLE_TIMES },
         uFoamColor: { value: new THREE.Color("#f8fbfd") },
         uFoamStrength: { value: 1.0 },
+        uWaterSim: { value: null },
       },
     });
+    (material.extensions as Record<string, boolean>).derivatives = true;
     return material;
   }, [waterBounds]);
 
@@ -153,6 +160,7 @@ export function ReservoirWater({ level = 1 }: { level?: number }) {
         uBounds: { value: waterBounds },
         uBedColor: { value: new THREE.Color("#4f6b3a") },
         uCausticsColor: { value: new THREE.Color("#b5f5f0") },
+        uCausticsTex: { value: null },
       },
     });
   }, [waterBounds]);
@@ -177,6 +185,13 @@ export function ReservoirWater({ level = 1 }: { level?: number }) {
     bedMaterial.uniforms.uTime.value = elapsed;
     bedMaterial.uniforms.uCausticsStrength.value = causticsStrength;
     bedMaterial.uniforms.uDepth.value = bedDepth;
+
+    sim.stepSimulation(state.gl);
+    sim.updateNormals(state.gl);
+    caustics.update(state.gl, sim.texture.texture);
+
+    waterMaterial.uniforms.uWaterSim.value = sim.texture.texture;
+    bedMaterial.uniforms.uCausticsTex.value = caustics.texture.texture;
   });
   /* eslint-enable react-hooks/immutability */
 
@@ -191,6 +206,16 @@ export function ReservoirWater({ level = 1 }: { level?: number }) {
     lastRippleTimeRef.current = now;
 
     const localPoint = waterMeshRef.current.worldToLocal(event.point.clone());
+
+    // Simulate drop on GPU
+    sim.addDrop(
+      gl,
+      localPoint.x / waterBounds.x,
+      localPoint.y / waterBounds.y,
+      0.07,
+      0.035,
+    );
+
     const index = rippleIndexRef.current % MAX_RIPPLES;
     rippleCenters.current[index].set(localPoint.x, localPoint.y);
     rippleTimes.current[index] = now;
