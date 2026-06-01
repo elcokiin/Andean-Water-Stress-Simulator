@@ -1,5 +1,5 @@
 import { ArrowLeft, HelpCircle, Moon, Sun, Waves } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -22,6 +22,7 @@ const reservoirOptions: { id: ReservoirId; label: string }[] = [
 
 export function TitleBar() {
   const { theme, toggle } = useTheme();
+  const navigate = useNavigate();
   const reservoir = useSimulationStore((s) => s.reservoir);
   const setReservoir = useSimulationStore((s) => s.setReservoir);
   const setConfigOpen = useSimulationStore((s) => s.setConfigOpen);
@@ -47,7 +48,13 @@ export function TitleBar() {
           type="single"
           value={reservoir}
           onValueChange={(value) => {
-            if (value) setReservoir(value as ReservoirId);
+            if (!value) return;
+
+            const nextReservoir = value as ReservoirId;
+            setReservoir(nextReservoir);
+            navigate(
+              nextReservoir === "tunja" ? "/model" : `/model/${nextReservoir}`,
+            );
           }}
           variant="outline"
           size="sm"

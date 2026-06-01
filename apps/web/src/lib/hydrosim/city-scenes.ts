@@ -45,7 +45,13 @@ export const citySceneConfigs = {
       hills: [
         { xCenter: 6.5, zCenter: -2, xWidth: 2.5, zWidth: 2.5, height: 0.4 },
       ],
-      basin: { xCenter: 0, zCenter: 0.3, xWidth: 4.2, zWidth: 2, depth: 0.7 },
+      basin: {
+        xCenter: 0,
+        zCenter: 0.3,
+        xWidth: 4.2,
+        zWidth: 2,
+        depth: 1.05,
+      },
       noise: [
         {
           amplitude: 0.06,
@@ -267,7 +273,7 @@ export const citySceneConfigs = {
         zCenter: 0.14,
         xWidth: 5.7,
         zWidth: 2.75,
-        depth: 0.24,
+        depth: 0.55,
       },
       noise: [
         {
@@ -467,7 +473,7 @@ export const citySceneConfigs = {
         zCenter: 0.42,
         xWidth: 4.8,
         zWidth: 1.65,
-        depth: 0.58,
+        depth: 0.9,
       },
       noise: [
         {
@@ -606,4 +612,8 @@ export const citySceneConfigs = {
 
 export function getCitySceneConfig(cityId: ReservoirId) {
   return citySceneConfigs[cityId];
+}
+
+export function isCitySceneId(value: string | undefined): value is ReservoirId {
+  return value === "tunja" || value === "duitama" || value === "sogamoso";
 }
