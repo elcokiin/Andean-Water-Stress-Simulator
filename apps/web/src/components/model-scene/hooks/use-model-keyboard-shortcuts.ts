@@ -1,140 +1,85 @@
-import { useEffect } from "react";
+import { useHotkey } from "@tanstack/react-hotkeys";
 
 import { useSimulationStore } from "@/lib/stores/simulation-store";
 import { timeline } from "@/src/lib/hydrosim/scenarios";
-import type { ShortcutAction } from "@/src/lib/hydrosim/types";
 
 export function useModelKeyboardShortcuts() {
-  useEffect(() => {
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.repeat || event.altKey || event.metaKey) {
-        return;
-      }
+  useHotkey("Space", () => {
+    useSimulationStore.getState().togglePlayback();
+  });
 
-      const action = resolveShortcutAction({
-        ctrlKey: event.ctrlKey,
-        key: event.key,
-      });
+  useHotkey("ArrowRight", () => {
+    const store = useSimulationStore.getState();
+    store.setStep(Math.min(store.step + 1, timeline.length - 1));
+  });
 
-      if (!action) {
-        return;
-      }
+  useHotkey("ArrowLeft", () => {
+    const store = useSimulationStore.getState();
+    store.setStep(Math.max(store.step - 1, 0));
+  });
 
-      if (!event.ctrlKey && isEditableElement(event.target)) {
-        return;
-      }
+  useHotkey("R", () => {
+    const store = useSimulationStore.getState();
+    store.setStep(0);
+    store.setScenario("baseline");
+    store.setConfigOpen(false);
+  });
 
-      const store = useSimulationStore.getState();
+  useHotkey("C", () => {
+    const store = useSimulationStore.getState();
+    store.setConfigOpen(!store.configOpen);
+  });
 
-      switch (action) {
-        case "toggle-play":
-          store.togglePlayback();
-          event.preventDefault();
-          break;
-        case "step-forward":
-          store.setStep(Math.min(store.step + 1, timeline.length - 1));
-          event.preventDefault();
-          break;
-        case "step-back":
-          store.setStep(Math.max(store.step - 1, 0));
-          event.preventDefault();
-          break;
-        case "restart":
-          store.setStep(0);
-          store.setScenario("baseline");
-          store.setConfigOpen(false);
-          event.preventDefault();
-          break;
-        case "open-config":
-          store.setConfigOpen(!store.configOpen);
-          event.preventDefault();
-          break;
-        case "close-config":
-          if (store.configOpen) {
-            store.setConfigOpen(false);
-            event.preventDefault();
-          }
-          break;
-        case "open-shortcuts-tab":
-          store.setConfigTab("shortcuts");
-          store.setConfigOpen(true);
-          event.preventDefault();
-          break;
-        case "tab-scenarios":
-          store.setConfigTab("scenarios");
-          store.setConfigOpen(true);
-          event.preventDefault();
-          break;
-        case "tab-parameters":
-          store.setConfigTab("parameters");
-          store.setConfigOpen(true);
-          event.preventDefault();
-          break;
-        case "tab-shortcuts":
-          store.setConfigTab("shortcuts");
-          store.setConfigOpen(true);
-          event.preventDefault();
-          break;
-        case "toggle-expand":
-          store.setConfigOpen(true);
-          store.toggleDialogExpanded();
-          event.preventDefault();
-          break;
-        case "save-config":
-          store.setConfigOpen(false);
-          event.preventDefault();
-          break;
-      }
-    };
+  useHotkey("Escape", () => {
+    const store = useSimulationStore.getState();
+    if (store.configOpen) {
+      store.setConfigOpen(false);
+    }
+  });
 
-    window.addEventListener("keydown", onKeyDown);
-    return () => {
-      window.removeEventListener("keydown", onKeyDown);
-    };
-  }, []);
-}
+  useHotkey({ key: "/", shift: true }, () => {
+    const store = useSimulationStore.getState();
+    store.setConfigTab("shortcuts");
+    store.setConfigOpen(true);
+  });
 
-function resolveShortcutAction({
-  ctrlKey,
-  key,
-}: {
-  ctrlKey: boolean;
-  key: string;
-}): ShortcutAction | null {
-  if (ctrlKey) {
-    const normalizedKey = key.toLowerCase();
+  useHotkey("Mod+1", () => {
+    const store = useSimulationStore.getState();
+    store.setConfigTab("scenarios");
+    store.setConfigOpen(true);
+  });
 
-    if (normalizedKey === "1") return "tab-scenarios";
-    if (normalizedKey === "2") return "tab-parameters";
-    if (normalizedKey === "3") return "tab-shortcuts";
-    if (normalizedKey === "e") return "toggle-expand";
-    if (normalizedKey === "enter") return "save-config";
+  useHotkey("Mod+2", () => {
+    const store = useSimulationStore.getState();
+    store.setConfigTab("climate");
+    store.setConfigOpen(true);
+  });
 
-    return null;
-  }
+  useHotkey("Mod+3", () => {
+    const store = useSimulationStore.getState();
+    store.setConfigTab("demand");
+    store.setConfigOpen(true);
+  });
 
-  if (key === " ") return "toggle-play";
+  useHotkey("Mod+4", () => {
+    const store = useSimulationStore.getState();
+    store.setConfigTab("infrastructure");
+    store.setConfigOpen(true);
+  });
 
-  const normalizedKey = key.toLowerCase();
+  useHotkey("Mod+5", () => {
+    const store = useSimulationStore.getState();
+    store.setConfigTab("shortcuts");
+    store.setConfigOpen(true);
+  });
 
-  if (normalizedKey === "arrowright") return "step-forward";
-  if (normalizedKey === "arrowleft") return "step-back";
-  if (normalizedKey === "r") return "restart";
-  if (normalizedKey === "c") return "open-config";
-  if (normalizedKey === "escape") return "close-config";
-  if (key === "?") return "open-shortcuts-tab";
+  useHotkey("Mod+E", () => {
+    const store = useSimulationStore.getState();
+    store.setConfigOpen(true);
+    store.toggleDialogExpanded();
+  });
 
-  return null;
-}
-
-function isEditableElement(target: EventTarget | null): boolean {
-  if (!(target instanceof Element)) {
-    return false;
-  }
-
-  if (target.closest('[contenteditable="true"]')) {
-    return true;
-  }
-
-  return ["INPUT", "TEXTAREA", "SELECT"].includes(target.tagName);
+  useHotkey("Mod+Enter", () => {
+    useSimulationStore.getState().setConfigOpen(false);
+  });
 }

@@ -8,20 +8,6 @@ export type ConfigTab =
   | "demand"
   | "infrastructure";
 
-export type ShortcutAction =
-  | "toggle-play"
-  | "step-forward"
-  | "step-back"
-  | "restart"
-  | "open-config"
-  | "close-config"
-  | "open-shortcuts-tab"
-  | "tab-scenarios"
-  | "tab-parameters"
-  | "tab-shortcuts"
-  | "toggle-expand"
-  | "save-config";
-
 export interface Scenario {
   name: string;
   badge: string;
