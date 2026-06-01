@@ -4,14 +4,21 @@ import * as THREE from "three";
 
 import { Tree } from "@/src/lib/ez-tree";
 import type { TerrainSampler } from "@/src/lib/hydrosim/terrain-sampler";
-import type { TreeZone } from "@/src/lib/hydrosim/types";
+import type { PlacedAssetSpec, TreeZone } from "@/src/lib/hydrosim/types";
 import { FOREST_TEXTURE_PATHS, type EzTreeTextures } from "./textures";
-import { createEzTree, seededRandom, type EzTreeConfig } from "./helpers";
+import {
+  createEzTree,
+  isInsidePlacedAssetFootprint,
+  seededRandom,
+  type EzTreeConfig,
+} from "./helpers";
 
 export function EzTreeForest({
+  avoidAssets,
   terrainSampler,
   treeZones,
 }: {
+  avoidAssets: PlacedAssetSpec[];
   terrainSampler: TerrainSampler;
   treeZones: TreeZone[];
 }) {
@@ -64,7 +71,9 @@ export function EzTreeForest({
         makeConfig(index + zoneIndex * 1000, zone),
       ).filter(
         ({ position: [x, , z] }) =>
-          !zone.avoidReservoir || !terrainSampler.isReservoirFootprint(x, z),
+          (!zone.avoidReservoir ||
+            !terrainSampler.isReservoirFootprint(x, z)) &&
+          !isInsidePlacedAssetFootprint(x, z, avoidAssets, 0.58),
       ),
     );
 
@@ -79,6 +88,7 @@ export function EzTreeForest({
     barkRoughness,
     oakLeaf,
     pineLeaf,
+    avoidAssets,
     terrainSampler,
     treeZones,
   ]);

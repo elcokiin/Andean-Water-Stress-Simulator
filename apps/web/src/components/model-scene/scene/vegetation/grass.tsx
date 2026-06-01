@@ -4,20 +4,23 @@ import * as THREE from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 
 import type { TerrainSampler } from "@/src/lib/hydrosim/terrain-sampler";
-import type { GrassProfile } from "@/src/lib/hydrosim/types";
+import type { GrassProfile, PlacedAssetSpec } from "@/src/lib/hydrosim/types";
 import { GRASS_GROUND_OFFSET, GRASS_MODEL_PATH } from "./textures";
 import {
   appendGrassWindShader,
   findFirstMesh,
+  isInsidePlacedAssetFootprint,
   patchNoise,
   seededRandom,
   type GrassMaterial,
 } from "./helpers";
 
 export function EzTreeGrass({
+  avoidAssets,
   profile,
   terrainSampler,
 }: {
+  avoidAssets: PlacedAssetSpec[];
   profile: GrassProfile;
   terrainSampler: TerrainSampler;
 }) {
@@ -71,7 +74,11 @@ export function EzTreeGrass({
         seededRandom(index * 3.31 + profile.seed) *
           (profile.keepThreshold[1] - profile.keepThreshold[0]);
 
-      if (noise < keepThreshold || terrainSampler.isReservoirFootprint(x, z)) {
+      if (
+        noise < keepThreshold ||
+        terrainSampler.isReservoirFootprint(x, z) ||
+        isInsidePlacedAssetFootprint(x, z, avoidAssets)
+      ) {
         continue;
       }
 
@@ -118,7 +125,7 @@ export function EzTreeGrass({
     mesh.computeBoundingSphere();
 
     return mesh;
-  }, [grassModel, profile, terrainSampler]);
+  }, [avoidAssets, grassModel, profile, terrainSampler]);
 
   useFrame(({ clock }) => {
     const material = grassRef.current?.material as GrassMaterial | undefined;

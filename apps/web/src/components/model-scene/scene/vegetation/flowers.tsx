@@ -6,12 +6,14 @@ import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import type { TerrainSampler } from "@/src/lib/hydrosim/terrain-sampler";
 import type { PlacedAssetSpec } from "@/src/lib/hydrosim/types";
 import { FLOWER_MODEL_PATHS } from "./textures";
-import { cloneSceneAsset } from "./helpers";
+import { cloneSceneAsset, isInsidePlacedAssetFootprint } from "./helpers";
 
 export function EzTreeFlowers({
+  avoidAssets,
   flowers,
   terrainSampler,
 }: {
+  avoidAssets: PlacedAssetSpec[];
   flowers: PlacedAssetSpec[];
   terrainSampler: TerrainSampler;
 }) {
@@ -20,20 +22,25 @@ export function EzTreeFlowers({
   const flowersGroup = useMemo(() => {
     const group = new THREE.Group();
 
-    flowers.forEach(({ model, position, rotationY, scale }) => {
-      group.add(
-        cloneSceneAsset(flowerModels[model].scene, {
-          position,
-          rotationY,
-          scale,
-          terrainSampler,
-          groundOffset: 0.018,
-        }),
-      );
-    });
+    flowers
+      .filter(
+        ({ position: [x, z] }) =>
+          !isInsidePlacedAssetFootprint(x, z, avoidAssets, 0.38),
+      )
+      .forEach(({ model, position, rotationY, scale }) => {
+        group.add(
+          cloneSceneAsset(flowerModels[model].scene, {
+            position,
+            rotationY,
+            scale,
+            terrainSampler,
+            groundOffset: 0.018,
+          }),
+        );
+      });
 
     return group;
-  }, [flowerModels, flowers, terrainSampler]);
+  }, [avoidAssets, flowerModels, flowers, terrainSampler]);
 
   return <primitive object={flowersGroup} />;
 }

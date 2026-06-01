@@ -128,17 +128,24 @@ export function TerrainMesh({
     <group>
       <mesh geometry={geometry} material={material} receiveShadow castShadow />
 
-      <EzTreeGrass profile={vegetation.grass} terrainSampler={terrainSampler} />
+      <EzTreeGrass
+        avoidAssets={vegetation.rocks}
+        profile={vegetation.grass}
+        terrainSampler={terrainSampler}
+      />
       <EzTreeForest
+        avoidAssets={vegetation.rocks}
         treeZones={vegetation.treeZones}
         terrainSampler={terrainSampler}
       />
       <ForegroundShrubs
+        avoidAssets={vegetation.rocks}
         shrubs={vegetation.shrubs}
         terrainSampler={terrainSampler}
       />
       <Suspense fallback={null}>
         <EzTreeFlowers
+          avoidAssets={vegetation.rocks}
           flowers={vegetation.flowers}
           terrainSampler={terrainSampler}
         />

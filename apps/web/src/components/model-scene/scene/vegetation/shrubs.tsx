@@ -4,14 +4,16 @@ import * as THREE from "three";
 
 import { Tree } from "@/src/lib/ez-tree";
 import type { TerrainSampler } from "@/src/lib/hydrosim/terrain-sampler";
-import type { ShrubSpec } from "@/src/lib/hydrosim/types";
+import type { PlacedAssetSpec, ShrubSpec } from "@/src/lib/hydrosim/types";
 import { BARK_TEXTURE_PATHS, type EzTreeTextures } from "./textures";
-import { createEzTree } from "./helpers";
+import { createEzTree, isInsidePlacedAssetFootprint } from "./helpers";
 
 export function ForegroundShrubs({
+  avoidAssets,
   shrubs,
   terrainSampler,
 }: {
+  avoidAssets: PlacedAssetSpec[];
   shrubs: ShrubSpec[];
   terrainSampler: TerrainSampler;
 }) {
@@ -31,20 +33,26 @@ export function ForegroundShrubs({
       },
       leaves: { ash: oakLeaf, pine: oakLeaf, aspen: oakLeaf, oak: oakLeaf },
     };
-    shrubs.forEach((config) => {
-      const [x, z] = config.position;
-      group.add(
-        createEzTree(
-          {
-            ...config,
-            position: [x, terrainSampler.getHeight(x, z), z],
-          },
-          textures,
-        ),
-      );
-    });
+    shrubs
+      .filter(
+        ({ position: [x, z] }) =>
+          !isInsidePlacedAssetFootprint(x, z, avoidAssets, 0.5),
+      )
+      .forEach((config) => {
+        const [x, z] = config.position;
+        group.add(
+          createEzTree(
+            {
+              ...config,
+              position: [x, terrainSampler.getHeight(x, z), z],
+            },
+            textures,
+          ),
+        );
+      });
     return group;
   }, [
+    avoidAssets,
     barkAo,
     barkColor,
     barkNormal,

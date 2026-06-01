@@ -4,6 +4,7 @@ import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 
 import { Tree } from "@/src/lib/ez-tree";
 import type { TerrainSampler } from "@/src/lib/hydrosim/terrain-sampler";
+import type { PlacedAssetSpec } from "@/src/lib/hydrosim/types";
 import type { EzTreeTextures } from "./textures";
 
 export type EzTreeConfig = {
@@ -51,6 +52,21 @@ export function isReservoirFootprint(x: number, z: number) {
   const normalizedX = x / 5.95;
   const normalizedZ = (z - 0.3) / 2.45;
   return normalizedX * normalizedX + normalizedZ * normalizedZ < 1.02;
+}
+
+export function isInsidePlacedAssetFootprint(
+  x: number,
+  z: number,
+  assets: PlacedAssetSpec[],
+  padding = 0.42,
+) {
+  return assets.some((asset) => {
+    const [assetX, assetZ] = asset.position;
+    const radius = padding + asset.scale * 2.8;
+    const dx = x - assetX;
+    const dz = z - assetZ;
+    return dx * dx + dz * dz < radius * radius;
+  });
 }
 
 export function appendGrassWindShader(material: GrassMaterial) {
