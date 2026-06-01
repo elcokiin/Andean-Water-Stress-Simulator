@@ -33,6 +33,7 @@ function patchTerrainShader(
     shader.uniforms.uGrassTexture = { value: material.userData.grassTexture };
     shader.uniforms.uDirtTexture = { value: material.userData.dirtTexture };
     shader.uniforms.uTextureScale = { value: terrain.textureScale };
+    shader.uniforms.uDirtMixStrength = { value: terrain.dirtMixStrength };
 
     shader.vertexShader = `
       varying vec3 vWorldPosition;
@@ -49,6 +50,7 @@ function patchTerrainShader(
       uniform sampler2D uGrassTexture;
       uniform sampler2D uDirtTexture;
       uniform float uTextureScale;
+      uniform float uDirtMixStrength;
     ${shader.fragmentShader}`;
 
     shader.fragmentShader = shader.fragmentShader.replace(
@@ -60,7 +62,7 @@ function patchTerrainShader(
         float broadPatch = sin(vWorldPosition.x * 1.35 + vWorldPosition.z * 0.9) * 0.5 + 0.5;
         float finePatch = sin(vWorldPosition.x * 3.7 - vWorldPosition.z * 2.6) * 0.5 + 0.5;
         float dirtMix = smoothstep(0.48, 0.82, broadPatch * 0.72 + finePatch * 0.28);
-        vec3 groundColor = mix(grassColor, dirtColor, dirtMix * 0.38) * 1.28;
+        vec3 groundColor = mix(grassColor, dirtColor, dirtMix * uDirtMixStrength) * 1.28;
         diffuseColor *= vec4(groundColor, 1.0);
       `,
     );

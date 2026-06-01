@@ -26,6 +26,100 @@ interface TerrainStats {
   avgH: number;
 }
 
+function seededNoise(value: number) {
+  return Math.sin(value * 12.9898) * 43758.5453;
+}
+
+function seededRandom(seed: number) {
+  const noise = seededNoise(seed);
+  return noise - Math.floor(noise);
+}
+
+function isPointInPolygon(point: THREE.Vector2, polygon: THREE.Vector2[]) {
+  let inside = false;
+
+  for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i, i += 1) {
+    const current = polygon[i];
+    const previous = polygon[j];
+    const intersects =
+      current.y > point.y !== previous.y > point.y &&
+      point.x <
+        ((previous.x - current.x) * (point.y - current.y)) /
+          (previous.y - current.y) +
+          current.x;
+
+    if (intersects) inside = !inside;
+  }
+
+  return inside;
+}
+
+function AquaticVegetation({
+  bounds,
+  polygon,
+  profile,
+}: {
+  bounds: THREE.Box2;
+  polygon: THREE.Vector2[];
+  profile: NonNullable<ReservoirProfile["aquaticVegetation"]>;
+}) {
+  const vegetation = useMemo(() => {
+    const geometry = new THREE.CircleGeometry(1, 10);
+    const material = new THREE.MeshBasicMaterial({
+      color: profile.color,
+      side: THREE.DoubleSide,
+      transparent: true,
+      opacity: profile.opacity,
+      vertexColors: true,
+      depthWrite: false,
+    });
+    const mesh = new THREE.InstancedMesh(geometry, material, profile.maxCount);
+    const dummy = new THREE.Object3D();
+    const color = new THREE.Color();
+    const point = new THREE.Vector2();
+    let count = 0;
+
+    for (let index = 0; index < profile.maxCount; index += 1) {
+      const x =
+        bounds.min.x +
+        seededRandom(profile.seed + index * 7.17) *
+          (bounds.max.x - bounds.min.x);
+      const y =
+        bounds.min.y +
+        seededRandom(profile.seed + index * 11.43) *
+          (bounds.max.y - bounds.min.y);
+
+      point.set(x, y);
+      if (!isPointInPolygon(point, polygon)) continue;
+
+      const scale =
+        profile.scale[0] +
+        seededRandom(profile.seed + index * 3.29) *
+          (profile.scale[1] - profile.scale[0]);
+      dummy.position.set(x, y, 0.035 + seededRandom(index) * 0.012);
+      dummy.rotation.set(0, 0, seededRandom(index * 5.7) * Math.PI * 2);
+      dummy.scale.set(scale * 1.35, scale * 0.82, 1);
+      dummy.updateMatrix();
+
+      color.set(index % 4 === 0 ? profile.secondaryColor : profile.color);
+      mesh.setMatrixAt(count, dummy.matrix);
+      mesh.setColorAt(count, color);
+      count += 1;
+
+      if (count >= profile.count) break;
+    }
+
+    mesh.count = count;
+    mesh.instanceMatrix.needsUpdate = true;
+    if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
+    mesh.computeBoundingBox();
+    mesh.computeBoundingSphere();
+    return mesh;
+  }, [bounds, polygon, profile]);
+
+  return <primitive object={vegetation} />;
+}
+
 function createReservoirShape(path: ReservoirPathCommand[]) {
   const shape = new THREE.Shape();
 
@@ -82,14 +176,35 @@ export function ReservoirWater({
   const rippleCenters = useRef(INITIAL_RIPPLE_CENTERS);
   const rippleTimes = useRef(INITIAL_RIPPLE_TIMES);
 
+  const reservoirShape = useMemo(
+    () => createReservoirShape(reservoir.path),
+    [reservoir.path],
+  );
+
   const waterGeometry = useMemo(() => {
     const geometry = new THREE.ShapeGeometry(
-      createReservoirShape(reservoir.path),
+      reservoirShape,
       reservoir.segments,
     );
     geometry.computeBoundingBox();
     return geometry;
-  }, [reservoir.path, reservoir.segments]);
+  }, [reservoir.segments, reservoirShape]);
+
+  const shapePolygon = useMemo(
+    () => reservoirShape.getSpacedPoints(128),
+    [reservoirShape],
+  );
+
+  const waterBounds2 = useMemo(() => {
+    const bounds = waterGeometry.boundingBox;
+    if (!bounds) {
+      return new THREE.Box2(new THREE.Vector2(-1, -1), new THREE.Vector2(1, 1));
+    }
+    return new THREE.Box2(
+      new THREE.Vector2(bounds.min.x, bounds.min.y),
+      new THREE.Vector2(bounds.max.x, bounds.max.y),
+    );
+  }, [waterGeometry]);
 
   const waterBounds = useMemo(() => {
     const bounds = waterGeometry.boundingBox;
@@ -265,6 +380,13 @@ export function ReservoirWater({
           position={[0, 0, 0.01]}
           onPointerMove={handlePointerMove}
         />
+        {reservoir.aquaticVegetation ? (
+          <AquaticVegetation
+            bounds={waterBounds2}
+            polygon={shapePolygon}
+            profile={reservoir.aquaticVegetation}
+          />
+        ) : null}
       </group>
     </group>
   );

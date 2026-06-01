@@ -71,6 +71,7 @@ export interface TerrainProfile {
   basin: TerrainBasin;
   noise: TerrainNoiseTerm[];
   textureScale: number;
+  dirtMixStrength: number;
   groundColor: string;
   normalScale: Vector2Tuple;
 }
@@ -104,6 +105,15 @@ export interface ReservoirProfile {
     foam: string;
     bed: string;
     caustics: string;
+  };
+  aquaticVegetation?: {
+    count: number;
+    maxCount: number;
+    seed: number;
+    color: string;
+    secondaryColor: string;
+    scale: Vector2Tuple;
+    opacity: number;
   };
 }
 
