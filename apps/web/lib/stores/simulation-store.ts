@@ -8,6 +8,7 @@ import type {
 interface SimulationState {
   scenario: ScenarioId;
   reservoir: ReservoirId;
+  waterVisibility: Partial<Record<ReservoirId, boolean>>;
   isPlaying: boolean;
   step: number;
   configOpen: boolean;
@@ -21,6 +22,7 @@ interface SimulationState {
 
   setScenario: (scenario: ScenarioId) => void;
   setReservoir: (reservoir: ReservoirId) => void;
+  setWaterVisible: (reservoir: ReservoirId, visible: boolean) => void;
   togglePlayback: () => void;
   setStep: (step: number) => void;
   setConfigOpen: (open: boolean) => void;
@@ -36,6 +38,7 @@ interface SimulationState {
 export const useSimulationStore = create<SimulationState>((set) => ({
   scenario: "baseline",
   reservoir: "tunja",
+  waterVisibility: {},
   isPlaying: false,
   step: 1,
   configOpen: false,
@@ -49,6 +52,13 @@ export const useSimulationStore = create<SimulationState>((set) => ({
 
   setScenario: (scenario) => set({ scenario }),
   setReservoir: (reservoir) => set({ reservoir }),
+  setWaterVisible: (reservoir, visible) =>
+    set((state) => ({
+      waterVisibility: {
+        ...state.waterVisibility,
+        [reservoir]: visible,
+      },
+    })),
   togglePlayback: () => set((state) => ({ isPlaying: !state.isPlaying })),
   setStep: (step) => set({ step }),
   setConfigOpen: (configOpen) => set({ configOpen }),

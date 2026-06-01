@@ -13,11 +13,13 @@ type SceneTheme = "light" | "dark";
 export function ModelScene({
   autoRotate = false,
   city,
+  showWater = city.reservoir.visible,
   theme,
   waterLevel = 1,
 }: {
   autoRotate?: boolean;
   city: CitySceneConfig;
+  showWater?: boolean;
   theme: SceneTheme;
   waterLevel?: number;
 }) {
@@ -49,7 +51,7 @@ export function ModelScene({
         terrainSampler={terrainSampler}
         vegetation={city.vegetation}
       />
-      {city.reservoir.visible ? (
+      {showWater ? (
         <ReservoirWater
           level={waterLevel}
           reservoir={city.reservoir}

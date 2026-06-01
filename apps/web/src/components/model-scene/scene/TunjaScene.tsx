@@ -16,6 +16,7 @@ export function TunjaScene({
     <ModelScene
       autoRotate={autoRotate}
       city={citySceneConfigs.tunja}
+      showWater={citySceneConfigs.tunja.reservoir.visible}
       theme={theme}
       waterLevel={waterLevel}
     />

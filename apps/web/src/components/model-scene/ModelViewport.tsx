@@ -12,8 +12,10 @@ export function ModelViewport() {
   const isPlaying = useSimulationStore((s) => s.isPlaying);
   const scenario = useSimulationStore((s) => s.scenario);
   const reservoir = useSimulationStore((s) => s.reservoir);
+  const waterVisibility = useSimulationStore((s) => s.waterVisibility);
   const selectedScenario = scenarios[scenario];
   const city = getCitySceneConfig(reservoir);
+  const showWater = waterVisibility[reservoir] ?? city.reservoir.visible;
 
   const reservoirScale = useMemo(
     () => Math.max(selectedScenario.reserve / 68, 0.24),
@@ -36,6 +38,7 @@ export function ModelViewport() {
         <ModelScene
           autoRotate={isPlaying}
           city={city}
+          showWater={showWater}
           theme={theme}
           waterLevel={reservoirScale}
         />
