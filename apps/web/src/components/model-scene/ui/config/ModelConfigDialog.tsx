@@ -45,6 +45,7 @@ export function ModelConfigDialog() {
   const isExpanded = useSimulationStore((s) => s.isDialogExpanded);
   const open = useSimulationStore((s) => s.configOpen);
   const scenario = useSimulationStore((s) => s.scenario);
+  const showShortcutHints = useSimulationStore((s) => s.showShortcutHints);
   const setConfigTab = useSimulationStore((s) => s.setConfigTab);
   const setConfigOpen = useSimulationStore((s) => s.setConfigOpen);
   const toggleDialogExpanded = useSimulationStore(
@@ -138,7 +139,10 @@ export function ModelConfigDialog() {
               </TooltipTrigger>
               <TooltipContent>
                 {isExpanded ? "Restaurar dialogo" : "Expandir dialogo"}{" "}
-                <ShortcutBadge hotkey={EXPAND_DIALOG_HOTKEY} />
+                <ShortcutBadge
+                  hidden={!showShortcutHints}
+                  hotkey={EXPAND_DIALOG_HOTKEY}
+                />
               </TooltipContent>
             </Tooltip>
             <div className="min-w-0">
@@ -168,11 +172,15 @@ export function ModelConfigDialog() {
                         : "text-muted-foreground",
                     )}
                   >
-                    <span className="flex min-w-0 items-center gap-3">
+                    <span className="flex min-w-0 flex-1 items-center gap-3 overflow-hidden">
                       <item.icon className="h-4 w-4 shrink-0" />
                       <span className="truncate">{item.label}</span>
                     </span>
-                    <ShortcutBadge className="shrink-0" hotkey={item.hotkey} />
+                    <ShortcutBadge
+                      className="shrink-0"
+                      hidden={!showShortcutHints}
+                      hotkey={item.hotkey}
+                    />
                   </button>
                 ))}
               </div>
@@ -189,11 +197,14 @@ export function ModelConfigDialog() {
         <DialogFooter className="shrink-0 border-t border-border bg-muted/10 px-6 py-4">
           <Button variant="outline" onClick={() => setConfigOpen(false)}>
             Descartar cambios
-            <ShortcutBadge hotkey={DISCARD_HOTKEY} />
+            <ShortcutBadge
+              hidden={!showShortcutHints}
+              hotkey={DISCARD_HOTKEY}
+            />
           </Button>
           <Button onClick={() => setConfigOpen(false)}>
             Guardar y Simular
-            <ShortcutBadge hotkey={SAVE_HOTKEY} />
+            <ShortcutBadge hidden={!showShortcutHints} hotkey={SAVE_HOTKEY} />
           </Button>
         </DialogFooter>
       </DialogContent>

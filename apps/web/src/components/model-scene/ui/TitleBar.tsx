@@ -31,6 +31,7 @@ export function TitleBar() {
   const navigate = useNavigate();
   const reservoir = useSimulationStore((s) => s.reservoir);
   const setReservoir = useSimulationStore((s) => s.setReservoir);
+  const showShortcutHints = useSimulationStore((s) => s.showShortcutHints);
   const setConfigOpen = useSimulationStore((s) => s.setConfigOpen);
   const city = getCitySceneConfig(reservoir);
 
@@ -89,14 +90,19 @@ export function TitleBar() {
             >
               <ShortcutFlag
                 className={compactFlagClassName}
+                hidden={!showShortcutHints}
                 hotkey={CONFIG_HOTKEY}
               />
               <HelpCircle />
             </Button>
           </TooltipTrigger>
           <TooltipContent>
-            Guia del modelo <ShortcutBadge hotkey={CONFIG_HOTKEY} />
-            <ShortcutBadge hotkey={SHORTCUTS_HOTKEY} />
+            Guia del modelo{" "}
+            <ShortcutBadge hidden={!showShortcutHints} hotkey={CONFIG_HOTKEY} />
+            <ShortcutBadge
+              hidden={!showShortcutHints}
+              hotkey={SHORTCUTS_HOTKEY}
+            />
           </TooltipContent>
         </Tooltip>
         <Separator orientation="vertical" className="h-5" />

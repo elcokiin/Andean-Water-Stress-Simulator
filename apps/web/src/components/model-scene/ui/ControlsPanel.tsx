@@ -23,6 +23,7 @@ const compactFlagClassName =
 export function ControlsPanel() {
   const isPlaying = useSimulationStore((s) => s.isPlaying);
   const isMinimized = useSimulationStore((s) => s.controlsPanelMinimized);
+  const showShortcutHints = useSimulationStore((s) => s.showShortcutHints);
   const scenario = useSimulationStore((s) => s.scenario);
   const step = useSimulationStore((s) => s.step);
   const setScenario = useSimulationStore((s) => s.setScenario);
@@ -37,7 +38,10 @@ export function ControlsPanel() {
   if (isMinimized) {
     return (
       <Card className="absolute right-3 bottom-3 z-10 rounded-[10px] border-border/80 bg-background/90 p-2 shadow-xl backdrop-blur-sm sm:right-auto sm:left-4">
-        <ShortcutFlag hotkey={CONTROLS_PANEL_HOTKEY} />
+        <ShortcutFlag
+          hidden={!showShortcutHints}
+          hotkey={CONTROLS_PANEL_HOTKEY}
+        />
         <CardContent className="flex items-center gap-1.5 p-0">
           <Tooltip>
             <TooltipTrigger asChild>
@@ -52,6 +56,7 @@ export function ControlsPanel() {
               >
                 <ShortcutFlag
                   className={compactFlagClassName}
+                  hidden={!showShortcutHints}
                   hotkey={PLAYBACK_HOTKEY}
                 />
                 {isPlaying ? <Pause /> : <Play />}
@@ -59,7 +64,10 @@ export function ControlsPanel() {
             </TooltipTrigger>
             <TooltipContent>
               {isPlaying ? "Pausar simulacion" : "Iniciar simulacion"}{" "}
-              <ShortcutBadge hotkey={PLAYBACK_HOTKEY} />
+              <ShortcutBadge
+                hidden={!showShortcutHints}
+                hotkey={PLAYBACK_HOTKEY}
+              />
             </TooltipContent>
           </Tooltip>
 
@@ -74,13 +82,18 @@ export function ControlsPanel() {
               >
                 <ShortcutFlag
                   className={compactFlagClassName}
+                  hidden={!showShortcutHints}
                   hotkey={CONFIG_HOTKEY}
                 />
                 <Settings />
               </Button>
             </TooltipTrigger>
             <TooltipContent>
-              Configurar modelo <ShortcutBadge hotkey={CONFIG_HOTKEY} />
+              Configurar modelo{" "}
+              <ShortcutBadge
+                hidden={!showShortcutHints}
+                hotkey={CONFIG_HOTKEY}
+              />
             </TooltipContent>
           </Tooltip>
         </CardContent>
@@ -109,13 +122,18 @@ export function ControlsPanel() {
               >
                 <ShortcutFlag
                   className={compactFlagClassName}
+                  hidden={!showShortcutHints}
                   hotkey={CONTROLS_PANEL_HOTKEY}
                 />
                 <Minimize2 />
               </Button>
             </TooltipTrigger>
             <TooltipContent>
-              Minimizar panel <ShortcutBadge hotkey={CONTROLS_PANEL_HOTKEY} />
+              Minimizar panel{" "}
+              <ShortcutBadge
+                hidden={!showShortcutHints}
+                hotkey={CONTROLS_PANEL_HOTKEY}
+              />
             </TooltipContent>
           </Tooltip>
 
@@ -130,13 +148,18 @@ export function ControlsPanel() {
               >
                 <ShortcutFlag
                   className={compactFlagClassName}
+                  hidden={!showShortcutHints}
                   hotkey={CONFIG_HOTKEY}
                 />
                 <Settings />
               </Button>
             </TooltipTrigger>
             <TooltipContent>
-              Configurar modelo <ShortcutBadge hotkey={CONFIG_HOTKEY} />
+              Configurar modelo{" "}
+              <ShortcutBadge
+                hidden={!showShortcutHints}
+                hotkey={CONFIG_HOTKEY}
+              />
             </TooltipContent>
           </Tooltip>
         </div>
@@ -203,6 +226,7 @@ export function ControlsPanel() {
           >
             <ShortcutFlag
               className={compactFlagClassName}
+              hidden={!showShortcutHints}
               hotkey={PLAYBACK_HOTKEY}
             />
             {isPlaying ? <Pause /> : <Play />}

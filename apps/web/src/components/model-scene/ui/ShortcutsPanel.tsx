@@ -1,11 +1,19 @@
 import { Keyboard } from "lucide-react";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
 import { ShortcutBadge } from "@/components/ui/shortcut-flag";
+import { Switch } from "@/components/ui/switch";
+import { useSimulationStore } from "@/lib/stores/simulation-store";
 
 import { shortcutGroups } from "@/src/lib/hydrosim/shortcuts";
 
 export function ShortcutsPanel() {
+  const showShortcutHints = useSimulationStore((s) => s.showShortcutHints);
+  const setShowShortcutHints = useSimulationStore(
+    (s) => s.setShowShortcutHints,
+  );
+
   return (
     <div className="flex flex-col gap-4">
       <div>
@@ -17,6 +25,22 @@ export function ShortcutsPanel() {
           Navegacion y control rapido del modelo, tomado del patron del
           simulador PRNG.
         </p>
+      </div>
+
+      <div className="flex items-center justify-between gap-4 rounded-lg border border-border bg-card/70 px-3 py-3">
+        <div className="min-w-0">
+          <Label htmlFor="shortcut-hints" className="text-sm font-medium">
+            Mostrar badges de atajos
+          </Label>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Muestra las ayudas de teclado sobre controles y acciones.
+          </p>
+        </div>
+        <Switch
+          id="shortcut-hints"
+          checked={showShortcutHints}
+          onCheckedChange={setShowShortcutHints}
+        />
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
