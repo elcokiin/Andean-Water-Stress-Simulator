@@ -14,6 +14,7 @@ interface SimulationState {
   configOpen: boolean;
   configTab: ConfigTab;
   controlsPanelMinimized: boolean;
+  ambientAudioEnabled: boolean;
   showShortcutHints: boolean;
   isDialogExpanded: boolean;
   oniValue: number;
@@ -31,6 +32,8 @@ interface SimulationState {
   setConfigOpen: (open: boolean) => void;
   setConfigTab: (tab: ConfigTab) => void;
   toggleControlsPanelMinimized: () => void;
+  setAmbientAudioEnabled: (enabled: boolean) => void;
+  toggleAmbientAudio: () => void;
   setShowShortcutHints: (show: boolean) => void;
   toggleShowShortcutHints: () => void;
   toggleDialogExpanded: () => void;
@@ -51,6 +54,7 @@ export const useSimulationStore = create<SimulationState>((set) => ({
   configOpen: false,
   configTab: "scenarios",
   controlsPanelMinimized: false,
+  ambientAudioEnabled: false,
   showShortcutHints: true,
   isDialogExpanded: false,
   oniValue: 0,
@@ -77,6 +81,9 @@ export const useSimulationStore = create<SimulationState>((set) => ({
     set((state) => ({
       controlsPanelMinimized: !state.controlsPanelMinimized,
     })),
+  setAmbientAudioEnabled: (ambientAudioEnabled) => set({ ambientAudioEnabled }),
+  toggleAmbientAudio: () =>
+    set((state) => ({ ambientAudioEnabled: !state.ambientAudioEnabled })),
   setShowShortcutHints: (showShortcutHints) => set({ showShortcutHints }),
   toggleShowShortcutHints: () =>
     set((state) => ({ showShortcutHints: !state.showShortcutHints })),

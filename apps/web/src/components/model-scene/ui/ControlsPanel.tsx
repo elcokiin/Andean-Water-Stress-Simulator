@@ -14,7 +14,7 @@ import { scenarioIds, scenarios, timeline } from "@/src/lib/hydrosim/scenarios";
 
 import { Metric } from "./Metric";
 
-const CONTROLS_PANEL_HOTKEY = "M";
+const CONTROLS_PANEL_HOTKEY = "P";
 const CONFIG_HOTKEY = "C";
 const PLAYBACK_HOTKEY = "Space";
 const compactFlagClassName =

@@ -1,4 +1,5 @@
-import { ArrowLeft, HelpCircle, Moon, Sun, Waves } from "lucide-react";
+import { useEffect, useRef } from "react";
+import { ArrowLeft, HelpCircle, Moon, Music, Sun, Waves } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 
 import { Button } from "@/components/ui/button";
@@ -24,20 +25,48 @@ const reservoirOptions: { id: ReservoirId; label: string }[] = [
 const CONFIG_HOTKEY = "C";
 const SHORTCUTS_HOTKEY = "Shift+/";
 const THEME_HOTKEY = "D";
+const AUDIO_HOTKEY = "M";
 const compactFlagClassName =
   "h-3.5 min-w-3.5 rounded-[3px] px-0.5 text-[0.5rem]";
 
 export function TitleBar() {
+  const audioRef = useRef<HTMLAudioElement>(null);
   const { theme, toggle } = useTheme();
   const navigate = useNavigate();
   const reservoir = useSimulationStore((s) => s.reservoir);
   const setReservoir = useSimulationStore((s) => s.setReservoir);
+  const ambientAudioEnabled = useSimulationStore((s) => s.ambientAudioEnabled);
+  const toggleAmbientAudio = useSimulationStore((s) => s.toggleAmbientAudio);
+  const setAmbientAudioEnabled = useSimulationStore(
+    (s) => s.setAmbientAudioEnabled,
+  );
   const showShortcutHints = useSimulationStore((s) => s.showShortcutHints);
   const setConfigOpen = useSimulationStore((s) => s.setConfigOpen);
   const city = getCitySceneConfig(reservoir);
 
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    if (!ambientAudioEnabled) {
+      audio.pause();
+      return;
+    }
+
+    void audio.play().catch(() => {
+      setAmbientAudioEnabled(false);
+    });
+  }, [ambientAudioEnabled, setAmbientAudioEnabled]);
+
   return (
     <div className="absolute top-4 left-1/2 z-10 -translate-x-1/2">
+      <audio
+        ref={audioRef}
+        src="/nature.mp3"
+        loop
+        preload="auto"
+        onError={() => setAmbientAudioEnabled(false)}
+      />
       <div className="flex max-w-[calc(100vw-2rem)] items-center gap-2 rounded-[10px] border border-border bg-background/85 px-3 py-2 shadow-lg backdrop-blur-sm sm:px-5">
         <Button variant="ghost" size="icon-sm" asChild aria-label="Volver">
           <Link to="/">
@@ -107,6 +136,35 @@ export function TitleBar() {
           </TooltipContent>
         </Tooltip>
         <Separator orientation="vertical" className="h-5" />
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant={ambientAudioEnabled ? "secondary" : "ghost"}
+              size="icon-sm"
+              className="relative"
+              onClick={toggleAmbientAudio}
+              aria-label={
+                ambientAudioEnabled
+                  ? "Desactivar audio ambiente"
+                  : "Activar audio ambiente"
+              }
+              aria-pressed={ambientAudioEnabled}
+            >
+              <ShortcutFlag
+                className={compactFlagClassName}
+                hidden={!showShortcutHints}
+                hotkey={AUDIO_HOTKEY}
+              />
+              <Music />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>
+            {ambientAudioEnabled
+              ? "Desactivar audio ambiente"
+              : "Activar audio ambiente"}{" "}
+            <ShortcutBadge hidden={!showShortcutHints} hotkey={AUDIO_HOTKEY} />
+          </TooltipContent>
+        </Tooltip>
         <Tooltip>
           <TooltipTrigger asChild>
             <Button

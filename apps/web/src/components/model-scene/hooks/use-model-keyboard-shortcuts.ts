@@ -33,8 +33,12 @@ export function useModelKeyboardShortcuts() {
     store.setConfigOpen(!store.configOpen);
   });
 
-  useHotkey("M", () => {
+  useHotkey("P", () => {
     useSimulationStore.getState().toggleControlsPanelMinimized();
+  });
+
+  useHotkey("M", () => {
+    useSimulationStore.getState().toggleAmbientAudio();
   });
 
   useHotkey("H", () => {
