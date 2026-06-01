@@ -13,6 +13,7 @@ interface SimulationState {
   step: number;
   configOpen: boolean;
   configTab: ConfigTab;
+  controlsPanelMinimized: boolean;
   isDialogExpanded: boolean;
   oniValue: number;
   rainValue: number;
@@ -28,6 +29,7 @@ interface SimulationState {
   setStep: (step: number) => void;
   setConfigOpen: (open: boolean) => void;
   setConfigTab: (tab: ConfigTab) => void;
+  toggleControlsPanelMinimized: () => void;
   toggleDialogExpanded: () => void;
   setOniValue: (value: number) => void;
   setRainValue: (value: number) => void;
@@ -45,6 +47,7 @@ export const useSimulationStore = create<SimulationState>((set) => ({
   step: 1,
   configOpen: false,
   configTab: "scenarios",
+  controlsPanelMinimized: false,
   isDialogExpanded: false,
   oniValue: 0,
   rainValue: 85,
@@ -66,6 +69,10 @@ export const useSimulationStore = create<SimulationState>((set) => ({
   setStep: (step) => set({ step }),
   setConfigOpen: (configOpen) => set({ configOpen }),
   setConfigTab: (configTab) => set({ configTab }),
+  toggleControlsPanelMinimized: () =>
+    set((state) => ({
+      controlsPanelMinimized: !state.controlsPanelMinimized,
+    })),
   toggleDialogExpanded: () =>
     set((state) => ({ isDialogExpanded: !state.isDialogExpanded })),
   setOniValue: (oniValue) => set({ oniValue }),

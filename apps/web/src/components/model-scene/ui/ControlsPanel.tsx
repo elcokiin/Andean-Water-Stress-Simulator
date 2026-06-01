@@ -1,8 +1,13 @@
-import { Pause, Play, Settings } from "lucide-react";
+import { Minimize2, Pause, Play, Settings } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { useSimulationStore } from "@/lib/stores/simulation-store";
 import { scenarioIds, scenarios, timeline } from "@/src/lib/hydrosim/scenarios";
 
@@ -10,13 +15,59 @@ import { Metric } from "./Metric";
 
 export function ControlsPanel() {
   const isPlaying = useSimulationStore((s) => s.isPlaying);
+  const isMinimized = useSimulationStore((s) => s.controlsPanelMinimized);
   const scenario = useSimulationStore((s) => s.scenario);
   const step = useSimulationStore((s) => s.step);
   const setScenario = useSimulationStore((s) => s.setScenario);
   const setConfigOpen = useSimulationStore((s) => s.setConfigOpen);
+  const toggleControlsPanelMinimized = useSimulationStore(
+    (s) => s.toggleControlsPanelMinimized,
+  );
   const togglePlayback = useSimulationStore((s) => s.togglePlayback);
 
   const selectedScenario = scenarios[scenario];
+
+  if (isMinimized) {
+    return (
+      <Card className="absolute right-3 bottom-3 z-10 rounded-[10px] border-border/80 bg-background/90 p-2 shadow-xl backdrop-blur-sm sm:right-auto sm:left-4">
+        <CardContent className="flex items-center gap-1.5 p-0">
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant={isPlaying ? "secondary" : "default"}
+                size="icon"
+                className="size-10 rounded-[8px]"
+                onClick={togglePlayback}
+                aria-label={
+                  isPlaying ? "Pausar simulacion" : "Iniciar simulacion"
+                }
+              >
+                {isPlaying ? <Pause /> : <Play />}
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              {isPlaying ? "Pausar simulacion" : "Iniciar simulacion"}
+            </TooltipContent>
+          </Tooltip>
+
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="outline"
+                size="icon"
+                className="size-10 rounded-[8px]"
+                onClick={() => setConfigOpen(true)}
+                aria-label="Configurar modelo"
+              >
+                <Settings />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Configurar modelo</TooltipContent>
+          </Tooltip>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card className="absolute right-3 bottom-3 left-3 z-10 gap-3 rounded-[10px] border-border/80 bg-background/90 p-3 shadow-xl backdrop-blur-sm sm:right-auto sm:left-4 sm:w-[340px]">
@@ -27,15 +78,37 @@ export function ControlsPanel() {
             {timeline[step]} - paso {step + 1}/{timeline.length}
           </p>
         </div>
-        <Button
-          variant="outline"
-          size="icon"
-          className="rounded-[8px]"
-          onClick={() => setConfigOpen(true)}
-          aria-label="Configurar modelo"
-        >
-          <Settings />
-        </Button>
+        <div className="flex items-center gap-1.5">
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="outline"
+                size="icon"
+                className="rounded-[8px]"
+                onClick={toggleControlsPanelMinimized}
+                aria-label="Minimizar panel de control"
+              >
+                <Minimize2 />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Minimizar panel (M)</TooltipContent>
+          </Tooltip>
+
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="outline"
+                size="icon"
+                className="rounded-[8px]"
+                onClick={() => setConfigOpen(true)}
+                aria-label="Configurar modelo"
+              >
+                <Settings />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Configurar modelo</TooltipContent>
+          </Tooltip>
+        </div>
       </CardHeader>
 
       <CardContent className="flex flex-col gap-3 p-0">

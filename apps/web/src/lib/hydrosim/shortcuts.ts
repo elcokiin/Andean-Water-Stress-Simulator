@@ -7,6 +7,7 @@ export const shortcutGroups = [
       ["ArrowLeft", "Retrocede un paso temporal"],
       ["R", "Reinicia al escenario base"],
       ["C", "Abre o cierra la configuracion"],
+      ["M", "Minimiza o restaura el panel de control"],
       ["Escape", "Cierra la configuracion"],
     ],
   },

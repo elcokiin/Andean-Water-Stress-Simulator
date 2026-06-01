@@ -30,6 +30,10 @@ export function useModelKeyboardShortcuts() {
     store.setConfigOpen(!store.configOpen);
   });
 
+  useHotkey("M", () => {
+    useSimulationStore.getState().toggleControlsPanelMinimized();
+  });
+
   useHotkey("Escape", () => {
     const store = useSimulationStore.getState();
     if (store.configOpen) {
