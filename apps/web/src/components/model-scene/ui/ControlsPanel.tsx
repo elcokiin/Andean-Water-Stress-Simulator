@@ -15,6 +15,8 @@ import { scenarioIds, scenarios, timeline } from "@/src/lib/hydrosim/scenarios";
 import { Metric } from "./Metric";
 
 const CONTROLS_PANEL_HOTKEY = "M";
+const shortcutBadgeClassName =
+  "pointer-events-none rounded-md border border-border bg-muted px-2 py-1 font-mono text-xs leading-none text-foreground shadow-sm";
 
 export function ControlsPanel() {
   const isPlaying = useSimulationStore((s) => s.isPlaying);
@@ -32,8 +34,10 @@ export function ControlsPanel() {
 
   if (isMinimized) {
     return (
-      <Card className="absolute right-3 bottom-3 z-10 rounded-[10px] border-border/80 bg-background/90 p-2 shadow-xl backdrop-blur-sm sm:right-auto sm:left-4">
-        <kbd className="pointer-events-none absolute -top-2 -right-2 rounded-[6px] border border-border bg-background px-1.5 py-0.5 font-mono text-[0.64rem] font-medium leading-none text-muted-foreground shadow-sm">
+      <Card className="absolute right-3 bottom-3 z-10 rounded-[10px] border-border/80 bg-background/90 p-2 pt-5 shadow-xl backdrop-blur-sm sm:right-auto sm:left-4">
+        <kbd
+          className={`${shortcutBadgeClassName} absolute top-1 right-1 z-20 text-[0.68rem]`}
+        >
           {formatForDisplay(CONTROLS_PANEL_HOTKEY)}
         </kbd>
         <CardContent className="flex items-center gap-1.5 p-0">
