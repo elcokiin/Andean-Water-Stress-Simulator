@@ -7,8 +7,20 @@ import {
   MAX_RIPPLES,
   WATER_SURFACE_FRAGMENT,
   WATER_SURFACE_VERTEX,
-} from "./ReservoirWaterShaders";
-import { getTerrainHeight } from "./terrain-height";
+} from "@/src/lib/hydrosim/shaders/water";
+import { getTerrainHeight } from "@/src/lib/hydrosim/terrain-height";
+
+const INITIAL_RIPPLE_CENTERS = Array.from(
+  { length: MAX_RIPPLES },
+  () => new THREE.Vector2(999, 999),
+);
+const INITIAL_RIPPLE_TIMES = Array.from({ length: MAX_RIPPLES }, () => -1000);
+
+interface TerrainStats {
+  minH: number;
+  maxH: number;
+  avgH: number;
+}
 
 export function ReservoirWater({ level = 1 }: { level?: number }) {
   const normalizedLevel = Math.min(Math.max(level, 0.24), 1);
@@ -20,6 +32,8 @@ export function ReservoirWater({ level = 1 }: { level?: number }) {
   const rippleIndexRef = useRef(0);
   const lastRippleTimeRef = useRef(0);
   const timeRef = useRef(0);
+  const rippleCenters = useRef(INITIAL_RIPPLE_CENTERS);
+  const rippleTimes = useRef(INITIAL_RIPPLE_TIMES);
 
   const waterGeometry = useMemo(() => {
     const shape = new THREE.Shape();
@@ -66,40 +80,34 @@ export function ReservoirWater({ level = 1 }: { level?: number }) {
     }
     positions.needsUpdate = true;
     geometry.computeVertexNormals();
-    // store statistics on the geometry object for later placement
-    (geometry as any).__terrainStats = {
+    const stats: TerrainStats = {
       minH,
       maxH,
       avgH: sumH / Math.max(1, countH),
     };
+    (geometry as unknown as { __terrainStats: TerrainStats }).__terrainStats =
+      stats;
     return geometry;
   }, [waterGeometry]);
   const bedScale = 1.08;
 
-  const rippleCenters = useRef(
-    Array.from({ length: MAX_RIPPLES }, () => new THREE.Vector2(999, 999)),
-  );
-
   const bedPositionY = useMemo(() => {
-    const stats = (bedGeometry as any).__terrainStats;
+    const stats = (bedGeometry as unknown as { __terrainStats?: TerrainStats })
+      .__terrainStats;
     if (!stats) return -0.055;
-    // place bed so its average terrain height sits slightly below the water group's origin
     return stats.avgH - 0.02;
   }, [bedGeometry]);
-  const rippleTimes = useRef(Array.from({ length: MAX_RIPPLES }, () => -1000));
 
-  // compute shore attribute per-vertex on the water geometry
   useMemo(() => {
     const geom = waterGeometry;
     const count = geom.attributes.position.count;
     const shore = new Float32Array(count);
-    const foamWidth = 0.22; // meters of shallow zone
+    const foamWidth = 0.22;
     for (let i = 0; i < count; i++) {
       const x = geom.attributes.position.getX(i);
       const y = geom.attributes.position.getY(i);
       const terrainH = getTerrainHeight(x, y);
       const depth = waterElevation - terrainH;
-      // foam intensity: 1 at depth=0, 0 at depth>=foamWidth
       const t = Math.max(0, Math.min(1, depth / foamWidth));
       shore[i] = 1.0 - t;
     }
@@ -124,14 +132,14 @@ export function ReservoirWater({ level = 1 }: { level?: number }) {
         uBounds: { value: waterBounds },
         uBaseColor: { value: new THREE.Color("#2a8ccc") },
         uDeepColor: { value: new THREE.Color("#0b3654") },
-        uRippleCenters: { value: rippleCenters.current },
-        uRippleTimes: { value: rippleTimes.current },
+        uRippleCenters: { value: INITIAL_RIPPLE_CENTERS },
+        uRippleTimes: { value: INITIAL_RIPPLE_TIMES },
         uFoamColor: { value: new THREE.Color("#f8fbfd") },
         uFoamStrength: { value: 1.0 },
       },
     });
     return material;
-  }, [waterBounds, rippleCenters, rippleTimes]);
+  }, [waterBounds]);
 
   const bedMaterial = useMemo(() => {
     return new THREE.ShaderMaterial({
@@ -149,6 +157,7 @@ export function ReservoirWater({ level = 1 }: { level?: number }) {
     });
   }, [waterBounds]);
 
+  /* eslint-disable react-hooks/immutability */
   useFrame((state) => {
     const elapsed = state.clock.getElapsedTime();
     timeRef.current = elapsed;
@@ -169,6 +178,7 @@ export function ReservoirWater({ level = 1 }: { level?: number }) {
     bedMaterial.uniforms.uCausticsStrength.value = causticsStrength;
     bedMaterial.uniforms.uDepth.value = bedDepth;
   });
+  /* eslint-enable react-hooks/immutability */
 
   const handlePointerMove = (event: ThreeEvent<PointerEvent>) => {
     if (!waterMeshRef.current) {

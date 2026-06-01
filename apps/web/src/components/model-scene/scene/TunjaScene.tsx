@@ -1,8 +1,9 @@
 import { ContactShadows, OrbitControls } from "@react-three/drei";
+
 import { CloudGroup } from "./CloudGroup";
-import { ReservoirWater } from "./ReservoirWater";
+import { ReservoirWater } from "./Water";
 import { TunjaTerrain } from "./Terrain";
-import { TunjaEnvironment, TunjaLighting, TunjaSky } from "./TunjaSky";
+import { TunjaEnvironment, TunjaLighting, TunjaSky } from "./sky";
 
 type SceneTheme = "light" | "dark";
 

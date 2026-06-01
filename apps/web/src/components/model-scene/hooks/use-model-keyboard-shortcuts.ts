@@ -1,9 +1,8 @@
 import { useEffect } from "react";
 
 import { useSimulationStore } from "@/lib/stores/simulation-store";
-
-import { timeline } from "./model-data";
-import type { ShortcutAction } from "./model-data";
+import { timeline } from "@/src/lib/hydrosim/scenarios";
+import type { ShortcutAction } from "@/src/lib/hydrosim/types";
 
 export function useModelKeyboardShortcuts() {
   useEffect(() => {

@@ -1,7 +1,11 @@
 import { useMemo } from "react";
 import { Environment, Stars } from "@react-three/drei";
 import * as THREE from "three";
-import { SKY_FRAGMENT_SHADER, SKY_VERTEX_SHADER } from "./sky-shaders";
+
+import {
+  SKY_FRAGMENT_SHADER,
+  SKY_VERTEX_SHADER,
+} from "@/src/lib/hydrosim/shaders/sky";
 
 type SkyTheme = "light" | "dark";
 
