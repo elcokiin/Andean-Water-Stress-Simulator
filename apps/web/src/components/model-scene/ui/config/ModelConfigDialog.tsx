@@ -158,26 +158,26 @@ export function ModelConfigDialog() {
         </DialogHeader>
 
         <div className="flex min-h-0 flex-1 overflow-hidden">
-          <div className="w-56 shrink-0 border-r border-border bg-muted/30">
+          <div className="w-64 shrink-0 border-r border-border bg-muted/30">
             <ScrollArea className="h-full">
-              <div className="flex flex-col gap-1 p-4">
+              <div className="flex flex-col gap-1 p-3">
                 {sidebarItems.map((item) => (
                   <button
                     key={item.id}
                     onClick={() => setConfigTab(item.id as ConfigTab)}
                     className={cn(
-                      "flex w-full items-center justify-between gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground",
+                      "grid w-full grid-cols-[minmax(0,1fr)_auto] items-center gap-2 rounded-md px-2.5 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground",
                       activeTab === item.id
                         ? "bg-accent text-accent-foreground"
                         : "text-muted-foreground",
                     )}
                   >
-                    <span className="flex min-w-0 flex-1 items-center gap-3 overflow-hidden">
+                    <span className="flex min-w-0 items-center gap-2.5 overflow-hidden text-left">
                       <item.icon className="h-4 w-4 shrink-0" />
                       <span className="truncate">{item.label}</span>
                     </span>
                     <ShortcutBadge
-                      className="shrink-0"
+                      className="h-4 shrink-0 px-1 text-[0.65rem]"
                       hidden={!showShortcutHints}
                       hotkey={item.hotkey}
                     />
