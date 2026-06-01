@@ -1,5 +1,7 @@
 export type ScenarioId = "baseline" | "moderate" | "extreme";
 
+export type ReservoirId = "tunja" | "duitama" | "sogamoso";
+
 export type ConfigTab =
   | "scenarios"
   | "parameters"

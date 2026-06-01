@@ -1,8 +1,13 @@
 import { create } from "zustand";
-import type { ConfigTab, ScenarioId } from "@/src/lib/hydrosim/types";
+import type {
+  ConfigTab,
+  ReservoirId,
+  ScenarioId,
+} from "@/src/lib/hydrosim/types";
 
 interface SimulationState {
   scenario: ScenarioId;
+  reservoir: ReservoirId;
   isPlaying: boolean;
   step: number;
   configOpen: boolean;
@@ -15,6 +20,7 @@ interface SimulationState {
   rationingActive: boolean;
 
   setScenario: (scenario: ScenarioId) => void;
+  setReservoir: (reservoir: ReservoirId) => void;
   togglePlayback: () => void;
   setStep: (step: number) => void;
   setConfigOpen: (open: boolean) => void;
@@ -29,6 +35,7 @@ interface SimulationState {
 
 export const useSimulationStore = create<SimulationState>((set) => ({
   scenario: "baseline",
+  reservoir: "tunja",
   isPlaying: false,
   step: 1,
   configOpen: false,
@@ -41,6 +48,7 @@ export const useSimulationStore = create<SimulationState>((set) => ({
   rationingActive: false,
 
   setScenario: (scenario) => set({ scenario }),
+  setReservoir: (reservoir) => set({ reservoir }),
   togglePlayback: () => set((state) => ({ isPlaying: !state.isPlaying })),
   setStep: (step) => set({ step }),
   setConfigOpen: (configOpen) => set({ configOpen }),
