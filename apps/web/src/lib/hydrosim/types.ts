@@ -88,6 +88,7 @@ export interface ReservoirFootprint {
 }
 
 export interface ReservoirProfile {
+  visible: boolean;
   path: ReservoirPathCommand[];
   footprint: ReservoirFootprint;
   segments: number;

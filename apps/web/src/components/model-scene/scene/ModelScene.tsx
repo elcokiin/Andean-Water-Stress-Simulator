@@ -49,11 +49,13 @@ export function ModelScene({
         terrainSampler={terrainSampler}
         vegetation={city.vegetation}
       />
-      <ReservoirWater
-        level={waterLevel}
-        reservoir={city.reservoir}
-        terrainSampler={terrainSampler}
-      />
+      {city.reservoir.visible ? (
+        <ReservoirWater
+          level={waterLevel}
+          reservoir={city.reservoir}
+          terrainSampler={terrainSampler}
+        />
+      ) : null}
       <ContactShadows
         position={[0, 0.02, 0]}
         scale={13}
