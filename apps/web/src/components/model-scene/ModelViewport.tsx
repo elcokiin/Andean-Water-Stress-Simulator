@@ -13,6 +13,8 @@ export function ModelViewport() {
   const reservoir = useSimulationStore((s) => s.reservoir);
   const waterVisibility = useSimulationStore((s) => s.waterVisibility);
   const simState = useSimulationStore((s) => s.simState);
+  const rainValue = useSimulationStore((s) => s.rainValue);
+  const oniValue = useSimulationStore((s) => s.oniValue);
   const city = getCitySceneConfig(reservoir);
   const showWater = waterVisibility[reservoir] ?? city.reservoir.visible;
 
@@ -41,6 +43,8 @@ export function ModelViewport() {
           fogIntensity={fogIntensity}
           theme={theme}
           waterLevel={waterLevel}
+          rainMm={rainValue}
+          oni={oniValue}
         />
       </Canvas>
       <div
