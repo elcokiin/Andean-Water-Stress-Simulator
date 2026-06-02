@@ -18,7 +18,7 @@ const ONI_RAIN_FACTOR_MIN = 0.25;
 const ONI_RAIN_FACTOR_MAX = 1.3;
 const PARAMO_RETENTION_MIN = 0.5;
 const PARAMO_RETENTION_MAX = 1;
-const RUNOFF_COEFFICIENT = 0.5;
+const RUNOFF_COEFFICIENT = 0.46;
 const RECHARGE_COEFFICIENT = 0.15;
 const EVAP_MM_PER_MONTH = 35;
 const EVAP_ONI_SLOPE_MM = 18;
@@ -40,7 +40,7 @@ const STARTING_RESERVOIR_PCT_BY_SCENARIO: Record<
 };
 
 const CAPACITY_M3: Record<CityProfile["id"], number> = {
-  tunja: 100_000_000,
+  tunja: 41_200_000,
   duitama: 35_000_000,
   sogamoso: 60_000_000,
 };

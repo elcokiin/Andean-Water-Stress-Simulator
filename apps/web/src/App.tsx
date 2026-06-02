@@ -26,7 +26,7 @@ import { useTheme } from "@/lib/theme-provider";
 const citySystems = [
   {
     city: "Tunja",
-    source: "Embalse La Copa",
+    source: "Represa de Teatinos",
     operator: "CORPOBOYACA / Veolia Aguas de Tunja",
     demand: "148 L/hab/dia",
     growth: "1.4% anual",
