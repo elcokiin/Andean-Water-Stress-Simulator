@@ -13,6 +13,7 @@ createRoot(document.getElementById("root")!).render(
         <Routes>
           <Route path="/" element={<App />} />
           <Route path="/model" element={<ModelScene />} />
+          <Route path="/model/:cityId" element={<ModelScene />} />
         </Routes>
       </BrowserRouter>
     </ThemeProvider>

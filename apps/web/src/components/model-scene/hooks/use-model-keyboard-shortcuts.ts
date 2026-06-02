@@ -1,140 +1,114 @@
-import { useEffect } from "react";
+import { useHotkey } from "@tanstack/react-hotkeys";
 
+import { useTheme } from "@/lib/theme-provider";
 import { useSimulationStore } from "@/lib/stores/simulation-store";
-import { timeline } from "@/src/lib/hydrosim/scenarios";
-import type { ShortcutAction } from "@/src/lib/hydrosim/types";
 
 export function useModelKeyboardShortcuts() {
-  useEffect(() => {
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.repeat || event.altKey || event.metaKey) {
-        return;
-      }
+  const { toggle: toggleTheme } = useTheme();
 
-      const action = resolveShortcutAction({
-        ctrlKey: event.ctrlKey,
-        key: event.key,
-      });
+  useHotkey("Space", () => {
+    const store = useSimulationStore.getState();
+    if (store.simState.collapse) return;
+    store.togglePlayback();
+  });
 
-      if (!action) {
-        return;
-      }
+  useHotkey("ArrowRight", () => {
+    const store = useSimulationStore.getState();
+    if (store.configOpen) return;
+    const order = ["baseline", "moderate", "extreme"] as const;
+    const index = order.indexOf(store.scenario);
+    store.setScenario(
+      order[Math.min(index + 1, order.length - 1)] ?? "extreme",
+    );
+  });
 
-      if (!event.ctrlKey && isEditableElement(event.target)) {
-        return;
-      }
+  useHotkey("ArrowLeft", () => {
+    const store = useSimulationStore.getState();
+    if (store.configOpen) return;
+    const order = ["baseline", "moderate", "extreme"] as const;
+    const index = order.indexOf(store.scenario);
+    store.setScenario(order[Math.max(index - 1, 0)] ?? "baseline");
+  });
 
-      const store = useSimulationStore.getState();
+  useHotkey("R", () => {
+    const store = useSimulationStore.getState();
+    store.setScenario("baseline");
+    store.resetSimulation();
+    store.setConfigOpen(false);
+  });
 
-      switch (action) {
-        case "toggle-play":
-          store.togglePlayback();
-          event.preventDefault();
-          break;
-        case "step-forward":
-          store.setStep(Math.min(store.step + 1, timeline.length - 1));
-          event.preventDefault();
-          break;
-        case "step-back":
-          store.setStep(Math.max(store.step - 1, 0));
-          event.preventDefault();
-          break;
-        case "restart":
-          store.setStep(0);
-          store.setScenario("baseline");
-          store.setConfigOpen(false);
-          event.preventDefault();
-          break;
-        case "open-config":
-          store.setConfigOpen(!store.configOpen);
-          event.preventDefault();
-          break;
-        case "close-config":
-          if (store.configOpen) {
-            store.setConfigOpen(false);
-            event.preventDefault();
-          }
-          break;
-        case "open-shortcuts-tab":
-          store.setConfigTab("shortcuts");
-          store.setConfigOpen(true);
-          event.preventDefault();
-          break;
-        case "tab-scenarios":
-          store.setConfigTab("scenarios");
-          store.setConfigOpen(true);
-          event.preventDefault();
-          break;
-        case "tab-parameters":
-          store.setConfigTab("parameters");
-          store.setConfigOpen(true);
-          event.preventDefault();
-          break;
-        case "tab-shortcuts":
-          store.setConfigTab("shortcuts");
-          store.setConfigOpen(true);
-          event.preventDefault();
-          break;
-        case "toggle-expand":
-          store.setConfigOpen(true);
-          store.toggleDialogExpanded();
-          event.preventDefault();
-          break;
-        case "save-config":
-          store.setConfigOpen(false);
-          event.preventDefault();
-          break;
-      }
-    };
+  useHotkey("C", () => {
+    const store = useSimulationStore.getState();
+    store.setConfigOpen(!store.configOpen);
+  });
 
-    window.addEventListener("keydown", onKeyDown);
-    return () => {
-      window.removeEventListener("keydown", onKeyDown);
-    };
-  }, []);
-}
+  useHotkey("P", () => {
+    useSimulationStore.getState().toggleControlsPanelMinimized();
+  });
 
-function resolveShortcutAction({
-  ctrlKey,
-  key,
-}: {
-  ctrlKey: boolean;
-  key: string;
-}): ShortcutAction | null {
-  if (ctrlKey) {
-    const normalizedKey = key.toLowerCase();
+  useHotkey("M", () => {
+    useSimulationStore.getState().toggleAmbientAudio();
+  });
 
-    if (normalizedKey === "1") return "tab-scenarios";
-    if (normalizedKey === "2") return "tab-parameters";
-    if (normalizedKey === "3") return "tab-shortcuts";
-    if (normalizedKey === "e") return "toggle-expand";
-    if (normalizedKey === "enter") return "save-config";
+  useHotkey("K", () => {
+    useSimulationStore.getState().toggleShowShortcutHints();
+  });
 
-    return null;
-  }
+  useHotkey("D", () => {
+    toggleTheme();
+  });
 
-  if (key === " ") return "toggle-play";
+  useHotkey("Escape", () => {
+    const store = useSimulationStore.getState();
+    if (store.configOpen) {
+      store.setConfigOpen(false);
+    }
+  });
 
-  const normalizedKey = key.toLowerCase();
+  useHotkey({ key: "/", shift: true }, () => {
+    const store = useSimulationStore.getState();
+    store.setConfigTab("shortcuts");
+    store.setConfigOpen(true);
+  });
 
-  if (normalizedKey === "arrowright") return "step-forward";
-  if (normalizedKey === "arrowleft") return "step-back";
-  if (normalizedKey === "r") return "restart";
-  if (normalizedKey === "c") return "open-config";
-  if (normalizedKey === "escape") return "close-config";
-  if (key === "?") return "open-shortcuts-tab";
+  useHotkey("Mod+1", () => {
+    const store = useSimulationStore.getState();
+    store.setConfigTab("scenarios");
+    store.setConfigOpen(true);
+  });
 
-  return null;
-}
+  useHotkey("Mod+2", () => {
+    const store = useSimulationStore.getState();
+    store.setConfigTab("climate");
+    store.setConfigOpen(true);
+  });
 
-function isEditableElement(target: EventTarget | null): boolean {
-  if (!(target instanceof Element)) {
-    return false;
-  }
+  useHotkey("Mod+3", () => {
+    const store = useSimulationStore.getState();
+    store.setConfigTab("demand");
+    store.setConfigOpen(true);
+  });
 
-  if (target.closest('[contenteditable="true"]')) {
-    return true;
-  }
+  useHotkey("Mod+4", () => {
+    const store = useSimulationStore.getState();
+    store.setConfigTab("infrastructure");
+    store.setConfigOpen(true);
+  });
 
-  return ["INPUT", "TEXTAREA", "SELECT"].includes(target.tagName);
+  useHotkey("Mod+5", () => {
+    const store = useSimulationStore.getState();
+    store.setConfigTab("shortcuts");
+    store.setConfigOpen(true);
+  });
+
+  useHotkey("Mod+E", () => {
+    const store = useSimulationStore.getState();
+    store.setConfigOpen(true);
+    store.toggleDialogExpanded();
+  });
+
+  useHotkey("Mod+Enter", () => {
+    useSimulationStore.setState({ paramSnapshot: null });
+    useSimulationStore.getState().setConfigOpen(false);
+  });
 }

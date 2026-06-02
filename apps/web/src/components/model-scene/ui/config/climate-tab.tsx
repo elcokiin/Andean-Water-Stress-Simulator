@@ -12,8 +12,10 @@ import { useSimulationStore } from "@/lib/stores/simulation-store";
 export function ClimateTab() {
   const oniValue = useSimulationStore((s) => s.oniValue);
   const rainValue = useSimulationStore((s) => s.rainValue);
+  const fogIntensity = useSimulationStore((s) => s.fogIntensity);
   const setOniValue = useSimulationStore((s) => s.setOniValue);
   const setRainValue = useSimulationStore((s) => s.setRainValue);
+  const setFogIntensity = useSimulationStore((s) => s.setFogIntensity);
 
   return (
     <div className="animate-in fade-in-50 space-y-8">
@@ -91,6 +93,42 @@ export function ClimateTab() {
           step={5}
           className="w-full"
         />
+      </div>
+
+      <div className="space-y-4 pt-4">
+        <div className="flex items-center justify-between">
+          <Label htmlFor="fog" className="flex items-center gap-2 text-base">
+            Niebla de horizonte
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Info className="h-4 w-4 cursor-help text-muted-foreground" />
+              </TooltipTrigger>
+              <TooltipContent className="max-w-xs">
+                <p>
+                  Controla la densidad visual que oculta los límites del
+                  terreno y del canvas en los bordes de la vista.
+                </p>
+              </TooltipContent>
+            </Tooltip>
+          </Label>
+          <span className="font-mono text-sm text-muted-foreground">
+            {Math.round(fogIntensity * 100)}%
+          </span>
+        </div>
+        <Slider
+          id="fog"
+          value={[fogIntensity]}
+          onValueChange={(val) => setFogIntensity(val[0])}
+          max={1.5}
+          min={0}
+          step={0.05}
+          className="w-full"
+        />
+        <div className="flex justify-between text-xs text-muted-foreground">
+          <span>Sin niebla</span>
+          <span>Normal</span>
+          <span>Densa</span>
+        </div>
       </div>
     </div>
   );

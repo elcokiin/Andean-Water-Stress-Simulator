@@ -53,6 +53,13 @@ See `notes/references.md` for reference repositories.
 - Extract shared logic only when the shared behavior is real and local patterns
   support it. Avoid broad generic abstractions for one-off duplication.
 
+## UI and Shortcuts
+
+- When adding or changing a keyboard shortcut, also update the visible shortcut
+  help: add the shortcut to the reference list and show it with
+  `ShortcutBadge` or `ShortcutFlag` on the related control when there is a
+  visible UI action for it.
+
 ## Other
 
 Please make note of mistakes you make in MISTAKES.md. If you find you wish you had more context or tools, write that down in DESIRES.md. If you learn anything about your env write that down in LEARNINGS.md.

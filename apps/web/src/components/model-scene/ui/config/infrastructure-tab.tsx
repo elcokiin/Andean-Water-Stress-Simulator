@@ -2,16 +2,23 @@ import { Info } from "lucide-react";
 
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
+import { Switch } from "@/components/ui/switch";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useSimulationStore } from "@/lib/stores/simulation-store";
+import { getCitySceneConfig } from "@/src/lib/hydrosim/city-scenes";
 
 export function InfrastructureTab() {
   const efficiencyValue = useSimulationStore((s) => s.efficiencyValue);
+  const reservoir = useSimulationStore((s) => s.reservoir);
+  const setWaterVisible = useSimulationStore((s) => s.setWaterVisible);
   const setEfficiencyValue = useSimulationStore((s) => s.setEfficiencyValue);
+  const waterVisibility = useSimulationStore((s) => s.waterVisibility);
+  const city = getCitySceneConfig(reservoir);
+  const showWater = waterVisibility[reservoir] ?? city.reservoir.visible;
 
   return (
     <div className="animate-in fade-in-50 space-y-8">
@@ -52,6 +59,26 @@ export function InfrastructureTab() {
         <p className="text-xs text-muted-foreground">
           El restante 38% se asume como pérdida técnica (fugas en tuberías).
         </p>
+      </div>
+      <div className="flex items-center justify-between gap-4 rounded-lg border border-border p-4">
+        <div className="flex min-w-0 flex-col gap-1">
+          <Label htmlFor="show-reservoir-water" className="text-base">
+            Mostrar agua del embalse
+          </Label>
+          <p
+            id="show-reservoir-water-description"
+            className="text-xs text-muted-foreground"
+          >
+            Alterna la superficie de agua para revisar solo la cuenca o el
+            embalse completo de {city.name}.
+          </p>
+        </div>
+        <Switch
+          id="show-reservoir-water"
+          checked={showWater}
+          aria-describedby="show-reservoir-water-description"
+          onCheckedChange={(checked) => setWaterVisible(reservoir, checked)}
+        />
       </div>
     </div>
   );
