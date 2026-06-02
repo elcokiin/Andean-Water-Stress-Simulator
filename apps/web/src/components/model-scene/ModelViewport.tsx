@@ -4,24 +4,22 @@ import { useMemo } from "react";
 import { useTheme } from "@/lib/theme-provider";
 import { useSimulationStore } from "@/lib/stores/simulation-store";
 import { getCitySceneConfig } from "@/src/lib/hydrosim/city-scenes";
-import { scenarios } from "@/src/lib/hydrosim/scenarios";
 import { ModelScene } from "./scene/ModelScene";
 
 export function ModelViewport() {
   const { theme } = useTheme();
   const isPlaying = useSimulationStore((s) => s.isPlaying);
   const fogIntensity = useSimulationStore((s) => s.fogIntensity);
-  const scenario = useSimulationStore((s) => s.scenario);
   const reservoir = useSimulationStore((s) => s.reservoir);
   const waterVisibility = useSimulationStore((s) => s.waterVisibility);
-  const selectedScenario = scenarios[scenario];
+  const simState = useSimulationStore((s) => s.simState);
   const city = getCitySceneConfig(reservoir);
   const showWater = waterVisibility[reservoir] ?? city.reservoir.visible;
 
-  const reservoirScale = useMemo(
-    () => Math.max(selectedScenario.reserve / 68, 0.24),
-    [selectedScenario.reserve],
-  );
+  const waterLevel = useMemo(() => {
+    const scaled = simState.reservoirPct / 100;
+    return Math.max(scaled, 0.24);
+  }, [simState.reservoirPct]);
 
   return (
     <div className="absolute inset-0">
@@ -42,7 +40,7 @@ export function ModelViewport() {
           showWater={showWater}
           fogIntensity={fogIntensity}
           theme={theme}
-          waterLevel={reservoirScale}
+          waterLevel={waterLevel}
         />
       </Canvas>
       <div

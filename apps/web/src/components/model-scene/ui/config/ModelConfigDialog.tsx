@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import {
   CalendarClock,
   CloudRain,
@@ -27,7 +27,6 @@ import {
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { useSimulationStore } from "@/lib/stores/simulation-store";
-import { scenarios } from "@/src/lib/hydrosim/scenarios";
 import type { ConfigTab } from "@/src/lib/hydrosim/types";
 
 import { ShortcutsPanel } from "../ShortcutsPanel";
@@ -44,20 +43,45 @@ export function ModelConfigDialog() {
   const configTab = useSimulationStore((s) => s.configTab);
   const isExpanded = useSimulationStore((s) => s.isDialogExpanded);
   const open = useSimulationStore((s) => s.configOpen);
-  const scenario = useSimulationStore((s) => s.scenario);
   const showShortcutHints = useSimulationStore((s) => s.showShortcutHints);
   const setConfigTab = useSimulationStore((s) => s.setConfigTab);
   const setConfigOpen = useSimulationStore((s) => s.setConfigOpen);
   const toggleDialogExpanded = useSimulationStore(
     (s) => s.toggleDialogExpanded,
   );
-  const setOniValue = useSimulationStore((s) => s.setOniValue);
+  const captureParamSnapshot = useSimulationStore(
+    (s) => s.captureParamSnapshot,
+  );
+  const revertParamSnapshot = useSimulationStore((s) => s.revertParamSnapshot);
 
-  const selectedScenario = scenarios[scenario];
+  const wasOpen = useRef(false);
 
   useEffect(() => {
-    setOniValue(parseFloat(selectedScenario.oni));
-  }, [selectedScenario, setOniValue]);
+    if (open && !wasOpen.current) {
+      captureParamSnapshot();
+    }
+    if (!open && wasOpen.current) {
+      revertParamSnapshot();
+    }
+    wasOpen.current = open;
+  }, [open, captureParamSnapshot, revertParamSnapshot]);
+
+  const handleSave = () => {
+    useSimulationStore.setState({ paramSnapshot: null });
+    setConfigOpen(false);
+  };
+
+  const handleDiscard = () => {
+    revertParamSnapshot();
+    setConfigOpen(false);
+  };
+
+  const handleOpenChange = (nextOpen: boolean) => {
+    if (!nextOpen) {
+      revertParamSnapshot();
+    }
+    setConfigOpen(nextOpen);
+  };
 
   const sidebarItems = [
     {
@@ -112,7 +136,7 @@ export function ModelConfigDialog() {
   };
 
   return (
-    <Dialog open={open} onOpenChange={setConfigOpen}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent
         className={cn(
           "flex flex-col gap-0 overflow-hidden p-0",
@@ -195,14 +219,14 @@ export function ModelConfigDialog() {
         </div>
 
         <DialogFooter className="shrink-0 border-t border-border bg-muted/10 px-6 py-4">
-          <Button variant="outline" onClick={() => setConfigOpen(false)}>
+          <Button variant="outline" onClick={handleDiscard}>
             Descartar cambios
             <ShortcutBadge
               hidden={!showShortcutHints}
               hotkey={DISCARD_HOTKEY}
             />
           </Button>
-          <Button onClick={() => setConfigOpen(false)}>
+          <Button onClick={handleSave}>
             Guardar y Simular
             <ShortcutBadge hidden={!showShortcutHints} hotkey={SAVE_HOTKEY} />
           </Button>

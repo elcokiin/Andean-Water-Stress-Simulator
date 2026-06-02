@@ -2,29 +2,38 @@ import { useHotkey } from "@tanstack/react-hotkeys";
 
 import { useTheme } from "@/lib/theme-provider";
 import { useSimulationStore } from "@/lib/stores/simulation-store";
-import { timeline } from "@/src/lib/hydrosim/scenarios";
 
 export function useModelKeyboardShortcuts() {
   const { toggle: toggleTheme } = useTheme();
 
   useHotkey("Space", () => {
-    useSimulationStore.getState().togglePlayback();
+    const store = useSimulationStore.getState();
+    if (store.simState.collapse) return;
+    store.togglePlayback();
   });
 
   useHotkey("ArrowRight", () => {
     const store = useSimulationStore.getState();
-    store.setStep(Math.min(store.step + 1, timeline.length - 1));
+    if (store.configOpen) return;
+    const order = ["baseline", "moderate", "extreme"] as const;
+    const index = order.indexOf(store.scenario);
+    store.setScenario(
+      order[Math.min(index + 1, order.length - 1)] ?? "extreme",
+    );
   });
 
   useHotkey("ArrowLeft", () => {
     const store = useSimulationStore.getState();
-    store.setStep(Math.max(store.step - 1, 0));
+    if (store.configOpen) return;
+    const order = ["baseline", "moderate", "extreme"] as const;
+    const index = order.indexOf(store.scenario);
+    store.setScenario(order[Math.max(index - 1, 0)] ?? "baseline");
   });
 
   useHotkey("R", () => {
     const store = useSimulationStore.getState();
-    store.setStep(0);
     store.setScenario("baseline");
+    store.resetSimulation();
     store.setConfigOpen(false);
   });
 
@@ -99,6 +108,7 @@ export function useModelKeyboardShortcuts() {
   });
 
   useHotkey("Mod+Enter", () => {
+    useSimulationStore.setState({ paramSnapshot: null });
     useSimulationStore.getState().setConfigOpen(false);
   });
 }

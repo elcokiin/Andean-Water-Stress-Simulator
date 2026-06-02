@@ -10,6 +10,7 @@ import {
   ModelViewport,
   TitleBar,
   useModelKeyboardShortcuts,
+  useSimulationEngine,
 } from "@/src/components/model-scene";
 import { isCitySceneId } from "@/src/lib/hydrosim/city-scenes";
 import type { ReservoirId } from "@/src/lib/hydrosim/types";
@@ -21,6 +22,7 @@ export default function ModelScene() {
   const setReservoir = useSimulationStore((s) => s.setReservoir);
 
   useModelKeyboardShortcuts();
+  useSimulationEngine();
 
   useEffect(() => {
     if (cityId && !isCitySceneId(cityId)) {
