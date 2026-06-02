@@ -33,6 +33,7 @@ const reservoirOptions: { id: ReservoirId; label: string }[] = [
 
 const THEME_HOTKEY = "D";
 const AUDIO_HOTKEY = "M";
+const HELP_TOUR_HOTKEY = "H";
 const compactFlagClassName =
   "h-3.5 min-w-3.5 rounded-[3px] px-0.5 text-[0.5rem]";
 const AMBIENT_AUDIO_FADE_IN_START = 0.4;
@@ -180,10 +181,21 @@ export function TitleBar() {
               aria-label="Iniciar tour del modelo"
               data-tour="help-tour-button"
             >
+              <ShortcutFlag
+                className={compactFlagClassName}
+                hidden={!showShortcutHints}
+                hotkey={HELP_TOUR_HOTKEY}
+              />
               <HelpCircle />
             </Button>
           </TooltipTrigger>
-          <TooltipContent>Iniciar tour del modelo</TooltipContent>
+          <TooltipContent>
+            Iniciar tour del modelo{" "}
+            <ShortcutBadge
+              hidden={!showShortcutHints}
+              hotkey={HELP_TOUR_HOTKEY}
+            />
+          </TooltipContent>
         </Tooltip>
         <Separator orientation="vertical" className="h-5" />
         <Tooltip>

@@ -12,6 +12,7 @@ export const shortcutGroups = [
       ["M", "Activa o desactiva el audio ambiente"],
       ["K", "Muestra u oculta los badges de atajos"],
       ["D", "Alterna el tema claro u oscuro"],
+      ["H", "Inicia el tour guiado del modelo"],
       ["Escape", "Cierra la configuracion"],
     ],
   },

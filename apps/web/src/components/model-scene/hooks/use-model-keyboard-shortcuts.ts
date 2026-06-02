@@ -2,9 +2,11 @@ import { useHotkey } from "@tanstack/react-hotkeys";
 
 import { useTheme } from "@/lib/theme-provider";
 import { useSimulationStore } from "@/lib/stores/simulation-store";
+import { useModelTour } from "./use-model-tour";
 
 export function useModelKeyboardShortcuts() {
   const { toggle: toggleTheme } = useTheme();
+  const startModelTour = useModelTour();
 
   useHotkey("Space", () => {
     const store = useSimulationStore.getState();
@@ -60,6 +62,10 @@ export function useModelKeyboardShortcuts() {
 
   useHotkey("D", () => {
     toggleTheme();
+  });
+
+  useHotkey("H", () => {
+    startModelTour();
   });
 
   useHotkey("Escape", () => {

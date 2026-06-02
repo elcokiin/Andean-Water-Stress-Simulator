@@ -96,33 +96,82 @@ const TOUR_STEPS: DriveStep[] = [
     },
   },
   {
+    element: '[data-tour="help-tour-button"]',
+    popover: {
+      title: "Repite esta guía",
+      description:
+        "Este botón de signo de interrogación inicia el tour. También puedes abrirlo con la tecla H desde la vista del modelo.",
+      side: "bottom",
+      align: "center",
+    },
+  },
+  {
     element: '[data-tour="config-button"]',
     popover: {
       title: "Configuración del modelo",
       description:
-        "El engranaje abre los parámetros editables: escenarios, clima, demanda, infraestructura y atajos. Úsalo para experimentar políticas de gestión.",
+        "El engranaje abre el diálogo donde vive la mayor parte del modelo editable: escenarios, clima, demanda, infraestructura y atajos.",
+      side: "right",
+      align: "center",
+      onNextClick: (_, __, { driver: tourDriver }) => {
+        useSimulationStore.getState().setConfigOpen(true);
+        window.requestAnimationFrame(() => tourDriver.moveNext());
+      },
+    },
+  },
+  {
+    element: '[data-tour="config-dialog"]',
+    popover: {
+      title: "Centro de parametrización",
+      description:
+        "Este diálogo es el laboratorio principal: cada cambio se previsualiza contra la dinámica stock-flujo antes de guardar o descartar.",
+      side: "over",
+      align: "center",
+    },
+    onHighlightStarted: () => {
+      useSimulationStore.getState().setConfigOpen(true);
+    },
+  },
+  {
+    element: '[data-tour="config-tabs"]',
+    popover: {
+      title: "Pestañas del modelo",
+      description:
+        "Usa la navegación lateral para moverte entre escenarios rápidos, clima y entorno, demanda poblacional, infraestructura y la referencia de atajos.",
       side: "right",
       align: "center",
     },
   },
   {
-    element: '[data-tour="help-tour-button"]',
+    element: '[data-tour="config-content"]',
     popover: {
-      title: "Repite esta guía",
+      title: "Parámetros editables",
       description:
-        "Este botón de signo de interrogación ya no abre configuración. Ahora inicia este tour cuando necesites repasar el funcionamiento del modelo.",
-      side: "bottom",
+        "Aquí se ajustan las variables que más cambian la simulación: intensidad ONI, lluvia, consumo, eficiencia, racionamiento, visibilidad del agua y niebla.",
+      side: "left",
+      align: "center",
+    },
+  },
+  {
+    element: '[data-tour="config-footer"]',
+    popover: {
+      title: "Experimenta sin perder control",
+      description:
+        "Descartar revierte la prueba actual. Guardar y Simular confirma los parámetros para seguir analizando políticas y riesgo de colapso.",
+      side: "top",
+      align: "center",
+    },
+  },
+  {
+    popover: {
+      title: "Listo para explorar",
+      description:
+        "Empieza por cambiar un escenario, abre configuración para modificar supuestos y observa en la escena y la gráfica cuándo aparece el PNR.",
+      side: "over",
       align: "center",
     },
   },
 ];
-
-function availableTourSteps() {
-  return TOUR_STEPS.filter((step) => {
-    if (typeof step.element !== "string") return true;
-    return document.querySelector(step.element);
-  });
-}
 
 export function useModelTour() {
   const driverRef = useRef<Driver | null>(null);
@@ -139,7 +188,7 @@ export function useModelTour() {
       driverRef.current?.destroy();
 
       const modelTour = driver({
-        steps: availableTourSteps(),
+        steps: TOUR_STEPS,
         animate: true,
         smoothScroll: true,
         allowClose: true,
@@ -155,6 +204,9 @@ export function useModelTour() {
         nextBtnText: "Siguiente",
         prevBtnText: "Anterior",
         doneBtnText: "Finalizar",
+        onDestroyed: () => {
+          useSimulationStore.getState().setConfigOpen(false);
+        },
       });
 
       driverRef.current = modelTour;
