@@ -1,4 +1,4 @@
-import { useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { useFrame, useThree, type ThreeEvent } from "@react-three/fiber";
 import * as THREE from "three";
 import {
@@ -15,6 +15,9 @@ import type {
 } from "@/src/lib/hydrosim/types";
 // import { getTerrainHeight } from "@/src/lib/hydrosim/terrain-height";
 import { WaterSimulation, Caustics } from "@/src/lib/hydrosim/gpu-water";
+import { useSkyEnvironment } from "./sky";
+
+type SkyTheme = "light" | "dark";
 
 const INITIAL_RIPPLE_CENTERS = Array.from(
   { length: MAX_RIPPLES },
@@ -147,21 +150,40 @@ function createReservoirShape(path: ReservoirPathCommand[]) {
   return shape;
 }
 
+export interface WaterSimHandle {
+  addDropAtUV: (u: number, v: number) => void;
+}
+
 export function ReservoirWater({
   level = 1,
   reservoir,
   terrainSampler,
   terrainWidth = 24,
   terrainDepth = 18,
+  theme = "light",
+  sunDirection,
+  onSimReady,
 }: {
   level?: number;
   reservoir: ReservoirProfile;
   terrainSampler: TerrainSampler;
   terrainWidth?: number;
   terrainDepth?: number;
+  theme?: SkyTheme;
+  sunDirection?: THREE.Vector3;
+  onSimReady?: (handle: WaterSimHandle) => void;
 }) {
   // export function ReservoirWater({ level = 1 }: { level?: number }) {
   const { gl } = useThree();
+  const envMap = useSkyEnvironment(theme);
+  const sunColor = useMemo(
+    () =>
+      theme === "dark"
+        ? new THREE.Color("#cfd9ff")
+        : new THREE.Color("#fff2cf"),
+    [theme],
+  );
+  const isNight = theme === "dark";
   const normalizedLevel = Math.min(Math.max(level, 0.24), 1);
   const waterScaleX =
     reservoir.minScale[0] +
@@ -175,6 +197,7 @@ export function ReservoirWater({
   const waterMeshRef = useRef<THREE.Mesh>(null);
   const rippleIndexRef = useRef(0);
   const lastRippleTimeRef = useRef(0);
+  const lastRainRippleTimeRef = useRef(0);
   const timeRef = useRef(0);
   const rippleCenters = useRef(INITIAL_RIPPLE_CENTERS);
   const rippleTimes = useRef(INITIAL_RIPPLE_TIMES);
@@ -286,6 +309,20 @@ export function ReservoirWater({
   const sim = useMemo(() => new WaterSimulation(256), []);
   const caustics = useMemo(() => new Caustics(1024), []);
 
+  useEffect(() => {
+    if (!onSimReady) return;
+    onSimReady({
+      addDropAtUV: (u, v) => {
+        const now = timeRef.current;
+        if (now - lastRainRippleTimeRef.current < 0.04) return;
+        const clampedU = Math.max(0, Math.min(1, u));
+        const clampedV = Math.max(0, Math.min(1, v));
+        sim.addDrop(gl, clampedU, clampedV, 0.028, 0.022);
+        lastRainRippleTimeRef.current = now;
+      },
+    });
+  }, [gl, onSimReady, sim]);
+
   useMemo(() => {
     const geom = waterPlaneGeometry;
     const count = geom.attributes.position.count;
@@ -301,12 +338,15 @@ export function ReservoirWater({
     geom.setAttribute("aShore", new THREE.BufferAttribute(shore, 1));
   }, [reservoir.foamWidth, terrainSampler, waterElevation, waterPlaneGeometry]);
 
-  const reservoirOffsetRef = useRef(
-    new THREE.Vector2(reservoir.position[0], reservoir.position[2]),
+  const reservoirOffset = useMemo(
+    () => new THREE.Vector2(reservoir.position[0], reservoir.position[2]),
+    [reservoir.position],
   );
-  reservoirOffsetRef.current.set(reservoir.position[0], reservoir.position[2]);
 
   const waterMaterial = useMemo(() => {
+    const regionColors = reservoir.waterColors.regionColors ?? {};
+    const regional = reservoir.regionalWater;
+    const hasRegional = !!regional;
     const material = new THREE.ShaderMaterial({
       vertexShader: WATER_SURFACE_VERTEX,
       fragmentShader: WATER_SURFACE_FRAGMENT,
@@ -320,7 +360,7 @@ export function ReservoirWater({
         uRippleStrength: { value: 0.18 },
         uRippleSpeed: { value: 1.0 },
         uWaveAmp: { value: 0.03 },
-        uFresnelStrength: { value: 0.55 },
+        uFresnelStrength: { value: 0.6 },
         uBounds: { value: planeBounds },
         uBaseColor: { value: new THREE.Color(reservoir.waterColors.base) },
         uDeepColor: { value: new THREE.Color(reservoir.waterColors.deep) },
@@ -331,17 +371,59 @@ export function ReservoirWater({
         uWaterSim: { value: null },
         uTerrainHeightmap: { value: heightmapTexture },
         uTerrainSize: { value: new THREE.Vector2(terrainWidth, terrainDepth) },
-        uReservoirOffset: { value: reservoirOffsetRef.current },
+        uReservoirOffset: { value: reservoirOffset },
+        uEnvMap: { value: envMap },
+        uSunDirection: {
+          value:
+            sunDirection?.clone() ??
+            new THREE.Vector3(-0.55, 0.46, -1.0).normalize(),
+        },
+        uSunColor: { value: sunColor },
+        uReflectionStrength: { value: 0.85 },
+        uSpecularStrength: { value: isNight ? 0.35 : 0.65 },
+        uSpecularPower: { value: 64.0 },
+        uEmeraldColor: {
+          value: new THREE.Color(
+            regionColors.emerald ?? reservoir.waterColors.base,
+          ),
+        },
+        uNavyColor: {
+          value: new THREE.Color(
+            regionColors.navy ?? reservoir.waterColors.deep,
+          ),
+        },
+        uSkyColor: {
+          value: new THREE.Color(
+            regionColors.sky ?? reservoir.waterColors.base,
+          ),
+        },
+        uGlintColor: {
+          value: new THREE.Color(regionColors.glint ?? "#ffffff"),
+        },
+        uRegionalStrength: { value: hasRegional ? regional.strength : 0 },
+        uEmeraldMix: { value: hasRegional ? regional.emeraldMix : 0 },
+        uNavyMix: { value: hasRegional ? regional.navyMix : 0 },
+        uSkyMix: { value: hasRegional ? regional.skyMix : 0 },
+        uGlintSpecularBoost: {
+          value: hasRegional ? regional.glintSpecularBoost : 0,
+        },
+        uGlintAdd: { value: hasRegional ? regional.glintAdd : 0 },
       },
     });
     (material.extensions as Record<string, boolean>).derivatives = true;
     return material;
   }, [
     reservoir.waterColors,
+    reservoir.regionalWater,
     planeBounds,
     heightmapTexture,
     terrainWidth,
     terrainDepth,
+    reservoirOffset,
+    envMap,
+    sunDirection,
+    sunColor,
+    isNight,
   ]);
 
   const bedMaterial = useMemo(() => {

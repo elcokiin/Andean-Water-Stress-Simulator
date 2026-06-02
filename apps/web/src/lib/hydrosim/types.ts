@@ -106,6 +106,45 @@ export interface ReservoirProfile {
     foam: string;
     bed: string;
     caustics: string;
+    /**
+     * Optional per-scene regional color overrides. When provided, the water
+     * surface shader blends between the base/deep gradient and these
+     * position-based tones to evoke depth, environment and sun reflections.
+     */
+    regionColors?: {
+      /** Bright green/emerald tone for the shallow/vegetated shallows. */
+      emerald?: string;
+      /** Dense marine blue for deep or shadowed water. */
+      navy?: string;
+      /** Light sky blue for the water that mirrors the atmosphere. */
+      sky?: string;
+      /** Bright white/silver tone for direct sun glints. */
+      glint?: string;
+    };
+  };
+  /**
+   * Optional per-scene configuration for position-based water color zones.
+   * When omitted the shader uses the default radial base/deep gradient only.
+   *
+   * The shader works in the water plane's local space where:
+   *   - `pos.x > 0` corresponds to the camera's left for the standard
+   *     `Tunja` camera setup (front-right camera at +X, +Z).
+   *   - `pos.y > 0` corresponds to the back of the scene (the dam / horizon).
+   *   - `pos.y < 0` corresponds to the foreground (closer to the camera).
+   */
+  regionalWater?: {
+    /** 0 disables regional blending, 1 enables the full effect. */
+    strength: number;
+    /** Mix amount for the emerald/green zone in the lower-left. */
+    emeraldMix: number;
+    /** Mix amount for the navy zone in the lower-right and shadows. */
+    navyMix: number;
+    /** Mix amount for the sky-blue zone at the back of the scene. */
+    skyMix: number;
+    /** Multiplier for sun specular inside the left-side glint zone. */
+    glintSpecularBoost: number;
+    /** Additive brightness for the white glint zone. */
+    glintAdd: number;
   };
   aquaticVegetation?: {
     count: number;
@@ -159,6 +198,15 @@ export interface ShrubSpec {
   leafTint: number;
 }
 
+export interface FrailejonSpec {
+  position: Vector2Tuple;
+  rotationY: number;
+  scale: number;
+  seed: number;
+  flowerTint?: number;
+  leafTint?: number;
+}
+
 export interface GrassProfile {
   count: number;
   maxCount: number;
@@ -180,6 +228,7 @@ export interface VegetationProfile {
   shrubs: ShrubSpec[];
   flowers: PlacedAssetSpec[];
   rocks: PlacedAssetSpec[];
+  frailejones?: FrailejonSpec[];
 }
 
 export interface CitySceneConfig {

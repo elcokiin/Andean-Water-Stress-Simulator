@@ -15,6 +15,7 @@ import {
   EzTreeGrass,
   EzTreeRocks,
   ForegroundShrubs,
+  Frailejones,
 } from "./vegetation";
 
 const GROUND_TEXTURE_PATHS = [
@@ -145,6 +146,13 @@ export function TerrainMesh({
         shrubs={vegetation.shrubs}
         terrainSampler={terrainSampler}
       />
+      {vegetation.frailejones && vegetation.frailejones.length > 0 ? (
+        <Frailejones
+          avoidAssets={vegetation.rocks}
+          frailejones={vegetation.frailejones}
+          terrainSampler={terrainSampler}
+        />
+      ) : null}
       <Suspense fallback={null}>
         <EzTreeFlowers
           avoidAssets={vegetation.rocks}
