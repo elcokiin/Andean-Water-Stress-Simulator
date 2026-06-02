@@ -3,13 +3,20 @@ import { Minimize2, Pause, Play, RotateCcw, Settings } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
 import { ShortcutBadge, ShortcutFlag } from "@/components/ui/shortcut-flag";
+import { Slider } from "@/components/ui/slider";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { useSimulationStore } from "@/lib/stores/simulation-store";
+import {
+  SIMULATION_SPEED_MAX,
+  SIMULATION_SPEED_MIN,
+  SIMULATION_SPEED_STEP,
+  useSimulationStore,
+} from "@/lib/stores/simulation-store";
 import {
   buildDisplayMetrics,
   formatM3PerSecond,
@@ -36,8 +43,10 @@ export function ControlsPanel() {
   const scenario = useSimulationStore((s) => s.scenario);
   const simState = useSimulationStore((s) => s.simState);
   const reservoir = useSimulationStore((s) => s.reservoir);
+  const simulationSpeed = useSimulationStore((s) => s.simulationSpeed);
   const setScenario = useSimulationStore((s) => s.setScenario);
   const setConfigOpen = useSimulationStore((s) => s.setConfigOpen);
+  const setSimulationSpeed = useSimulationStore((s) => s.setSimulationSpeed);
   const toggleControlsPanelMinimized = useSimulationStore(
     (s) => s.toggleControlsPanelMinimized,
   );
@@ -55,6 +64,9 @@ export function ControlsPanel() {
     : timeline[
         Math.min(Math.floor(simState.month / 12) + 1, timeline.length - 1)
       ];
+  const simulationSpeedLabel = Number.isInteger(simulationSpeed)
+    ? simulationSpeed.toFixed(0)
+    : simulationSpeed.toFixed(2).replace(/0$/, "");
 
   if (isMinimized) {
     return (
@@ -262,6 +274,35 @@ export function ControlsPanel() {
             value={formatPct(metrics.aquiferLevel * 100, 0)}
             hint="Nivel relativo"
           />
+        </div>
+
+        <div className="rounded-[8px] border border-border bg-card/80 p-2.5">
+          <div className="mb-2 flex items-center justify-between gap-3">
+            <Label
+              htmlFor="simulation-speed"
+              className="text-xs font-medium text-foreground"
+            >
+              Velocidad de simulacion
+            </Label>
+            <span className="font-mono text-xs text-muted-foreground tabular-nums">
+              {simulationSpeedLabel}x
+            </span>
+          </div>
+          <Slider
+            id="simulation-speed"
+            value={[simulationSpeed]}
+            min={SIMULATION_SPEED_MIN}
+            max={SIMULATION_SPEED_MAX}
+            step={SIMULATION_SPEED_STEP}
+            onValueChange={(value) => setSimulationSpeed(value[0])}
+            aria-label="Velocidad de simulacion"
+            className="w-full"
+          />
+          <div className="mt-1.5 flex justify-between text-[0.68rem] text-muted-foreground">
+            <span>Lenta</span>
+            <span>Normal</span>
+            <span>Rapida</span>
+          </div>
         </div>
 
         <div className="grid grid-cols-[1fr_auto_auto] items-center gap-2">

@@ -13,7 +13,7 @@ import type { ReservoirId, ScenarioId } from "@/src/lib/hydrosim/types";
 import { SCENARIO_ONI } from "@/lib/stores/simulation-store";
 import type { SimState } from "@/src/lib/hydrosim/engine";
 
-const TICK_MS = 700;
+const BASE_TICK_MS = 700;
 
 function buildInitialForScenario(
   scenario: ScenarioId,
@@ -47,6 +47,7 @@ export function useSimulationEngine() {
   const demandValue = useSimulationStore((s) => s.demandValue);
   const efficiencyValue = useSimulationStore((s) => s.efficiencyValue);
   const rationingActive = useSimulationStore((s) => s.rationingActive);
+  const simulationSpeed = useSimulationStore((s) => s.simulationSpeed);
   const setSimState = useSimulationStore((s) => s.setSimState);
   const simState = useSimulationStore((s) => s.simState);
   const lastAppliedScenario = useRef<ScenarioId | null>(null);
@@ -75,6 +76,7 @@ export function useSimulationEngine() {
   useEffect(() => {
     if (!isPlaying) return undefined;
     const city = getCityProfile(reservoir);
+    const tickMs = Math.round(BASE_TICK_MS / simulationSpeed);
     const id = window.setInterval(() => {
       const current = useSimulationStore.getState();
       if (current.simState.collapse) {
@@ -120,7 +122,7 @@ export function useSimulationEngine() {
           history: newHistory,
         };
       });
-    }, TICK_MS);
+    }, tickMs);
     return () => window.clearInterval(id);
   }, [
     isPlaying,
@@ -130,6 +132,7 @@ export function useSimulationEngine() {
     demandValue,
     efficiencyValue,
     rationingActive,
+    simulationSpeed,
   ]);
 
   return {

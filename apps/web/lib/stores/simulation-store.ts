@@ -17,7 +17,7 @@ interface SimulationState {
   reservoir: ReservoirId;
   waterVisibility: Partial<Record<ReservoirId, boolean>>;
   isPlaying: boolean;
-  step: number;
+  simulationSpeed: number;
   configOpen: boolean;
   configTab: ConfigTab;
   controlsPanelMinimized: boolean;
@@ -46,7 +46,7 @@ interface SimulationState {
   setReservoir: (reservoir: ReservoirId) => void;
   setWaterVisible: (reservoir: ReservoirId, visible: boolean) => void;
   togglePlayback: () => void;
-  setStep: (step: number) => void;
+  setSimulationSpeed: (speed: number) => void;
   setConfigOpen: (open: boolean) => void;
   setConfigTab: (tab: ConfigTab) => void;
   toggleControlsPanelMinimized: () => void;
@@ -78,7 +78,7 @@ export const useSimulationStore = create<SimulationState>((set, get) => ({
   reservoir: "tunja",
   waterVisibility: {},
   isPlaying: false,
-  step: 1,
+  simulationSpeed: 1,
   configOpen: false,
   configTab: "scenarios",
   controlsPanelMinimized: false,
@@ -135,7 +135,13 @@ export const useSimulationStore = create<SimulationState>((set, get) => ({
       },
     })),
   togglePlayback: () => set((state) => ({ isPlaying: !state.isPlaying })),
-  setStep: (step) => set({ step }),
+  setSimulationSpeed: (simulationSpeed) =>
+    set({
+      simulationSpeed: Math.min(
+        SIMULATION_SPEED_MAX,
+        Math.max(SIMULATION_SPEED_MIN, simulationSpeed),
+      ),
+    }),
   setConfigOpen: (configOpen) => set({ configOpen }),
   setConfigTab: (configTab) => set({ configTab }),
   toggleControlsPanelMinimized: () =>
@@ -206,6 +212,10 @@ export const useSimulationStore = create<SimulationState>((set, get) => ({
     });
   },
 }));
+
+export const SIMULATION_SPEED_MIN = 0.25;
+export const SIMULATION_SPEED_MAX = 4;
+export const SIMULATION_SPEED_STEP = 0.25;
 
 export const SCENARIO_ONI: Record<ScenarioId, number> = {
   baseline: 0,
