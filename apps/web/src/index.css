@@ -205,11 +205,59 @@
   inset: 0;
   z-index: 1;
   contain: paint;
-  box-shadow: inset 0 0 clamp(6rem, 14vmax, 14rem)
-    clamp(3rem, 8vmax, 8rem) var(--mist-edge-color);
+  box-shadow: inset 0 0 clamp(6rem, 14vmax, 14rem) clamp(3rem, 8vmax, 8rem)
+    var(--mist-edge-color);
   transition: opacity 120ms linear;
 }
 
 .model-viewport-mist-dark {
   --mist-edge-color: rgba(16, 36, 61, 0.96);
+}
+
+.hydrosim-driver-popover {
+  max-width: min(360px, calc(100vw - 2rem));
+  border: 1px solid color-mix(in oklch, var(--border), transparent 12%);
+  border-radius: 10px;
+  background: color-mix(in oklch, var(--popover), transparent 4%);
+  color: var(--popover-foreground);
+  box-shadow: var(--shadow-2xl);
+  backdrop-filter: blur(14px);
+}
+
+.hydrosim-driver-popover .driver-popover-title {
+  font-size: 0.92rem;
+  line-height: 1.25;
+  letter-spacing: 0;
+}
+
+.hydrosim-driver-popover .driver-popover-description {
+  color: var(--muted-foreground);
+  font-size: 0.78rem;
+  line-height: 1.5;
+}
+
+.hydrosim-driver-popover .driver-popover-progress-text {
+  color: var(--muted-foreground);
+  font-size: 0.7rem;
+}
+
+.hydrosim-driver-popover .driver-popover-close-btn {
+  color: var(--muted-foreground);
+}
+
+.hydrosim-driver-popover .driver-popover-footer button {
+  border-radius: 8px;
+  border-color: var(--border);
+  font-size: 0.75rem;
+  text-shadow: none;
+}
+
+.hydrosim-driver-popover .driver-popover-next-btn {
+  background: var(--primary);
+  color: var(--primary-foreground);
+}
+
+.hydrosim-driver-popover .driver-popover-prev-btn {
+  background: var(--background);
+  color: var(--foreground);
 }

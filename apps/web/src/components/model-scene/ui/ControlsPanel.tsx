@@ -112,6 +112,7 @@ export function ControlsPanel() {
                 className="relative size-10 rounded-[8px]"
                 onClick={() => setConfigOpen(true)}
                 aria-label="Configurar modelo"
+                data-tour="config-button"
               >
                 <ShortcutFlag
                   className={compactFlagClassName}
@@ -135,7 +136,10 @@ export function ControlsPanel() {
   }
 
   return (
-    <Card className="absolute right-3 bottom-3 left-3 z-10 gap-3 rounded-[10px] border-border/80 bg-background/90 p-3 shadow-xl backdrop-blur-sm sm:right-auto sm:left-4 sm:w-[360px]">
+    <Card
+      className="absolute right-3 bottom-3 left-3 z-10 gap-3 rounded-[10px] border-border/80 bg-background/90 p-3 shadow-xl backdrop-blur-sm sm:right-auto sm:left-4 sm:w-[360px]"
+      data-tour="controls-panel"
+    >
       <CardHeader className="flex items-center justify-between gap-3 p-0">
         <div className="min-w-0">
           <CardTitle className="text-sm">Panel de control</CardTitle>
@@ -178,6 +182,7 @@ export function ControlsPanel() {
                 className="relative rounded-[8px]"
                 onClick={() => setConfigOpen(true)}
                 aria-label="Configurar modelo"
+                data-tour="config-button"
               >
                 <ShortcutFlag
                   className={compactFlagClassName}
@@ -199,7 +204,7 @@ export function ControlsPanel() {
       </CardHeader>
 
       <CardContent className="flex flex-col gap-3 p-0">
-        <div className="grid grid-cols-3 gap-1.5">
+        <div className="grid grid-cols-3 gap-1.5" data-tour="scenario-selector">
           {scenarioIds.map((scenarioId) => (
             <Button
               key={scenarioId}
@@ -218,7 +223,10 @@ export function ControlsPanel() {
           ))}
         </div>
 
-        <div className="rounded-[8px] border border-border bg-card/80 p-2.5">
+        <div
+          className="rounded-[8px] border border-border bg-card/80 p-2.5"
+          data-tour="reservoir-status"
+        >
           <div className="flex items-center justify-between gap-3">
             <div className="min-w-0">
               <p className="text-xs font-medium text-foreground">
@@ -253,7 +261,10 @@ export function ControlsPanel() {
           />
         </div>
 
-        <div className="grid grid-cols-2 gap-1.5 text-xs">
+        <div
+          className="grid grid-cols-2 gap-1.5 text-xs"
+          data-tour="flow-metrics"
+        >
           <Metric
             label="Entrada"
             value={`${formatMcm(metrics.inflowMcmPerMonth)} Mm³/mes`}
@@ -305,7 +316,10 @@ export function ControlsPanel() {
           </div>
         </div>
 
-        <div className="grid grid-cols-[1fr_auto_auto] items-center gap-2">
+        <div
+          className="grid grid-cols-[1fr_auto_auto] items-center gap-2"
+          data-tour="playback-controls"
+        >
           <Button
             variant={isPlaying ? "secondary" : "default"}
             className="relative h-10 rounded-[8px]"

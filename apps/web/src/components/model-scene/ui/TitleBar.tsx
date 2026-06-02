@@ -1,5 +1,13 @@
 import { useEffect, useRef } from "react";
-import { ArrowLeft, HelpCircle, Moon, Music, Sun, VolumeOff, Waves } from "lucide-react";
+import {
+  ArrowLeft,
+  HelpCircle,
+  Moon,
+  Music,
+  Sun,
+  VolumeOff,
+  Waves,
+} from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 
 import { Button } from "@/components/ui/button";
@@ -15,6 +23,7 @@ import { useTheme } from "@/lib/theme-provider";
 import { useSimulationStore } from "@/lib/stores/simulation-store";
 import { getCitySceneConfig } from "@/src/lib/hydrosim/city-scenes";
 import type { ReservoirId } from "@/src/lib/hydrosim/types";
+import { useModelTour } from "../hooks/use-model-tour";
 
 const reservoirOptions: { id: ReservoirId; label: string }[] = [
   { id: "tunja", label: "Tunja" },
@@ -22,8 +31,6 @@ const reservoirOptions: { id: ReservoirId; label: string }[] = [
   { id: "sogamoso", label: "Sogamoso" },
 ];
 
-const CONFIG_HOTKEY = "C";
-const SHORTCUTS_HOTKEY = "Shift+/";
 const THEME_HOTKEY = "D";
 const AUDIO_HOTKEY = "M";
 const compactFlagClassName =
@@ -50,7 +57,7 @@ export function TitleBar() {
     (s) => s.setAmbientAudioEnabled,
   );
   const showShortcutHints = useSimulationStore((s) => s.showShortcutHints);
-  const setConfigOpen = useSimulationStore((s) => s.setConfigOpen);
+  const startModelTour = useModelTour();
   const city = getCitySceneConfig(reservoir);
 
   useEffect(() => {
@@ -117,7 +124,10 @@ export function TitleBar() {
         preload="auto"
         onError={() => setAmbientAudioEnabled(false)}
       />
-      <div className="flex max-w-[calc(100vw-2rem)] items-center gap-2 rounded-[10px] border border-border bg-background/85 px-3 py-2 shadow-lg backdrop-blur-sm sm:px-5">
+      <div
+        className="flex max-w-[calc(100vw-2rem)] items-center gap-2 rounded-[10px] border border-border bg-background/85 px-3 py-2 shadow-lg backdrop-blur-sm sm:px-5"
+        data-tour="title-bar"
+      >
         <Button variant="ghost" size="icon-sm" asChild aria-label="Volver">
           <Link to="/">
             <ArrowLeft />
@@ -148,6 +158,7 @@ export function TitleBar() {
           spacing={0}
           aria-label="Seleccionar embalse"
           className="shrink-0"
+          data-tour="city-selector"
         >
           {reservoirOptions.map((option) => (
             <ToggleGroupItem
@@ -165,25 +176,14 @@ export function TitleBar() {
               variant="ghost"
               size="icon-sm"
               className="relative"
-              onClick={() => setConfigOpen(true)}
-              aria-label="Abrir guia del modelo"
+              onClick={startModelTour}
+              aria-label="Iniciar tour del modelo"
+              data-tour="help-tour-button"
             >
-              <ShortcutFlag
-                className={compactFlagClassName}
-                hidden={!showShortcutHints}
-                hotkey={CONFIG_HOTKEY}
-              />
               <HelpCircle />
             </Button>
           </TooltipTrigger>
-          <TooltipContent>
-            Guia del modelo{" "}
-            <ShortcutBadge hidden={!showShortcutHints} hotkey={CONFIG_HOTKEY} />
-            <ShortcutBadge
-              hidden={!showShortcutHints}
-              hotkey={SHORTCUTS_HOTKEY}
-            />
-          </TooltipContent>
+          <TooltipContent>Iniciar tour del modelo</TooltipContent>
         </Tooltip>
         <Separator orientation="vertical" className="h-5" />
         <Tooltip>

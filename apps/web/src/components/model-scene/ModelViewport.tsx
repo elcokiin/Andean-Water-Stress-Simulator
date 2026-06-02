@@ -24,7 +24,7 @@ export function ModelViewport() {
   }, [simState.reservoirPct]);
 
   return (
-    <div className="absolute inset-0">
+    <div className="absolute inset-0" data-tour="model-viewport">
       <Canvas
         key={city.id}
         camera={{ position: city.camera.position, fov: city.camera.fov }}

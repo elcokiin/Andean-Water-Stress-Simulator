@@ -67,7 +67,10 @@ export function ChartsPanel() {
   }
 
   return (
-    <Card className="absolute top-3 right-3 z-10 w-[390px] max-w-[calc(100vw-1.5rem)] gap-3 rounded-[10px] border-border/80 bg-background/90 p-3 shadow-xl backdrop-blur-sm">
+    <Card
+      className="absolute top-3 right-3 z-10 w-[390px] max-w-[calc(100vw-1.5rem)] gap-3 rounded-[10px] border-border/80 bg-background/90 p-3 shadow-xl backdrop-blur-sm"
+      data-tour="charts-panel"
+    >
       <CardHeader className="flex items-center justify-between gap-3 p-0">
         <div className="min-w-0">
           <CardTitle className="flex items-center gap-2 text-sm">
