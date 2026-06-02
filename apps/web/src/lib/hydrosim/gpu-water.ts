@@ -228,7 +228,7 @@ export class Caustics {
       type: THREE.UnsignedByteType,
     });
     const mat = new THREE.RawShaderMaterial({
-      extensions: { derivatives: true },
+      extensions: { derivatives: true } as any,
       uniforms: {
         light: { value: new THREE.Vector3(0.75, 0.75, -0.37).normalize() },
         water: { value: null },

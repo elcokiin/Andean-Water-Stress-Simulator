@@ -146,7 +146,13 @@ export class WaterSimulation {
     this._updateMesh = new THREE.Mesh(this._geometry, updateMaterial);
   }
 
-  addDrop(renderer: THREE.WebGLRenderer, x: number, y: number, radius: number, strength: number) {
+  addDrop(
+    renderer: THREE.WebGLRenderer,
+    x: number,
+    y: number,
+    radius: number,
+    strength: number,
+  ) {
     this._dropMesh.material.uniforms["center"].value = [x, y];
     this._dropMesh.material.uniforms["radius"].value = radius;
     this._dropMesh.material.uniforms["strength"].value = strength;
@@ -163,9 +169,11 @@ export class WaterSimulation {
 
   _render(renderer: THREE.WebGLRenderer, mesh: THREE.Mesh) {
     const oldTexture = this.texture;
-    const newTexture = this.texture === this._textureA ? this._textureB : this._textureA;
+    const newTexture =
+      this.texture === this._textureA ? this._textureB : this._textureA;
 
-    mesh.material.uniforms["texture"].value = oldTexture.texture;
+    (mesh.material as THREE.RawShaderMaterial).uniforms["texture"].value =
+      oldTexture.texture;
 
     const currentRenderTarget = renderer.getRenderTarget();
     renderer.setRenderTarget(newTexture);
@@ -173,7 +181,7 @@ export class WaterSimulation {
     this._scene.clear();
     this._scene.add(mesh);
     renderer.render(this._scene, this._camera);
-    
+
     renderer.setRenderTarget(currentRenderTarget);
 
     this.texture = newTexture;
@@ -229,9 +237,15 @@ export class Caustics {
   public _scene: THREE.Scene;
   public _geometry: THREE.BufferGeometry;
   public texture: THREE.WebGLRenderTarget;
-  public _causticMesh: THREE.Mesh<THREE.BufferGeometry, THREE.RawShaderMaterial>;
+  public _causticMesh: THREE.Mesh<
+    THREE.BufferGeometry,
+    THREE.RawShaderMaterial
+  >;
 
-  constructor(lightFrontGeometry: THREE.BufferGeometry, lightDirection: number[]) {
+  constructor(
+    lightFrontGeometry: THREE.BufferGeometry,
+    lightDirection: number[],
+  ) {
     this._camera = new THREE.OrthographicCamera(0, 1, 1, 0, 0, 2000);
     this._scene = new THREE.Scene();
     this._geometry = lightFrontGeometry;
