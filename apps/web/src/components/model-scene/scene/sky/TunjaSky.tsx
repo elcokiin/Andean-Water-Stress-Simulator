@@ -1,24 +1,25 @@
-import { useMemo } from "react";
 import { Environment, Stars } from "@react-three/drei";
-import * as THREE from "three";
 
 import {
-  SKY_FRAGMENT_SHADER,
-  SKY_VERTEX_SHADER,
-} from "@/src/lib/hydrosim/shaders/sky";
-
-type SkyTheme = "light" | "dark";
+  CUBEMAP_FILES,
+  DAY_ENVIRONMENT,
+  NIGHT_ENVIRONMENT,
+  type SkyTheme,
+} from "./sky-config";
 
 export function ModelEnvironment({ theme }: { theme: SkyTheme }) {
   const isNight = theme === "dark";
+  const settings = isNight ? NIGHT_ENVIRONMENT : DAY_ENVIRONMENT;
 
   return (
     <Environment
       key={theme}
-      background={false}
-      environmentIntensity={isNight ? 0.18 : 0.42}
-      environmentRotation={isNight ? [3.45, 5.9, 6.1] : [3.95, 6.64, 6.27]}
-      files={["px.png", "nx.png", "py.png", "ny.png", "pz.png", "nz.png"]}
+      background
+      backgroundIntensity={settings.backgroundIntensity}
+      backgroundBlurriness={settings.backgroundBlurriness}
+      environmentIntensity={settings.environmentIntensity}
+      environmentRotation={settings.environmentRotation}
+      files={CUBEMAP_FILES}
       path={`/assets/elemental-serenity/map/${isNight ? "night" : "day"}/`}
     />
   );
@@ -26,59 +27,19 @@ export function ModelEnvironment({ theme }: { theme: SkyTheme }) {
 
 export function ModelSky({ theme }: { theme: SkyTheme }) {
   const isNight = theme === "dark";
-  const uniforms = useMemo(
-    () => ({
-      uZenithColor: {
-        value: new THREE.Color(isNight ? "#07152c" : "#0078d9"),
-      },
-      uHorizonColor: {
-        value: new THREE.Color(isNight ? "#162845" : "#8cd1f7"),
-      },
-      uGroundColor: {
-        value: new THREE.Color(isNight ? "#071018" : "#29738c"),
-      },
-      uSunPosition: {
-        value: new THREE.Vector3(
-          isNight ? 0.42 : -0.55,
-          isNight ? 0.62 : 0.46,
-          -1.0,
-        ),
-      },
-      uSunColor: {
-        value: new THREE.Color(isNight ? "#d8e8ff" : "#fffbe0"),
-      },
-      uSunGlowColor: {
-        value: new THREE.Color(isNight ? "#7aa8ff" : "#ffc252"),
-      },
-    }),
-    [isNight],
-  );
+
+  if (!isNight) return null;
 
   return (
-    <>
-      <mesh renderOrder={-10}>
-        <sphereGeometry args={[150, 64, 32]} />
-        <shaderMaterial
-          key={theme}
-          uniforms={uniforms}
-          vertexShader={SKY_VERTEX_SHADER}
-          fragmentShader={SKY_FRAGMENT_SHADER}
-          side={THREE.BackSide}
-          depthWrite={false}
-        />
-      </mesh>
-      {isNight ? (
-        <Stars
-          radius={95}
-          depth={42}
-          count={900}
-          factor={3.1}
-          saturation={0.15}
-          fade
-          speed={0.08}
-        />
-      ) : null}
-    </>
+    <Stars
+      radius={110}
+      depth={48}
+      count={1400}
+      factor={3.4}
+      saturation={0.12}
+      fade
+      speed={0.06}
+    />
   );
 }
 
