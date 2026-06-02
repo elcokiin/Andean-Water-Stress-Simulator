@@ -23,7 +23,7 @@ export function FireEventToast() {
   const paramoLossPct = fireEvent.paramoLoss * 100;
 
   return (
-    <div className="pointer-events-none absolute top-20 right-3 z-20 w-[min(420px,calc(100vw-1.5rem))] sm:right-4">
+    <div className="pointer-events-none absolute right-3 bottom-3 z-20 w-[min(420px,calc(100vw-1.5rem))] sm:right-4 sm:bottom-4">
       <div className="pointer-events-auto overflow-hidden rounded-[10px] border border-destructive/30 bg-background/95 shadow-2xl backdrop-blur-md">
         <div className="flex items-start gap-3 border-b border-destructive/20 bg-destructive/10 px-4 py-3">
           <div className="mt-0.5 rounded-[8px] bg-destructive/15 p-2 text-destructive">
