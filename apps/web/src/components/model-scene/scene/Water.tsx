@@ -13,7 +13,7 @@ import type {
   ReservoirPathCommand,
   ReservoirProfile,
 } from "@/src/lib/hydrosim/types";
-import { getTerrainHeight } from "@/src/lib/hydrosim/terrain-height";
+// import { getTerrainHeight } from "@/src/lib/hydrosim/terrain-height";
 import { WaterSimulation, Caustics } from "@/src/lib/hydrosim/gpu-water";
 
 const INITIAL_RIPPLE_CENTERS = Array.from(
@@ -162,7 +162,7 @@ export function ReservoirWater({
   reservoir: ReservoirProfile;
   terrainSampler: TerrainSampler;
 }) {
-export function ReservoirWater({ level = 1 }: { level?: number }) {
+// export function ReservoirWater({ level = 1 }: { level?: number }) {
   const { gl } = useThree();
   const normalizedLevel = Math.min(Math.max(level, 0.24), 1);
   const waterScaleX =
