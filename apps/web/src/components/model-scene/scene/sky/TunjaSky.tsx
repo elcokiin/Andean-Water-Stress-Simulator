@@ -1,27 +1,60 @@
 import { Environment, Stars } from "@react-three/drei";
+import { useThree } from "@react-three/fiber";
+import { useEffect } from "react";
 
 import {
   CUBEMAP_FILES,
   DAY_ENVIRONMENT,
   NIGHT_ENVIRONMENT,
   type SkyTheme,
+  useSkyEnvironment,
 } from "./sky-config";
+
+function ModelBackground({ theme }: { theme: SkyTheme }) {
+  const { scene } = useThree();
+  const backgroundMap = useSkyEnvironment(theme);
+  const isNight = theme === "dark";
+  const settings = isNight ? NIGHT_ENVIRONMENT : DAY_ENVIRONMENT;
+
+  useEffect(() => {
+    const previousBackground = scene.background;
+    const previousBackgroundIntensity = scene.backgroundIntensity;
+    const previousBackgroundBlurriness = scene.backgroundBlurriness;
+
+    scene.background = backgroundMap;
+    scene.backgroundIntensity = settings.backgroundIntensity;
+    scene.backgroundBlurriness = settings.backgroundBlurriness;
+
+    return () => {
+      scene.background = previousBackground;
+      scene.backgroundIntensity = previousBackgroundIntensity;
+      scene.backgroundBlurriness = previousBackgroundBlurriness;
+    };
+  }, [
+    backgroundMap,
+    scene,
+    settings.backgroundBlurriness,
+    settings.backgroundIntensity,
+  ]);
+
+  return null;
+}
 
 export function ModelEnvironment({ theme }: { theme: SkyTheme }) {
   const isNight = theme === "dark";
   const settings = isNight ? NIGHT_ENVIRONMENT : DAY_ENVIRONMENT;
 
   return (
-    <Environment
-      key={theme}
-      background
-      backgroundIntensity={settings.backgroundIntensity}
-      backgroundBlurriness={settings.backgroundBlurriness}
-      environmentIntensity={settings.environmentIntensity}
-      environmentRotation={settings.environmentRotation}
-      files={CUBEMAP_FILES}
-      path={`/assets/elemental-serenity/map/${isNight ? "night" : "day"}/`}
-    />
+    <>
+      <ModelBackground theme={theme} />
+      <Environment
+        key={theme}
+        environmentIntensity={settings.environmentIntensity}
+        environmentRotation={settings.environmentRotation}
+        files={CUBEMAP_FILES}
+        path={`/assets/elemental-serenity/map/${isNight ? "night" : "day"}/`}
+      />
+    </>
   );
 }
 

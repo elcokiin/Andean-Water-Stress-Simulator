@@ -39,8 +39,8 @@ export const DAY_ENVIRONMENT = {
 export const NIGHT_ENVIRONMENT = {
   environmentIntensity: 0.16,
   environmentRotation: [3.45, 5.9, 6.1] as [number, number, number],
-  backgroundIntensity: 0.7,
-  backgroundBlurriness: 0.06,
+  backgroundIntensity: 0.42,
+  backgroundBlurriness: 0.02,
 };
 
 export const SUN_POSITIONS = {
