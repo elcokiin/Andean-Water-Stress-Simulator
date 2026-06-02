@@ -2,8 +2,10 @@ import { ContactShadows, OrbitControls } from "@react-three/drei";
 import { useMemo } from "react";
 
 import { createTerrainSampler } from "@/src/lib/hydrosim/terrain-sampler";
+import { getRainIntensity } from "@/src/lib/hydrosim/rain-intensity";
 import type { CitySceneConfig } from "@/src/lib/hydrosim/types";
 import { CloudGroup } from "./CloudGroup";
+import { Rain } from "./Rain";
 import { TerrainMesh } from "./Terrain";
 import { ReservoirWater } from "./Water";
 import { ModelEnvironment, ModelLighting, ModelSky } from "./sky";
@@ -17,6 +19,8 @@ export function ModelScene({
   showWater = city.reservoir.visible,
   theme,
   waterLevel = 1,
+  rainMm = 0,
+  oni = 0,
 }: {
   autoRotate?: boolean;
   city: CitySceneConfig;
@@ -24,6 +28,8 @@ export function ModelScene({
   showWater?: boolean;
   theme: SceneTheme;
   waterLevel?: number;
+  rainMm?: number;
+  oni?: number;
 }) {
   const isNight = theme === "dark";
   const fogColor = isNight ? "#10243d" : "#a9d9ef";
@@ -35,6 +41,10 @@ export function ModelScene({
         reservoir: city.reservoir,
       }),
     [city],
+  );
+  const rainIntensity = useMemo(
+    () => getRainIntensity({ rainMm, oni }).value,
+    [rainMm, oni],
   );
 
   return (
@@ -53,6 +63,13 @@ export function ModelScene({
           scale={cloud.scale}
         />
       ))}
+      {rainIntensity > 0 ? (
+        <Rain
+          intensity={rainIntensity}
+          bounds={{ width: city.terrain.width, depth: city.terrain.depth }}
+          night={isNight}
+        />
+      ) : null}
       <TerrainMesh
         terrain={city.terrain}
         terrainSampler={terrainSampler}
