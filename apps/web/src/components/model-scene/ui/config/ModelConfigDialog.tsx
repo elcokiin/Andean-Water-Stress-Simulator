@@ -193,6 +193,7 @@ export function ModelConfigDialog() {
                   <button
                     key={item.id}
                     onClick={() => setConfigTab(item.id as ConfigTab)}
+                    data-tour={`config-tab-${item.id}`}
                     className={cn(
                       "grid w-full grid-cols-[minmax(0,1fr)_auto] items-center gap-2 rounded-md px-2.5 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground",
                       activeTab === item.id

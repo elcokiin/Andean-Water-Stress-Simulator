@@ -4,6 +4,14 @@ import "driver.js/dist/driver.css";
 
 import { useSimulationStore } from "@/lib/stores/simulation-store";
 
+function openConfigTab(
+  tab: "scenarios" | "climate" | "demand" | "infrastructure" | "shortcuts",
+) {
+  const store = useSimulationStore.getState();
+  store.setConfigOpen(true);
+  store.setConfigTab(tab);
+}
+
 const TOUR_STEPS: DriveStep[] = [
   {
     element: '[data-tour="title-bar"]',
@@ -143,11 +151,66 @@ const TOUR_STEPS: DriveStep[] = [
     },
   },
   {
+    element: '[data-tour="config-tab-scenarios"]',
+    popover: {
+      title: "Escenarios Rápidos",
+      description:
+        "Este apartado carga configuraciones predefinidas: línea base, El Niño moderado y El Niño extremo. Sirve para iniciar una comparación rápida con reservas y ONI consistentes.",
+      side: "right",
+      align: "center",
+    },
+    onHighlightStarted: () => openConfigTab("scenarios"),
+  },
+  {
+    element: '[data-tour="config-tab-climate"]',
+    popover: {
+      title: "Clima y Entorno",
+      description:
+        "Aquí ajustas el índice ONI, la precipitación base y la niebla de la escena. Es la sección clave para simular sequía, recarga por lluvia y lectura ambiental del territorio.",
+      side: "right",
+      align: "center",
+    },
+    onHighlightStarted: () => openConfigTab("climate"),
+  },
+  {
+    element: '[data-tour="config-tab-demand"]',
+    popover: {
+      title: "Demanda Poblacional",
+      description:
+        "Este apartado modifica la presión humana sobre el sistema: consumo, población, eficiencia y racionamiento. Úsalo para probar si reducir demanda retrasa el PNR.",
+      side: "right",
+      align: "center",
+    },
+    onHighlightStarted: () => openConfigTab("demand"),
+  },
+  {
+    element: '[data-tour="config-tab-infrastructure"]',
+    popover: {
+      title: "Infraestructura",
+      description:
+        "Aquí se ajustan condiciones de soporte y representación, como visibilidad del agua e infraestructura asociada. Ayuda a revisar el estado físico del embalse y su lectura visual.",
+      side: "right",
+      align: "center",
+    },
+    onHighlightStarted: () => openConfigTab("infrastructure"),
+  },
+  {
+    element: '[data-tour="config-tab-shortcuts"]',
+    popover: {
+      title: "Atajos y Atributos",
+      description:
+        "Esta sección reúne los comandos de teclado y los badges visibles. Es útil para operar el modelo sin depender del mouse durante una explicación o comparación de escenarios.",
+      side: "right",
+      align: "center",
+    },
+    onHighlightStarted: () => openConfigTab("shortcuts"),
+  },
+  {
     element: '[data-tour="config-content"]',
     popover: {
       title: "Parámetros editables",
       description:
-        "Aquí se ajustan las variables que más cambian la simulación: intensidad ONI, lluvia, consumo, eficiencia, racionamiento, visibilidad del agua y niebla.",
+        "El panel derecho muestra el formulario del apartado seleccionado. Los cambios actualizan el estado del simulador para experimentar con supuestos antes de guardar.",
       side: "left",
       align: "center",
     },
