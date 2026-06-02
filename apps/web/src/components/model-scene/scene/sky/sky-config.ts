@@ -30,17 +30,17 @@ export function useSkyEnvironment(theme: SkyTheme) {
 }
 
 export const DAY_ENVIRONMENT = {
-  environmentIntensity: 0.5,
+  environmentIntensity: 0.3,
   environmentRotation: [3.95, 6.64, 6.27] as [number, number, number],
   backgroundIntensity: 1.0,
   backgroundBlurriness: 0.04,
 };
 
 export const NIGHT_ENVIRONMENT = {
-  environmentIntensity: 0.16,
-  environmentRotation: [3.45, 5.9, 6.1] as [number, number, number],
-  backgroundIntensity: 0.42,
-  backgroundBlurriness: 0.02,
+  environmentIntensity: 0.12,
+  environmentRotation: [4.65, 3.25, 4.67] as [number, number, number],
+  backgroundIntensity: 1.0,
+  backgroundBlurriness: 0,
 };
 
 export const SUN_POSITIONS = {
