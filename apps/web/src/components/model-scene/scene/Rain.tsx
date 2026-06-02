@@ -31,16 +31,25 @@ export interface RainBounds {
   depth: number;
 }
 
+export interface RainRippleTarget {
+  /** World Y of the water surface expressed in Rain's local frame. */
+  surfaceYLocal: number;
+  /** Attempt to fire a ripple at the given world (x, z) coordinate. */
+  tryRipple: (worldX: number, worldZ: number) => void;
+}
+
 export function Rain({
   intensity,
   bounds,
   night = false,
   maxParticles = MAX_PARTICLES,
+  rippleTarget = null,
 }: {
   intensity: number;
   bounds: RainBounds;
   night?: boolean;
   maxParticles?: number;
+  rippleTarget?: RainRippleTarget | null;
 }) {
   const halfWidth = bounds.width * 0.55;
   const halfDepth = bounds.depth * 0.55;
@@ -118,15 +127,26 @@ export function Rain({
     const tailG = tint.g * TAIL_ALPHA;
     const tailB = tint.b * TAIL_ALPHA;
 
+    const surfaceYLocal = rippleTarget?.surfaceYLocal ?? null;
+
     for (let i = 0; i < activeCount; i += 1) {
       const p = particles[i];
       const i6 = i * 6;
+      const prevY = p.y;
 
       p.x += p.vx * dt;
       p.y += p.vy * dt;
       p.z += p.vz * dt;
       p.x += Math.sin(elapsed * 1.5 + p.z * 0.05) * WIND_STRENGTH * dt;
       p.z += Math.cos(elapsed * 1.2 + p.x * 0.03) * WIND_STRENGTH * dt;
+
+      if (
+        surfaceYLocal !== null &&
+        prevY >= surfaceYLocal &&
+        p.y < surfaceYLocal
+      ) {
+        rippleTarget?.tryRipple(p.x, p.z);
+      }
 
       if (p.y < RESPAWN_Y) {
         p.x = (seededRandom(i * 7.17 + 1) * 2 - 1) * halfWidth;
