@@ -1,4 +1,4 @@
-import { BarChart3, Minimize2, X } from "lucide-react";
+import { BarChart3, Minimize2 } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -22,7 +22,6 @@ export function ChartsPanel() {
   const showShortcutHints = useSimulationStore((s) => s.showShortcutHints);
   const scenario = useSimulationStore((s) => s.scenario);
   const history = useSimulationStore((s) => s.history);
-  const setChartsPanelOpen = useSimulationStore((s) => s.setChartsPanelOpen);
   const toggleChartsPanel = useSimulationStore((s) => s.toggleChartsPanel);
 
   if (!open) {
@@ -73,31 +72,6 @@ export function ChartsPanel() {
           </p>
         </div>
         <div className="flex items-center gap-1.5">
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="outline"
-                size="icon"
-                className="relative rounded-[8px]"
-                onClick={() => setChartsPanelOpen(false)}
-                aria-label="Ocultar panel de graficas"
-              >
-                <ShortcutFlag
-                  className={compactFlagClassName}
-                  hidden={!showShortcutHints}
-                  hotkey={CHARTS_HOTKEY}
-                />
-                <X />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              Ocultar graficas{" "}
-              <ShortcutBadge
-                hidden={!showShortcutHints}
-                hotkey={CHARTS_HOTKEY}
-              />
-            </TooltipContent>
-          </Tooltip>
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
