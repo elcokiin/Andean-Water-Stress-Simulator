@@ -31,11 +31,16 @@ const compactFlagClassName =
 const AMBIENT_AUDIO_FADE_IN_START = 0.4;
 const AMBIENT_AUDIO_FADE_IN_DURATION_MS = 2000;
 const AMBIENT_AUDIO_LOOP_END_TRIM_S = 0.3;
+const AMBIENT_AUDIO_SRC_BY_THEME = {
+  light: "/nature.mp3",
+  dark: "/nature-night.mp3",
+} as const;
 
 export function TitleBar() {
   const audioRef = useRef<HTMLAudioElement>(null);
   const fadeFrameRef = useRef<number | null>(null);
   const { theme, toggle } = useTheme();
+  const ambientAudioSrc = AMBIENT_AUDIO_SRC_BY_THEME[theme];
   const navigate = useNavigate();
   const reservoir = useSimulationStore((s) => s.reservoir);
   const setReservoir = useSimulationStore((s) => s.setReservoir);
@@ -102,13 +107,13 @@ export function TitleBar() {
       }
       audio.removeEventListener("timeupdate", handleTimeUpdate);
     };
-  }, [ambientAudioEnabled, setAmbientAudioEnabled]);
+  }, [ambientAudioEnabled, ambientAudioSrc, setAmbientAudioEnabled]);
 
   return (
     <div className="absolute top-4 left-1/2 z-10 -translate-x-1/2">
       <audio
         ref={audioRef}
-        src="/nature.mp3"
+        src={ambientAudioSrc}
         preload="auto"
         onError={() => setAmbientAudioEnabled(false)}
       />
