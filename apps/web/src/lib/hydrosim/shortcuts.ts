@@ -7,6 +7,7 @@ export const shortcutGroups = [
       ["ArrowLeft", "Retrocede un paso temporal"],
       ["R", "Reinicia al escenario base"],
       ["C", "Abre o cierra la configuracion"],
+      ["G", "Muestra u oculta las graficas de trayectoria"],
       ["P", "Minimiza o restaura el panel de control"],
       ["M", "Activa o desactiva el audio ambiente"],
       ["K", "Muestra u oculta los badges de atajos"],

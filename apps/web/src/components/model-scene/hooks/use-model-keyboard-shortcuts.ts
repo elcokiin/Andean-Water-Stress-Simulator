@@ -42,6 +42,10 @@ export function useModelKeyboardShortcuts() {
     store.setConfigOpen(!store.configOpen);
   });
 
+  useHotkey("G", () => {
+    useSimulationStore.getState().toggleChartsPanel();
+  });
+
   useHotkey("P", () => {
     useSimulationStore.getState().toggleControlsPanelMinimized();
   });

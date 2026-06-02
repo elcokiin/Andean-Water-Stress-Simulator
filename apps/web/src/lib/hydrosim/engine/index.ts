@@ -16,6 +16,17 @@ export {
   type DisplayMetrics,
 } from "./metrics";
 export {
+  clearHistoryBuffer,
+  createEmptyHistory,
+  HISTORY_CAPACITY,
+  pushHistory,
+  snapshotToEntry,
+  toSimState,
+  type HistoryBuffer,
+  type HistoryEntry,
+  type HistoryMap,
+} from "./history";
+export {
   AQUIFER_STRESS_DENOMINATOR_PCT,
   PNR_CONSECUTIVE_MONTHS,
   PNR_THRESHOLD_PCT,

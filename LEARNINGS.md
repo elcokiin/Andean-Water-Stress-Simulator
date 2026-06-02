@@ -11,3 +11,4 @@
 - `apps/docs` can build after `bun install`, but `bun run typecheck` prompts for missing `@astrojs/check` instead of running a full Astro check.
 - `bunx prettier` cannot infer a parser for `.astro` files in this workspace because no Astro Prettier plugin is configured.
 - `bunx --bun shadcn@latest search/info` can fail here with package copy errors; `bunx --bun shadcn@4.9.0` worked for registry search, docs, view, info, and add.
+- Vite `resolve.alias` regex redirects like `find: /^es-toolkit\/compat\/(.+)$/, replacement: "es-toolkit/dist/compat/$1.mjs"` still go through the package resolver and fail on the second pass. Use a custom plugin with `enforce: "pre"` and `resolveId` that returns an absolute file path (resolved via `this.resolve("es-toolkit/package.json")` then `path.join`) to bypass the broken `exports` map entirely.
