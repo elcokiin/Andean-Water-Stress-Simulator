@@ -30,6 +30,9 @@ export const WATER_SURFACE_FRAGMENT = `
   uniform float uRippleTimes[${MAX_RIPPLES}];
 
   uniform sampler2D uWaterSim;
+  uniform sampler2D uTerrainHeightmap;
+  uniform vec2 uTerrainSize;
+  uniform vec2 uReservoirOffset;
 
   varying vec3 vWorldPosition;
   varying vec3 vLocalPosition;
@@ -51,6 +54,10 @@ export const WATER_SURFACE_FRAGMENT = `
   }
 
   void main() {
+    vec2 terrainUv = (vWorldPosition.xz - uReservoirOffset) / uTerrainSize + 0.5;
+    float terrainHeight = texture2D(uTerrainHeightmap, terrainUv).r;
+    if (terrainHeight > vWorldPosition.y) discard;
+
     vec2 pos = vLocalPosition.xy;
     float height = rippleHeight(pos);
     

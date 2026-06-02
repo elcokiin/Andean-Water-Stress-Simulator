@@ -63,6 +63,8 @@ export function ModelScene({
           level={waterLevel}
           reservoir={city.reservoir}
           terrainSampler={terrainSampler}
+          terrainWidth={city.terrain.width}
+          terrainDepth={city.terrain.depth}
         />
       ) : null}
       <ContactShadows

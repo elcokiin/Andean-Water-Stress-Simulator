@@ -157,12 +157,16 @@ export function ReservoirWater({
   level = 1,
   reservoir,
   terrainSampler,
+  terrainWidth = 24,
+  terrainDepth = 18,
 }: {
   level?: number;
   reservoir: ReservoirProfile;
   terrainSampler: TerrainSampler;
+  terrainWidth?: number;
+  terrainDepth?: number;
 }) {
-// export function ReservoirWater({ level = 1 }: { level?: number }) {
+  // export function ReservoirWater({ level = 1 }: { level?: number }) {
   const { gl } = useThree();
   const normalizedLevel = Math.min(Math.max(level, 0.24), 1);
   const waterScaleX =
@@ -224,6 +228,52 @@ export function ReservoirWater({
     );
   }, [waterGeometry]);
 
+  const PLANE_MARGIN = 1.2;
+
+  const waterPlaneGeometry = useMemo(() => {
+    const geometry = new THREE.PlaneGeometry(
+      terrainWidth * PLANE_MARGIN,
+      terrainDepth * PLANE_MARGIN,
+      128,
+      128,
+    );
+    return geometry;
+  }, [terrainWidth, terrainDepth]);
+
+  const planeBounds = useMemo(() => {
+    return new THREE.Vector2(
+      terrainWidth * PLANE_MARGIN * 0.5,
+      terrainDepth * PLANE_MARGIN * 0.5,
+    );
+  }, [terrainWidth, terrainDepth]);
+
+  const heightmapTexture = useMemo(() => {
+    const resolution = 256;
+    const data = new Float32Array(resolution * resolution);
+    for (let iy = 0; iy < resolution; iy++) {
+      for (let ix = 0; ix < resolution; ix++) {
+        const x =
+          -terrainWidth * 0.5 + ((ix + 0.5) / resolution) * terrainWidth;
+        const z =
+          -terrainDepth * 0.5 + ((iy + 0.5) / resolution) * terrainDepth;
+        data[iy * resolution + ix] = terrainSampler.getHeight(x, z);
+      }
+    }
+    const texture = new THREE.DataTexture(
+      data,
+      resolution,
+      resolution,
+      THREE.RedFormat,
+      THREE.FloatType,
+    );
+    texture.minFilter = THREE.LinearFilter;
+    texture.magFilter = THREE.LinearFilter;
+    texture.wrapS = THREE.ClampToEdgeWrapping;
+    texture.wrapT = THREE.ClampToEdgeWrapping;
+    texture.needsUpdate = true;
+    return texture;
+  }, [terrainSampler, terrainWidth, terrainDepth]);
+
   const bedGeometry = useMemo(() => {
     const geometry = waterGeometry.clone();
     const positions = geometry.attributes.position as THREE.BufferAttribute;
@@ -264,7 +314,7 @@ export function ReservoirWater({
   const caustics = useMemo(() => new Caustics(1024), []);
 
   useMemo(() => {
-    const geom = waterGeometry;
+    const geom = waterPlaneGeometry;
     const count = geom.attributes.position.count;
     const shore = new Float32Array(count);
     for (let i = 0; i < count; i++) {
@@ -276,7 +326,12 @@ export function ReservoirWater({
       shore[i] = 1.0 - t;
     }
     geom.setAttribute("aShore", new THREE.BufferAttribute(shore, 1));
-  }, [reservoir.foamWidth, terrainSampler, waterElevation, waterGeometry]);
+  }, [reservoir.foamWidth, terrainSampler, waterElevation, waterPlaneGeometry]);
+
+  const reservoirOffsetRef = useRef(
+    new THREE.Vector2(reservoir.position[0], reservoir.position[2]),
+  );
+  reservoirOffsetRef.current.set(reservoir.position[0], reservoir.position[2]);
 
   const waterMaterial = useMemo(() => {
     const material = new THREE.ShaderMaterial({
@@ -293,7 +348,7 @@ export function ReservoirWater({
         uRippleSpeed: { value: 1.0 },
         uWaveAmp: { value: 0.03 },
         uFresnelStrength: { value: 0.55 },
-        uBounds: { value: waterBounds },
+        uBounds: { value: planeBounds },
         uBaseColor: { value: new THREE.Color(reservoir.waterColors.base) },
         uDeepColor: { value: new THREE.Color(reservoir.waterColors.deep) },
         uRippleCenters: { value: INITIAL_RIPPLE_CENTERS },
@@ -301,11 +356,20 @@ export function ReservoirWater({
         uFoamColor: { value: new THREE.Color(reservoir.waterColors.foam) },
         uFoamStrength: { value: 1.0 },
         uWaterSim: { value: null },
+        uTerrainHeightmap: { value: heightmapTexture },
+        uTerrainSize: { value: new THREE.Vector2(terrainWidth, terrainDepth) },
+        uReservoirOffset: { value: reservoirOffsetRef.current },
       },
     });
     (material.extensions as Record<string, boolean>).derivatives = true;
     return material;
-  }, [reservoir.waterColors, waterBounds]);
+  }, [
+    reservoir.waterColors,
+    planeBounds,
+    heightmapTexture,
+    terrainWidth,
+    terrainDepth,
+  ]);
 
   const bedMaterial = useMemo(() => {
     return new THREE.ShaderMaterial({
@@ -371,8 +435,8 @@ export function ReservoirWater({
     // Simulate drop on GPU
     sim.addDrop(
       gl,
-      localPoint.x / waterBounds.x,
-      localPoint.y / waterBounds.y,
+      localPoint.x / planeBounds.x,
+      localPoint.y / planeBounds.y,
       0.07,
       0.035,
     );
@@ -400,14 +464,14 @@ export function ReservoirWater({
           position={[0, bedPositionY, 0]}
         />
       </group>
+      <mesh
+        ref={waterMeshRef}
+        geometry={waterPlaneGeometry}
+        material={waterMaterial}
+        position={[0, 0, 0.01]}
+        onPointerMove={handlePointerMove}
+      />
       <group scale={[waterScaleX, waterScaleY, 1]}>
-        <mesh
-          ref={waterMeshRef}
-          geometry={waterGeometry}
-          material={waterMaterial}
-          position={[0, 0, 0.01]}
-          onPointerMove={handlePointerMove}
-        />
         {reservoir.aquaticVegetation ? (
           <AquaticVegetation
             bounds={waterBounds2}

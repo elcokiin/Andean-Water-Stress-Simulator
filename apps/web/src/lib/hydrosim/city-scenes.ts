@@ -297,7 +297,7 @@ export const citySceneConfigs = {
       normalScale: [0.12, 0.16],
     },
     reservoir: {
-      visible: false,
+      visible: true,
       path: [
         ["moveTo", -6.65, -1.05],
         ["bezierCurveTo", -5.35, -2.04, -2.85, -2.16, -0.75, -1.72],
@@ -520,7 +520,7 @@ export const citySceneConfigs = {
       normalScale: [0.28, 0.24],
     },
     reservoir: {
-      visible: false,
+      visible: true,
       path: [
         ["moveTo", -7.1, -0.35],
         ["bezierCurveTo", -6.1, -1.7, -3.95, -1.95, -1.9, -1.55],
