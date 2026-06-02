@@ -19,6 +19,7 @@ export function ClimateTab() {
   const oniValue = useSimulationStore((s) => s.oniValue);
   const rainValue = useSimulationStore((s) => s.rainValue);
   const runoffCoefficient = useSimulationStore((s) => s.runoffCoefficient);
+  const fireProbability = useSimulationStore((s) => s.fireProbability);
   const evaporationFactor = useSimulationStore((s) => s.evaporationFactor);
   const fogIntensity = useSimulationStore((s) => s.fogIntensity);
   const simState = useSimulationStore((s) => s.simState);
@@ -28,6 +29,7 @@ export function ClimateTab() {
   const setRunoffCoefficient = useSimulationStore(
     (s) => s.setRunoffCoefficient,
   );
+  const setFireProbability = useSimulationStore((s) => s.setFireProbability);
   const setEvaporationFactor = useSimulationStore(
     (s) => s.setEvaporationFactor,
   );
@@ -178,6 +180,42 @@ export function ClimateTab() {
         </div>
       </div>
 
+      <div className="space-y-4 pt-4">
+        <div className="flex items-center justify-between">
+          <Label className="flex items-center gap-2 text-base">
+            Probabilidad mensual de incendio
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Info className="h-4 w-4 cursor-help text-muted-foreground" />
+              </TooltipTrigger>
+              <TooltipContent className="max-w-xs">
+                <p>
+                  Probabilidad usada cada mes de simulación. Si el sorteo
+                  ocurre, el impacto se calcula con un generador congruencial
+                  multiplicativo y afecta páramo y embalse.
+                </p>
+              </TooltipContent>
+            </Tooltip>
+          </Label>
+          <span className="font-mono text-sm text-muted-foreground">
+            {formatPct(fireProbability * 100, 0)}
+          </span>
+        </div>
+        <Slider
+          value={[fireProbability]}
+          onValueChange={(val) => setFireProbability(val[0])}
+          max={1}
+          min={0}
+          step={0.01}
+          className="w-full"
+        />
+        <div className="flex justify-between text-xs text-muted-foreground">
+          <span>Sin incendios</span>
+          <span>Riesgo medio</span>
+          <span>Seguro mensual</span>
+        </div>
+      </div>
+
       <div className="grid gap-3 rounded-lg border border-border bg-muted/20 p-4 sm:grid-cols-3">
         <div>
           <p className="text-xs text-muted-foreground">Entrada calculada</p>
@@ -192,11 +230,11 @@ export function ClimateTab() {
           </p>
         </div>
         <div>
-          <p className="text-xs text-muted-foreground">
-            Probabilidad de incendios
-          </p>
+          <p className="text-xs text-muted-foreground">Impacto del incendio</p>
           <p className="font-mono text-sm">
-            {formatPct(metrics.fireProbabilityPct, 0)}
+            {metrics.fireImpactPct > 0
+              ? formatPct(metrics.fireImpactPct, 0)
+              : "Sin evento"}
           </p>
         </div>
       </div>

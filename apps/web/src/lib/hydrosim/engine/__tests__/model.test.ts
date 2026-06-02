@@ -20,6 +20,7 @@ const baselineParams = (): SimParams => ({
   oni: 0,
   rainMm: 85,
   runoffCoefficient: 0.48,
+  fireProbability: 0,
   demandLpcd: TUNJA.perCapitaDemandLpcd,
   industrialDemandMcmMonth: TUNJA.industrialDemandMcmMonth,
   agriculturalDemandMcmMonth: TUNJA.agriculturalDemandMcmMonth,
@@ -47,6 +48,8 @@ describe("simulation engine: createInitialState", () => {
     const state = createInitialState(TUNJA, "baseline");
     expect(state.aquiferLevel).toBeGreaterThan(0.5);
     expect(state.paramoCoverage).toBeGreaterThan(0.7);
+    expect(state.fireEvent).toBeNull();
+    expect(state.rngSeed).toBeGreaterThan(0);
     expect(state.pnrTriggered).toBe(false);
     expect(state.collapse).toBe(false);
     expect(state.consecutivePnrMonths).toBe(0);
@@ -276,6 +279,44 @@ describe("simulation engine: parameters influence flows", () => {
       TUNJA,
     );
     expect(high.flows.evaporation).toBeGreaterThan(low.flows.evaporation);
+  });
+
+  it("fire probability triggers a stochastic fire event with reservoir and paramo losses", () => {
+    const state = createInitialState(TUNJA, "baseline");
+    const noFire = step(
+      state,
+      { ...baselineParams(), fireProbability: 0 },
+      TUNJA,
+    );
+    const fire = step(
+      state,
+      { ...baselineParams(), fireProbability: 1 },
+      TUNJA,
+    );
+    expect(noFire.fireEvent).toBeNull();
+    expect(fire.fireEvent).not.toBeNull();
+    expect(fire.flows.fireImpact).toBeGreaterThan(0);
+    expect(fire.flows.fireReservoirLoss).toBeGreaterThan(0);
+    expect(fire.flows.fireParamoLoss).toBeGreaterThan(0);
+    expect(fire.reservoirPct).toBeLessThan(noFire.reservoirPct);
+    expect(fire.paramoCoverage).toBeLessThan(noFire.paramoCoverage);
+  });
+
+  it("multiplicative congruential fire sequence is deterministic from the state seed", () => {
+    const state = createInitialState(TUNJA, "baseline");
+    const first = step(
+      state,
+      { ...baselineParams(), fireProbability: 1 },
+      TUNJA,
+    );
+    const second = step(
+      state,
+      { ...baselineParams(), fireProbability: 1 },
+      TUNJA,
+    );
+    expect(first.rngSeed).toBe(second.rngSeed);
+    expect(first.fireEvent?.roll).toBe(second.fireEvent?.roll);
+    expect(first.fireEvent?.impact).toBe(second.fireEvent?.impact);
   });
 
   it("birth and migration rates control population growth", () => {

@@ -19,6 +19,7 @@ const baseParams = {
   oni: 0,
   rainMm: 85,
   runoffCoefficient: 0.48,
+  fireProbability: 0,
   demandLpcd: tunja.perCapitaDemandLpcd,
   industrialDemandMcmMonth: tunja.industrialDemandMcmMonth,
   agriculturalDemandMcmMonth: tunja.agriculturalDemandMcmMonth,

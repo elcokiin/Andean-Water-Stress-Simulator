@@ -1,6 +1,7 @@
 export { cityProfiles, getCityProfile } from "./city-profiles";
 export {
   BASE_EVAPORATION_FACTOR,
+  BASE_FIRE_PROBABILITY,
   BASE_RUNOFF_COEFFICIENT,
   createInitialState,
   formatMonth,

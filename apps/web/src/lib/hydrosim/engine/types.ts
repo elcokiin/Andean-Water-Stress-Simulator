@@ -15,6 +15,7 @@ export interface SimParams {
   oni: number;
   rainMm: number;
   runoffCoefficient: number;
+  fireProbability: number;
   demandLpcd: number;
   industrialDemandMcmMonth: number;
   agriculturalDemandMcmMonth: number;
@@ -38,6 +39,19 @@ export interface SimFlows {
   filtration: number;
   aquiferExtraction: number;
   fireProbability: number;
+  fireImpact: number;
+  fireReservoirLoss: number;
+  fireParamoLoss: number;
+}
+
+export interface FireEvent {
+  id: string;
+  month: number;
+  probability: number;
+  roll: number;
+  impact: number;
+  reservoirLossM3: number;
+  paramoLoss: number;
 }
 
 export interface SimState {
@@ -46,6 +60,8 @@ export interface SimState {
   aquiferLevel: number;
   paramoCoverage: number;
   population: number;
+  rngSeed: number;
+  fireEvent: FireEvent | null;
   consecutivePnrMonths: number;
   pnrTriggered: boolean;
   collapse: boolean;

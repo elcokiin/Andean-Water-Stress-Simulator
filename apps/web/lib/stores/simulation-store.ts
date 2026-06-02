@@ -6,6 +6,7 @@ import type {
 } from "@/src/lib/hydrosim/types";
 import {
   BASE_EVAPORATION_FACTOR,
+  BASE_FIRE_PROBABILITY,
   BASE_RUNOFF_COEFFICIENT,
   createEmptyHistory,
   getCityProfile,
@@ -30,6 +31,7 @@ interface SimulationState {
   oniValue: number;
   rainValue: number;
   runoffCoefficient: number;
+  fireProbability: number;
   demandValue: number;
   industrialDemandValue: number;
   agriculturalDemandValue: number;
@@ -47,6 +49,7 @@ interface SimulationState {
     oni: number;
     rain: number;
     runoffCoefficient: number;
+    fireProbability: number;
     demand: number;
     industrialDemand: number;
     agriculturalDemand: number;
@@ -73,6 +76,7 @@ interface SimulationState {
   setOniValue: (value: number) => void;
   setRainValue: (value: number) => void;
   setRunoffCoefficient: (value: number) => void;
+  setFireProbability: (value: number) => void;
   setDemandValue: (value: number) => void;
   setIndustrialDemandValue: (value: number) => void;
   setAgriculturalDemandValue: (value: number) => void;
@@ -109,6 +113,7 @@ export const useSimulationStore = create<SimulationState>((set, get) => ({
   oniValue: 0,
   rainValue: 85,
   runoffCoefficient: BASE_RUNOFF_COEFFICIENT,
+  fireProbability: BASE_FIRE_PROBABILITY,
   demandValue: getCityProfile("tunja").perCapitaDemandLpcd,
   industrialDemandValue: getCityProfile("tunja").industrialDemandMcmMonth,
   agriculturalDemandValue: getCityProfile("tunja").agriculturalDemandMcmMonth,
@@ -125,6 +130,8 @@ export const useSimulationStore = create<SimulationState>((set, get) => ({
     aquiferLevel: 0.7,
     paramoCoverage: 0.9,
     population: 180_000,
+    rngSeed: 184_348,
+    fireEvent: null,
     consecutivePnrMonths: 0,
     pnrTriggered: false,
     collapse: false,
@@ -141,6 +148,9 @@ export const useSimulationStore = create<SimulationState>((set, get) => ({
       filtration: 0,
       aquiferExtraction: 0,
       fireProbability: 0,
+      fireImpact: 0,
+      fireReservoirLoss: 0,
+      fireParamoLoss: 0,
     },
   },
   paramSnapshot: null,
@@ -198,6 +208,7 @@ export const useSimulationStore = create<SimulationState>((set, get) => ({
   setOniValue: (oniValue) => set({ oniValue }),
   setRainValue: (rainValue) => set({ rainValue }),
   setRunoffCoefficient: (runoffCoefficient) => set({ runoffCoefficient }),
+  setFireProbability: (fireProbability) => set({ fireProbability }),
   setDemandValue: (demandValue) => set({ demandValue }),
   setIndustrialDemandValue: (industrialDemandValue) =>
     set({ industrialDemandValue }),
@@ -233,6 +244,7 @@ export const useSimulationStore = create<SimulationState>((set, get) => ({
         oni: state.oniValue,
         rain: state.rainValue,
         runoffCoefficient: state.runoffCoefficient,
+        fireProbability: state.fireProbability,
         demand: state.demandValue,
         industrialDemand: state.industrialDemandValue,
         agriculturalDemand: state.agriculturalDemandValue,
@@ -251,6 +263,7 @@ export const useSimulationStore = create<SimulationState>((set, get) => ({
       oniValue: snapshot.oni,
       rainValue: snapshot.rain,
       runoffCoefficient: snapshot.runoffCoefficient,
+      fireProbability: snapshot.fireProbability,
       demandValue: snapshot.demand,
       industrialDemandValue: snapshot.industrialDemand,
       agriculturalDemandValue: snapshot.agriculturalDemand,
@@ -308,7 +321,16 @@ function createEmptyFlows(): SimState["flows"] {
     filtration: 0,
     aquiferExtraction: 0,
     fireProbability: 0,
+    fireImpact: 0,
+    fireReservoirLoss: 0,
+    fireParamoLoss: 0,
   };
+}
+
+function createInitialSeed(reservoir: ReservoirId): number {
+  const cityOffset =
+    reservoir === "tunja" ? 11 : reservoir === "duitama" ? 23 : 37;
+  return 184_337 + cityOffset;
 }
 
 function createInitialSimState(
@@ -321,6 +343,8 @@ function createInitialSimState(
     aquiferLevel: 0.7,
     paramoCoverage: 0.9,
     population: CITY_POPULATION[reservoir],
+    rngSeed: createInitialSeed(reservoir),
+    fireEvent: null,
     consecutivePnrMonths: 0,
     pnrTriggered: false,
     collapse: false,

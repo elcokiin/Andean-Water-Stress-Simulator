@@ -45,6 +45,7 @@ export function useSimulationEngine() {
   const oniValue = useSimulationStore((s) => s.oniValue);
   const rainValue = useSimulationStore((s) => s.rainValue);
   const runoffCoefficient = useSimulationStore((s) => s.runoffCoefficient);
+  const fireProbability = useSimulationStore((s) => s.fireProbability);
   const demandValue = useSimulationStore((s) => s.demandValue);
   const industrialDemandValue = useSimulationStore(
     (s) => s.industrialDemandValue,
@@ -97,6 +98,7 @@ export function useSimulationEngine() {
       const sharedParams = {
         rainMm: current.rainValue,
         runoffCoefficient: current.runoffCoefficient,
+        fireProbability: current.fireProbability,
         demandLpcd: current.demandValue,
         industrialDemandMcmMonth: current.industrialDemandValue,
         agriculturalDemandMcmMonth: current.agriculturalDemandValue,
@@ -146,6 +148,7 @@ export function useSimulationEngine() {
     oniValue,
     rainValue,
     runoffCoefficient,
+    fireProbability,
     demandValue,
     industrialDemandValue,
     agriculturalDemandValue,

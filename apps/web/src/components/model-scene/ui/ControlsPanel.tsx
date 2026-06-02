@@ -283,7 +283,11 @@ export function ControlsPanel() {
           <Metric
             label="Evaporacion"
             value={`${formatMcm(metrics.evaporationMcmPerMonth)} Mm³/mes`}
-            hint={`Incendio ${formatPct(metrics.fireProbabilityPct, 0)}`}
+            hint={
+              metrics.fireImpactPct > 0
+                ? `Fuego ${formatPct(metrics.fireImpactPct, 0)}`
+                : `Riesgo ${formatPct(metrics.fireProbabilityPct, 0)}`
+            }
           />
           <Metric
             label="Páramo"

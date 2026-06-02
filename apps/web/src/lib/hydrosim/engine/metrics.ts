@@ -18,6 +18,9 @@ export interface DisplayMetrics {
   filtrationMcmPerMonth: number;
   aquiferExtractionMcmPerMonth: number;
   fireProbabilityPct: number;
+  fireImpactPct: number;
+  fireReservoirLossMcm: number;
+  fireParamoLossPct: number;
   netBalanceMcmPerMonth: number;
   extractionM3PerSecond: number;
   inflowM3PerSecond: number;
@@ -51,6 +54,7 @@ function flowsToMcm(flows: SimFlows) {
     evaporation: flows.evaporation / M3_PER_MCM,
     filtration: flows.filtration / M3_PER_MCM,
     aquiferExtraction: flows.aquiferExtraction / M3_PER_MCM,
+    fireReservoirLoss: flows.fireReservoirLoss / M3_PER_MCM,
   };
 }
 
@@ -85,6 +89,9 @@ export function buildDisplayMetrics(
     filtrationMcmPerMonth: flows.filtration,
     aquiferExtractionMcmPerMonth: flows.aquiferExtraction,
     fireProbabilityPct: state.flows.fireProbability * 100,
+    fireImpactPct: state.flows.fireImpact * 100,
+    fireReservoirLossMcm: flows.fireReservoirLoss,
+    fireParamoLossPct: state.flows.fireParamoLoss * 100,
     netBalanceMcmPerMonth: net,
     extractionM3PerSecond: state.flows.extraction / SECONDS_PER_MONTH,
     inflowM3PerSecond: state.flows.inflow / SECONDS_PER_MONTH,
