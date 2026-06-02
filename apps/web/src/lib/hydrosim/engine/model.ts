@@ -18,7 +18,6 @@ const ONI_RAIN_FACTOR_MIN = 0.25;
 const ONI_RAIN_FACTOR_MAX = 1.3;
 const PARAMO_RETENTION_MIN = 0.5;
 const PARAMO_RETENTION_MAX = 1;
-const RUNOFF_COEFFICIENT = 0.46;
 const RECHARGE_COEFFICIENT = 0.15;
 const EVAP_MM_PER_MONTH = 35;
 const EVAP_ONI_SLOPE_MM = 18;
@@ -30,6 +29,9 @@ const PARAMO_DEGRADATION_SLOPE = 0.015;
 const PARAMO_DEGRADATION_BIAS = 0.5;
 const PARAMO_MIN_COVERAGE = 0.05;
 const AQUIFER_NORMALIZATION = 0.35;
+const M3_PER_MCM = 1_000_000;
+const DEFAULT_RUNOFF_COEFFICIENT = 0.48;
+const DEFAULT_EVAPORATION_FACTOR = 1;
 const STARTING_RESERVOIR_PCT_BY_SCENARIO: Record<
   "baseline" | "moderate" | "extreme",
   number
@@ -76,10 +78,16 @@ export function createInitialState(
     flows: {
       inflow: 0,
       recharge: 0,
+      domesticDemand: 0,
+      industrialDemand: 0,
+      agriculturalDemand: 0,
+      totalDemand: 0,
+      networkLoss: 0,
       extraction: 0,
       evaporation: 0,
       filtration: 0,
       aquiferExtraction: 0,
+      fireProbability: 0,
     },
   };
 }
@@ -107,24 +115,36 @@ function computeFlows(
 
   const basinAreaM2 = city.basinAreaKm2 * 1_000_000;
   const rainVolumeM3 = (effectiveRainMm / 1000) * basinAreaM2;
-  const inflow = rainVolumeM3 * RUNOFF_COEFFICIENT;
+  const runoffCoefficient = clamp(params.runoffCoefficient, 0, 1);
+  const inflow = rainVolumeM3 * runoffCoefficient;
   const recharge = rainVolumeM3 * RECHARGE_COEFFICIENT;
 
-  const populationMonthly = state.population * (1 + city.growthRateAnnual / 12);
+  const populationGrowthAnnual =
+    params.birthRateAnnual + params.migrationRateAnnual;
+  const populationMonthly =
+    state.population * (1 + populationGrowthAnnual / 12);
   const perCapitaM3PerMonth = (params.demandLpcd * 30) / 1000;
-  const grossExtractionM3 =
-    (populationMonthly * perCapitaM3PerMonth) / (params.efficiencyPct / 100);
+  const domesticDemand = populationMonthly * perCapitaM3PerMonth;
+  const industrialDemand = params.industrialDemandMcmMonth * M3_PER_MCM;
+  const agriculturalDemand = params.agriculturalDemandMcmMonth * M3_PER_MCM;
+  const totalDemand = domesticDemand + industrialDemand + agriculturalDemand;
   const rationingActive =
     params.rationingActive && state.reservoirPct < RATIONING_THRESHOLD_PCT;
-  const extraction = rationingActive
-    ? grossExtractionM3 * (1 - RATIONING_REDUCTION)
-    : grossExtractionM3;
+  const deliveredDemand = rationingActive
+    ? totalDemand * (1 - RATIONING_REDUCTION)
+    : totalDemand;
+  const extraction = deliveredDemand / (params.efficiencyPct / 100);
+  const networkLoss = Math.max(0, extraction - deliveredDemand);
 
   const evapMm = Math.max(
     0,
     EVAP_MM_PER_MONTH + params.oni * EVAP_ONI_SLOPE_MM,
   );
-  const evaporation = (evapMm / 1000) * basinAreaM2 * EVAP_BASIN_FRACTION;
+  const evaporation =
+    (evapMm / 1000) *
+    basinAreaM2 *
+    EVAP_BASIN_FRACTION *
+    params.evaporationFactor;
 
   const filtration = capacityM3 * FILTRATION_FRACTION_OF_CAPACITY;
 
@@ -137,16 +157,35 @@ function computeFlows(
     capacityM3 *
     AQUIFER_BASE_EXTRACTION_FRACTION *
     (1 + AQUIFER_STRESS_GAIN * stressIndex);
+  const rainDeficit = clamp(
+    1 - effectiveRainMm / Math.max(params.rainMm, 1),
+    0,
+    1,
+  );
+  const fireProbability = clamp(
+    Math.max(0, params.oni) * 0.16 +
+      stressIndex * 0.28 +
+      (1 - state.paramoCoverage) * 0.2 +
+      rainDeficit * 0.26,
+    0,
+    1,
+  );
 
   return {
     state: { ...state, population: populationMonthly },
     flows: {
       inflow,
       recharge,
+      domesticDemand,
+      industrialDemand,
+      agriculturalDemand,
+      totalDemand,
+      networkLoss,
       extraction,
       evaporation,
       filtration,
       aquiferExtraction,
+      fireProbability,
     },
   };
 }
@@ -188,7 +227,8 @@ export function step(
   const paramoStress = stressIndex + oniStress * 0.3;
   const degradation =
     Math.max(0, paramoStress - PARAMO_DEGRADATION_BIAS) *
-    PARAMO_DEGRADATION_SLOPE;
+      PARAMO_DEGRADATION_SLOPE +
+    flows.fireProbability * 0.004;
   const paramoCoverage = clamp(
     preFlowState.paramoCoverage - degradation,
     PARAMO_MIN_COVERAGE,
@@ -270,5 +310,7 @@ export function getCapacityM3(cityId: CityProfile["id"]): number {
 }
 
 export const SCENARIO_INITIAL_RESERVOIR = STARTING_RESERVOIR_PCT_BY_SCENARIO;
+export const BASE_RUNOFF_COEFFICIENT = DEFAULT_RUNOFF_COEFFICIENT;
+export const BASE_EVAPORATION_FACTOR = DEFAULT_EVAPORATION_FACTOR;
 
 export { cityProfiles, getCityProfile };

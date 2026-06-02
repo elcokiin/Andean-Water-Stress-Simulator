@@ -5,7 +5,10 @@ import type {
   ScenarioId,
 } from "@/src/lib/hydrosim/types";
 import {
+  BASE_EVAPORATION_FACTOR,
+  BASE_RUNOFF_COEFFICIENT,
   createEmptyHistory,
+  getCityProfile,
   pushHistory,
   type HistoryEntry,
   type HistoryMap,
@@ -26,8 +29,14 @@ interface SimulationState {
   isDialogExpanded: boolean;
   oniValue: number;
   rainValue: number;
+  runoffCoefficient: number;
   demandValue: number;
+  industrialDemandValue: number;
+  agriculturalDemandValue: number;
   efficiencyValue: number;
+  evaporationFactor: number;
+  birthRateAnnual: number;
+  migrationRateAnnual: number;
   rationingActive: boolean;
   fogIntensity: number;
 
@@ -37,8 +46,14 @@ interface SimulationState {
   paramSnapshot: {
     oni: number;
     rain: number;
+    runoffCoefficient: number;
     demand: number;
+    industrialDemand: number;
+    agriculturalDemand: number;
     efficiency: number;
+    evaporationFactor: number;
+    birthRateAnnual: number;
+    migrationRateAnnual: number;
     rationing: boolean;
   } | null;
 
@@ -57,8 +72,14 @@ interface SimulationState {
   toggleDialogExpanded: () => void;
   setOniValue: (value: number) => void;
   setRainValue: (value: number) => void;
+  setRunoffCoefficient: (value: number) => void;
   setDemandValue: (value: number) => void;
+  setIndustrialDemandValue: (value: number) => void;
+  setAgriculturalDemandValue: (value: number) => void;
   setEfficiencyValue: (value: number) => void;
+  setEvaporationFactor: (value: number) => void;
+  setBirthRateAnnual: (value: number) => void;
+  setMigrationRateAnnual: (value: number) => void;
   setRationingActive: (active: boolean) => void;
   setFogIntensity: (value: number) => void;
   toggleChartsPanel: () => void;
@@ -87,8 +108,14 @@ export const useSimulationStore = create<SimulationState>((set, get) => ({
   isDialogExpanded: false,
   oniValue: 0,
   rainValue: 85,
-  demandValue: 120,
+  runoffCoefficient: BASE_RUNOFF_COEFFICIENT,
+  demandValue: getCityProfile("tunja").perCapitaDemandLpcd,
+  industrialDemandValue: getCityProfile("tunja").industrialDemandMcmMonth,
+  agriculturalDemandValue: getCityProfile("tunja").agriculturalDemandMcmMonth,
   efficiencyValue: 62,
+  evaporationFactor: BASE_EVAPORATION_FACTOR,
+  birthRateAnnual: getCityProfile("tunja").birthRateAnnual,
+  migrationRateAnnual: getCityProfile("tunja").migrationRateAnnual,
   rationingActive: false,
   fogIntensity: 0.8,
   chartsPanelOpen: true,
@@ -104,10 +131,16 @@ export const useSimulationStore = create<SimulationState>((set, get) => ({
     flows: {
       inflow: 0,
       recharge: 0,
+      domesticDemand: 0,
+      industrialDemand: 0,
+      agriculturalDemand: 0,
+      totalDemand: 0,
+      networkLoss: 0,
       extraction: 0,
       evaporation: 0,
       filtration: 0,
       aquiferExtraction: 0,
+      fireProbability: 0,
     },
   },
   paramSnapshot: null,
@@ -121,8 +154,14 @@ export const useSimulationStore = create<SimulationState>((set, get) => ({
   setReservoir: (reservoir) =>
     set((state) => {
       if (state.reservoir === reservoir) return state;
+      const city = getCityProfile(reservoir);
       return {
         reservoir,
+        demandValue: city.perCapitaDemandLpcd,
+        industrialDemandValue: city.industrialDemandMcmMonth,
+        agriculturalDemandValue: city.agriculturalDemandMcmMonth,
+        birthRateAnnual: city.birthRateAnnual,
+        migrationRateAnnual: city.migrationRateAnnual,
         history: createEmptyHistory(),
         simState: createInitialSimState(reservoir, state.scenario),
       };
@@ -158,8 +197,16 @@ export const useSimulationStore = create<SimulationState>((set, get) => ({
     set((state) => ({ isDialogExpanded: !state.isDialogExpanded })),
   setOniValue: (oniValue) => set({ oniValue }),
   setRainValue: (rainValue) => set({ rainValue }),
+  setRunoffCoefficient: (runoffCoefficient) => set({ runoffCoefficient }),
   setDemandValue: (demandValue) => set({ demandValue }),
+  setIndustrialDemandValue: (industrialDemandValue) =>
+    set({ industrialDemandValue }),
+  setAgriculturalDemandValue: (agriculturalDemandValue) =>
+    set({ agriculturalDemandValue }),
   setEfficiencyValue: (efficiencyValue) => set({ efficiencyValue }),
+  setEvaporationFactor: (evaporationFactor) => set({ evaporationFactor }),
+  setBirthRateAnnual: (birthRateAnnual) => set({ birthRateAnnual }),
+  setMigrationRateAnnual: (migrationRateAnnual) => set({ migrationRateAnnual }),
   setRationingActive: (rationingActive) => set({ rationingActive }),
   setFogIntensity: (fogIntensity) => set({ fogIntensity }),
   toggleChartsPanel: () =>
@@ -185,8 +232,14 @@ export const useSimulationStore = create<SimulationState>((set, get) => ({
       paramSnapshot: {
         oni: state.oniValue,
         rain: state.rainValue,
+        runoffCoefficient: state.runoffCoefficient,
         demand: state.demandValue,
+        industrialDemand: state.industrialDemandValue,
+        agriculturalDemand: state.agriculturalDemandValue,
         efficiency: state.efficiencyValue,
+        evaporationFactor: state.evaporationFactor,
+        birthRateAnnual: state.birthRateAnnual,
+        migrationRateAnnual: state.migrationRateAnnual,
         rationing: state.rationingActive,
       },
     });
@@ -197,8 +250,14 @@ export const useSimulationStore = create<SimulationState>((set, get) => ({
     set({
       oniValue: snapshot.oni,
       rainValue: snapshot.rain,
+      runoffCoefficient: snapshot.runoffCoefficient,
       demandValue: snapshot.demand,
+      industrialDemandValue: snapshot.industrialDemand,
+      agriculturalDemandValue: snapshot.agriculturalDemand,
       efficiencyValue: snapshot.efficiency,
+      evaporationFactor: snapshot.evaporationFactor,
+      birthRateAnnual: snapshot.birthRateAnnual,
+      migrationRateAnnual: snapshot.migrationRateAnnual,
       rationingActive: snapshot.rationing,
       paramSnapshot: null,
     });
@@ -235,6 +294,23 @@ export const CITY_POPULATION: Record<ReservoirId, number> = {
   sogamoso: 115_000,
 };
 
+function createEmptyFlows(): SimState["flows"] {
+  return {
+    inflow: 0,
+    recharge: 0,
+    domesticDemand: 0,
+    industrialDemand: 0,
+    agriculturalDemand: 0,
+    totalDemand: 0,
+    networkLoss: 0,
+    extraction: 0,
+    evaporation: 0,
+    filtration: 0,
+    aquiferExtraction: 0,
+    fireProbability: 0,
+  };
+}
+
 function createInitialSimState(
   reservoir: ReservoirId,
   scenario: ScenarioId,
@@ -248,13 +324,6 @@ function createInitialSimState(
     consecutivePnrMonths: 0,
     pnrTriggered: false,
     collapse: false,
-    flows: {
-      inflow: 0,
-      recharge: 0,
-      extraction: 0,
-      evaporation: 0,
-      filtration: 0,
-      aquiferExtraction: 0,
-    },
+    flows: createEmptyFlows(),
   };
 }

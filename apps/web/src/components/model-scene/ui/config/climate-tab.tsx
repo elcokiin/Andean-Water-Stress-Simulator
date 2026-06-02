@@ -8,14 +8,35 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useSimulationStore } from "@/lib/stores/simulation-store";
+import {
+  buildDisplayMetrics,
+  formatMcm,
+  formatPct,
+  getCityProfile,
+} from "@/src/lib/hydrosim/engine";
 
 export function ClimateTab() {
   const oniValue = useSimulationStore((s) => s.oniValue);
   const rainValue = useSimulationStore((s) => s.rainValue);
+  const runoffCoefficient = useSimulationStore((s) => s.runoffCoefficient);
+  const evaporationFactor = useSimulationStore((s) => s.evaporationFactor);
   const fogIntensity = useSimulationStore((s) => s.fogIntensity);
+  const simState = useSimulationStore((s) => s.simState);
+  const reservoir = useSimulationStore((s) => s.reservoir);
   const setOniValue = useSimulationStore((s) => s.setOniValue);
   const setRainValue = useSimulationStore((s) => s.setRainValue);
+  const setRunoffCoefficient = useSimulationStore(
+    (s) => s.setRunoffCoefficient,
+  );
+  const setEvaporationFactor = useSimulationStore(
+    (s) => s.setEvaporationFactor,
+  );
   const setFogIntensity = useSimulationStore((s) => s.setFogIntensity);
+  const metrics = buildDisplayMetrics(
+    simState,
+    null,
+    getCityProfile(reservoir),
+  );
 
   return (
     <div className="animate-in fade-in-50 space-y-8">
@@ -95,6 +116,91 @@ export function ClimateTab() {
         />
       </div>
 
+      <div className="grid gap-5 pt-4 sm:grid-cols-2">
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <Label className="flex items-center gap-2 text-base">
+              Coeficiente de escorrentía
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Info className="h-4 w-4 cursor-help text-muted-foreground" />
+                </TooltipTrigger>
+                <TooltipContent className="max-w-xs">
+                  <p>
+                    Fracción de la lluvia efectiva que entra al embalse como
+                    caudal superficial.
+                  </p>
+                </TooltipContent>
+              </Tooltip>
+            </Label>
+            <span className="font-mono text-sm text-muted-foreground">
+              {formatPct(runoffCoefficient * 100, 0)}
+            </span>
+          </div>
+          <Slider
+            value={[runoffCoefficient]}
+            onValueChange={(val) => setRunoffCoefficient(val[0])}
+            max={1}
+            min={0.05}
+            step={0.01}
+            className="w-full"
+          />
+        </div>
+
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <Label className="flex items-center gap-2 text-base">
+              Factor de evaporación
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Info className="h-4 w-4 cursor-help text-muted-foreground" />
+                </TooltipTrigger>
+                <TooltipContent className="max-w-xs">
+                  <p>
+                    Multiplicador aplicado a la evaporación mensual calculada
+                    por ONI y área de cuenca.
+                  </p>
+                </TooltipContent>
+              </Tooltip>
+            </Label>
+            <span className="font-mono text-sm text-muted-foreground">
+              x{evaporationFactor.toFixed(2)}
+            </span>
+          </div>
+          <Slider
+            value={[evaporationFactor]}
+            onValueChange={(val) => setEvaporationFactor(val[0])}
+            max={2.5}
+            min={0.25}
+            step={0.05}
+            className="w-full"
+          />
+        </div>
+      </div>
+
+      <div className="grid gap-3 rounded-lg border border-border bg-muted/20 p-4 sm:grid-cols-3">
+        <div>
+          <p className="text-xs text-muted-foreground">Entrada calculada</p>
+          <p className="font-mono text-sm">
+            {formatMcm(metrics.inflowMcmPerMonth)} Mm³/mes
+          </p>
+        </div>
+        <div>
+          <p className="text-xs text-muted-foreground">Evaporación</p>
+          <p className="font-mono text-sm">
+            {formatMcm(metrics.evaporationMcmPerMonth)} Mm³/mes
+          </p>
+        </div>
+        <div>
+          <p className="text-xs text-muted-foreground">
+            Probabilidad de incendios
+          </p>
+          <p className="font-mono text-sm">
+            {formatPct(metrics.fireProbabilityPct, 0)}
+          </p>
+        </div>
+      </div>
+
       <div className="space-y-4 pt-4">
         <div className="flex items-center justify-between">
           <Label htmlFor="fog" className="flex items-center gap-2 text-base">
@@ -105,8 +211,8 @@ export function ClimateTab() {
               </TooltipTrigger>
               <TooltipContent className="max-w-xs">
                 <p>
-                  Controla la densidad visual que oculta los límites del
-                  terreno y del canvas en los bordes de la vista.
+                  Controla la densidad visual que oculta los límites del terreno
+                  y del canvas en los bordes de la vista.
                 </p>
               </TooltipContent>
             </Tooltip>

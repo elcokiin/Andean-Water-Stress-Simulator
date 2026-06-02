@@ -7,8 +7,14 @@ import { createInitialState, run, step } from "../model";
 const baseParams = {
   oni: 0,
   rainMm: 85,
-  demandLpcd: 148,
+  runoffCoefficient: 0.48,
+  demandLpcd: cityProfiles.tunja.perCapitaDemandLpcd,
+  industrialDemandMcmMonth: cityProfiles.tunja.industrialDemandMcmMonth,
+  agriculturalDemandMcmMonth: cityProfiles.tunja.agriculturalDemandMcmMonth,
   efficiencyPct: 62,
+  evaporationFactor: 1,
+  birthRateAnnual: cityProfiles.tunja.birthRateAnnual,
+  migrationRateAnnual: cityProfiles.tunja.migrationRateAnnual,
   rationingActive: false,
 } as const;
 
@@ -68,6 +74,19 @@ describe("metrics: buildDisplayMetrics", () => {
       cityProfiles.tunja,
     );
     expect(metrics.population).toBeGreaterThan(cityProfiles.tunja.population);
+  });
+
+  it("reports separated demand and fire-risk metrics", () => {
+    const state = createInitialState(cityProfiles.tunja, "baseline");
+    const next = step(state, { ...baseParams, oni: 2 }, cityProfiles.tunja);
+    const metrics = buildDisplayMetrics(next, state, cityProfiles.tunja);
+    expect(metrics.domesticDemandMcmPerMonth).toBeGreaterThan(0);
+    expect(metrics.industrialDemandMcmPerMonth).toBeGreaterThan(0);
+    expect(metrics.agriculturalDemandMcmPerMonth).toBeGreaterThan(0);
+    expect(metrics.totalDemandMcmPerMonth).toBeGreaterThan(
+      metrics.domesticDemandMcmPerMonth,
+    );
+    expect(metrics.fireProbabilityPct).toBeGreaterThan(0);
   });
 });
 

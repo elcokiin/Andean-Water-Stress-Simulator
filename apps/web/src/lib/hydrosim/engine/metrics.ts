@@ -8,10 +8,16 @@ export interface DisplayMetrics {
   reservoirPctDelta: number;
   inflowMcmPerMonth: number;
   rechargeMcmPerMonth: number;
+  domesticDemandMcmPerMonth: number;
+  industrialDemandMcmPerMonth: number;
+  agriculturalDemandMcmPerMonth: number;
+  totalDemandMcmPerMonth: number;
+  networkLossMcmPerMonth: number;
   extractionMcmPerMonth: number;
   evaporationMcmPerMonth: number;
   filtrationMcmPerMonth: number;
   aquiferExtractionMcmPerMonth: number;
+  fireProbabilityPct: number;
   netBalanceMcmPerMonth: number;
   extractionM3PerSecond: number;
   inflowM3PerSecond: number;
@@ -36,6 +42,11 @@ function flowsToMcm(flows: SimFlows) {
   return {
     inflow: flows.inflow / M3_PER_MCM,
     recharge: flows.recharge / M3_PER_MCM,
+    domesticDemand: flows.domesticDemand / M3_PER_MCM,
+    industrialDemand: flows.industrialDemand / M3_PER_MCM,
+    agriculturalDemand: flows.agriculturalDemand / M3_PER_MCM,
+    totalDemand: flows.totalDemand / M3_PER_MCM,
+    networkLoss: flows.networkLoss / M3_PER_MCM,
     extraction: flows.extraction / M3_PER_MCM,
     evaporation: flows.evaporation / M3_PER_MCM,
     filtration: flows.filtration / M3_PER_MCM,
@@ -64,10 +75,16 @@ export function buildDisplayMetrics(
       : 0,
     inflowMcmPerMonth: flows.inflow,
     rechargeMcmPerMonth: flows.recharge,
+    domesticDemandMcmPerMonth: flows.domesticDemand,
+    industrialDemandMcmPerMonth: flows.industrialDemand,
+    agriculturalDemandMcmPerMonth: flows.agriculturalDemand,
+    totalDemandMcmPerMonth: flows.totalDemand,
+    networkLossMcmPerMonth: flows.networkLoss,
     extractionMcmPerMonth: flows.extraction,
     evaporationMcmPerMonth: flows.evaporation,
     filtrationMcmPerMonth: flows.filtration,
     aquiferExtractionMcmPerMonth: flows.aquiferExtraction,
+    fireProbabilityPct: state.flows.fireProbability * 100,
     netBalanceMcmPerMonth: net,
     extractionM3PerSecond: state.flows.extraction / SECONDS_PER_MONTH,
     inflowM3PerSecond: state.flows.inflow / SECONDS_PER_MONTH,

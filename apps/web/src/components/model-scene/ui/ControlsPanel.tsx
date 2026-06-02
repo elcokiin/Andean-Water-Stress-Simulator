@@ -276,6 +276,16 @@ export function ControlsPanel() {
             hint={`${formatM3PerSecond(metrics.extractionM3PerSecond)} m³/s`}
           />
           <Metric
+            label="Demanda"
+            value={`${formatMcm(metrics.totalDemandMcmPerMonth)} Mm³/mes`}
+            hint="Dom + ind + agr"
+          />
+          <Metric
+            label="Evaporacion"
+            value={`${formatMcm(metrics.evaporationMcmPerMonth)} Mm³/mes`}
+            hint={`Incendio ${formatPct(metrics.fireProbabilityPct, 0)}`}
+          />
+          <Metric
             label="Páramo"
             value={formatPct(metrics.paramoCoverage * 100, 1)}
             hint={metrics.paramoCoverage < 0.4 ? "Degradado" : "Sano"}

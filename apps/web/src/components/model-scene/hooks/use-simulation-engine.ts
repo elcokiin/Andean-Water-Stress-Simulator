@@ -44,8 +44,18 @@ export function useSimulationEngine() {
   const isPlaying = useSimulationStore((s) => s.isPlaying);
   const oniValue = useSimulationStore((s) => s.oniValue);
   const rainValue = useSimulationStore((s) => s.rainValue);
+  const runoffCoefficient = useSimulationStore((s) => s.runoffCoefficient);
   const demandValue = useSimulationStore((s) => s.demandValue);
+  const industrialDemandValue = useSimulationStore(
+    (s) => s.industrialDemandValue,
+  );
+  const agriculturalDemandValue = useSimulationStore(
+    (s) => s.agriculturalDemandValue,
+  );
   const efficiencyValue = useSimulationStore((s) => s.efficiencyValue);
+  const evaporationFactor = useSimulationStore((s) => s.evaporationFactor);
+  const birthRateAnnual = useSimulationStore((s) => s.birthRateAnnual);
+  const migrationRateAnnual = useSimulationStore((s) => s.migrationRateAnnual);
   const rationingActive = useSimulationStore((s) => s.rationingActive);
   const simulationSpeed = useSimulationStore((s) => s.simulationSpeed);
   const setSimState = useSimulationStore((s) => s.setSimState);
@@ -86,8 +96,14 @@ export function useSimulationEngine() {
 
       const sharedParams = {
         rainMm: current.rainValue,
+        runoffCoefficient: current.runoffCoefficient,
         demandLpcd: current.demandValue,
+        industrialDemandMcmMonth: current.industrialDemandValue,
+        agriculturalDemandMcmMonth: current.agriculturalDemandValue,
         efficiencyPct: current.efficiencyValue,
+        evaporationFactor: current.evaporationFactor,
+        birthRateAnnual: current.birthRateAnnual,
+        migrationRateAnnual: current.migrationRateAnnual,
         rationingActive: current.rationingActive,
       };
 
@@ -129,8 +145,14 @@ export function useSimulationEngine() {
     reservoir,
     oniValue,
     rainValue,
+    runoffCoefficient,
     demandValue,
+    industrialDemandValue,
+    agriculturalDemandValue,
     efficiencyValue,
+    evaporationFactor,
+    birthRateAnnual,
+    migrationRateAnnual,
     rationingActive,
     simulationSpeed,
   ]);

@@ -18,8 +18,14 @@ const tunja = cityProfiles.tunja;
 const baseParams = {
   oni: 0,
   rainMm: 85,
-  demandLpcd: 148,
+  runoffCoefficient: 0.48,
+  demandLpcd: tunja.perCapitaDemandLpcd,
+  industrialDemandMcmMonth: tunja.industrialDemandMcmMonth,
+  agriculturalDemandMcmMonth: tunja.agriculturalDemandMcmMonth,
   efficiencyPct: 62,
+  evaporationFactor: 1,
+  birthRateAnnual: tunja.birthRateAnnual,
+  migrationRateAnnual: tunja.migrationRateAnnual,
   rationingActive: false,
 };
 
