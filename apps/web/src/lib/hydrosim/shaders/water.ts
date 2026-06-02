@@ -2,13 +2,11 @@ export const MAX_RIPPLES = 12;
 
 export const WATER_SURFACE_VERTEX = `
   attribute float aShore;
-  varying vec2 vUv;
   varying vec3 vWorldPosition;
   varying vec3 vLocalPosition;
   varying float vShore;
 
   void main() {
-    vUv = uv;
     vLocalPosition = position;
     vec4 worldPosition = modelMatrix * vec4(position, 1.0);
     vWorldPosition = worldPosition.xyz;
@@ -31,7 +29,8 @@ export const WATER_SURFACE_FRAGMENT = `
   uniform vec2 uRippleCenters[${MAX_RIPPLES}];
   uniform float uRippleTimes[${MAX_RIPPLES}];
 
-  varying vec2 vUv;
+  uniform sampler2D uWaterSim;
+
   varying vec3 vWorldPosition;
   varying vec3 vLocalPosition;
   varying float vShore;
@@ -54,9 +53,16 @@ export const WATER_SURFACE_FRAGMENT = `
   void main() {
     vec2 pos = vLocalPosition.xy;
     float height = rippleHeight(pos);
+    
+    vec2 simUv = pos / uBounds * 0.5 + 0.5;
+    vec4 simData = texture2D(uWaterSim, simUv);
+    height += simData.r * 2.0;
+
     float dx = dFdx(height);
     float dy = dFdy(height);
-    vec3 normal = normalize(vec3(-dx, -dy, 1.0));
+    
+    vec3 gpuNorm = vec3(simData.b, simData.a, sqrt(1.0 - dot(simData.ba, simData.ba)));
+    vec3 normal = normalize(vec3(-dx, -dy, 1.0) + gpuNorm * 0.4);
 
     vec3 viewDir = normalize(cameraPosition - vWorldPosition);
     float fresnel = pow(1.0 - max(dot(normal, viewDir), 0.0), 3.0);
@@ -77,7 +83,6 @@ export const WATER_SURFACE_FRAGMENT = `
 `;
 
 export const BED_VERTEX = `
-  varying vec2 vUv;
   varying vec3 vLocalPosition;
   varying float vDepth;
 
@@ -85,7 +90,6 @@ export const BED_VERTEX = `
   uniform vec2 uBounds;
 
   void main() {
-    vUv = uv;
     vec3 displaced = position;
     vec2 scaled = displaced.xy / uBounds;
     float radial = clamp(length(scaled), 0.0, 1.0);
@@ -105,7 +109,8 @@ export const BED_FRAGMENT = `
   uniform vec3 uBedColor;
   uniform vec3 uCausticsColor;
 
-  varying vec2 vUv;
+  uniform sampler2D uCausticsTex;
+
   varying vec3 vLocalPosition;
   varying float vDepth;
 
@@ -126,7 +131,10 @@ export const BED_FRAGMENT = `
     vec3 baseColor = mix(uBedColor, uBedColor * 0.55, depth * 0.5 + depthShade * 0.5);
 
     float causticMask = caustics(scaled);
-    vec3 causticColor = uCausticsColor * causticMask * uCausticsStrength;
+    vec2 causticUv = vLocalPosition.xy / uBounds * 0.5 + 0.5;
+    float gpuCaustics = texture2D(uCausticsTex, causticUv).r;
+    
+    vec3 causticColor = uCausticsColor * max(causticMask * uCausticsStrength, (gpuCaustics * 2.0));
 
     gl_FragColor = vec4(baseColor + causticColor, 1.0);
   }

@@ -23,7 +23,7 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
-
+.turbo/cache
 
 .reference/
 ./DOMAIN_DOC.html
