@@ -22,12 +22,6 @@ const INITIAL_RIPPLE_CENTERS = Array.from(
 );
 const INITIAL_RIPPLE_TIMES = Array.from({ length: MAX_RIPPLES }, () => -1000);
 
-interface TerrainStats {
-  minH: number;
-  maxH: number;
-  avgH: number;
-}
-
 function seededNoise(value: number) {
   return Math.sin(value * 12.9898) * 43758.5453;
 }
@@ -277,38 +271,17 @@ export function ReservoirWater({
   const bedGeometry = useMemo(() => {
     const geometry = waterGeometry.clone();
     const positions = geometry.attributes.position as THREE.BufferAttribute;
-    let minH = Infinity;
-    let maxH = -Infinity;
-    let sumH = 0;
-    let countH = 0;
     for (let i = 0; i < positions.count; i++) {
       const x = positions.getX(i);
       const y = positions.getY(i);
       const terrainHeight = terrainSampler.getHeight(x, y);
-      positions.setZ(i, terrainHeight);
-      if (terrainHeight < minH) minH = terrainHeight;
-      if (terrainHeight > maxH) maxH = terrainHeight;
-      sumH += terrainHeight;
-      countH += 1;
+      const clamped = Math.min(terrainHeight, waterElevation);
+      positions.setZ(i, clamped);
     }
     positions.needsUpdate = true;
     geometry.computeVertexNormals();
-    const stats: TerrainStats = {
-      minH,
-      maxH,
-      avgH: sumH / Math.max(1, countH),
-    };
-    (geometry as unknown as { __terrainStats: TerrainStats }).__terrainStats =
-      stats;
     return geometry;
-  }, [terrainSampler, waterGeometry]);
-
-  const bedPositionY = useMemo(() => {
-    const stats = (bedGeometry as unknown as { __terrainStats?: TerrainStats })
-      .__terrainStats;
-    if (!stats) return -0.055;
-    return stats.avgH - 0.02;
-  }, [bedGeometry]);
+  }, [terrainSampler, waterGeometry, waterElevation]);
 
   const sim = useMemo(() => new WaterSimulation(256), []);
   const caustics = useMemo(() => new Caustics(1024), []);
@@ -461,7 +434,7 @@ export function ReservoirWater({
           receiveShadow
           geometry={bedGeometry}
           material={bedMaterial}
-          position={[0, bedPositionY, 0]}
+          position={[0, 0, -waterElevation]}
         />
       </group>
       <mesh
