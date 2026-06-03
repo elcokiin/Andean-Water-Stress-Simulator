@@ -122,7 +122,7 @@ export const useSimulationStore = create<SimulationState>((set, get) => ({
   birthRateAnnual: getCityProfile("tunja").birthRateAnnual,
   migrationRateAnnual: getCityProfile("tunja").migrationRateAnnual,
   rationingActive: false,
-  fogIntensity: 0.8,
+  fogIntensity: 0.2,
   chartsPanelOpen: false,
   simState: {
     month: 0,
