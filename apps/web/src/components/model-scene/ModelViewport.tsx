@@ -28,51 +28,148 @@ function SceneReadyMarker() {
   return null;
 }
 
-function ModelLoadingOverlay({ theme }: { theme: "light" | "dark" }) {
+function ModelLoadingOverlay({
+  cityName,
+  theme,
+}: {
+  cityName: string;
+  theme: "light" | "dark";
+}) {
   const isNight = theme === "dark";
 
   return (
-    <div className="pointer-events-none absolute inset-0 z-[2] flex items-center justify-center px-6">
+    <div
+      className="pointer-events-none absolute inset-0 z-[2] flex items-center justify-center px-6"
+      aria-live="polite"
+      aria-label="Cargando modelo 3D"
+    >
       <div
-        className={`relative grid place-items-center rounded-[10px] border px-5 py-4 shadow-2xl backdrop-blur-md ${
+        className={`relative w-[min(440px,calc(100vw-2rem))] overflow-hidden rounded-[10px] border px-5 py-5 shadow-2xl backdrop-blur-xl ${
           isNight
-            ? "border-sky-200/20 bg-[#081527]/75 text-sky-50"
-            : "border-sky-900/10 bg-sky-50/78 text-slate-900"
+            ? "border-cyan-100/18 bg-[#061421]/82 text-sky-50 shadow-cyan-950/50"
+            : "border-sky-900/12 bg-[#f3fbff]/82 text-slate-950 shadow-sky-950/12"
         }`}
       >
-        <div className="absolute inset-0 rounded-[10px] bg-[radial-gradient(circle_at_50%_0%,rgba(125,211,252,0.24),transparent_62%)]" />
-        <div className="relative flex items-center gap-4">
-          <div className="relative size-12">
-            <div
-              className={`absolute inset-0 rounded-full border ${
-                isNight ? "border-sky-100/20" : "border-sky-900/15"
-              }`}
-            />
-            <div
-              className={`absolute inset-1 animate-spin rounded-full border-2 border-transparent ${
-                isNight ? "border-t-cyan-200" : "border-t-sky-700"
-              }`}
-            />
-            <div
-              className={`absolute inset-3 rounded-full ${
-                isNight ? "bg-cyan-200/80" : "bg-sky-700/85"
-              }`}
-            />
-            <div
-              className={`absolute right-1 bottom-2 left-1 h-3 rounded-b-full ${
-                isNight ? "bg-blue-300/35" : "bg-cyan-600/25"
-              }`}
-            />
+        <div
+          className={`absolute inset-0 ${
+            isNight
+              ? "bg-[linear-gradient(145deg,rgba(8,28,52,0.38),rgba(2,8,23,0.78)),radial-gradient(ellipse_at_20%_18%,rgba(34,211,238,0.15),transparent_48%),radial-gradient(ellipse_at_86%_74%,rgba(59,130,246,0.12),transparent_50%)]"
+              : "bg-[linear-gradient(145deg,rgba(240,249,255,0.78),rgba(224,242,254,0.44)),radial-gradient(ellipse_at_18%_20%,rgba(14,165,233,0.16),transparent_46%),radial-gradient(ellipse_at_82%_78%,rgba(45,212,191,0.14),transparent_48%)]"
+          }`}
+        />
+        <div
+          className={`absolute inset-x-5 top-0 h-px ${
+            isNight
+              ? "bg-gradient-to-r from-transparent via-cyan-200/65 to-transparent"
+              : "bg-gradient-to-r from-transparent via-sky-600/45 to-transparent"
+          }`}
+        />
+
+        <div className="relative grid gap-5">
+          <div className="flex items-center gap-4">
+            <div className="relative grid size-24 shrink-0 place-items-center">
+              <div
+                className={`absolute inset-0 rounded-full border ${
+                  isNight ? "border-cyan-100/18" : "border-sky-900/12"
+                }`}
+              />
+              <div
+                className={`absolute inset-2 animate-[spin_7s_linear_infinite] rounded-full border border-dashed ${
+                  isNight ? "border-cyan-100/30" : "border-sky-900/20"
+                }`}
+              />
+              <div
+                className={`absolute inset-5 animate-[spin_5s_linear_infinite_reverse] rounded-full border ${
+                  isNight ? "border-blue-200/22" : "border-cyan-700/20"
+                }`}
+              />
+              <div
+                className={`absolute h-16 w-4 -rotate-45 rounded-full blur-[1px] ${
+                  isNight
+                    ? "bg-gradient-to-b from-cyan-100/0 via-cyan-200/70 to-blue-400/0"
+                    : "bg-gradient-to-b from-sky-700/0 via-sky-700/55 to-cyan-500/0"
+                }`}
+              />
+              <div
+                className={`absolute left-7 top-8 size-2 animate-pulse rounded-full ${
+                  isNight ? "bg-cyan-100" : "bg-sky-700"
+                }`}
+              />
+              <div
+                className={`absolute right-7 bottom-7 size-1.5 animate-pulse rounded-full [animation-delay:350ms] ${
+                  isNight ? "bg-blue-200" : "bg-cyan-700"
+                }`}
+              />
+              <div
+                className={`relative size-8 rounded-full border ${
+                  isNight
+                    ? "border-cyan-100/45 bg-cyan-200/18 shadow-[0_0_30px_rgba(103,232,249,0.28)]"
+                    : "border-sky-700/35 bg-sky-600/12 shadow-[0_0_26px_rgba(14,116,144,0.18)]"
+                }`}
+              >
+                <div
+                  className={`absolute inset-x-1 bottom-1 h-3 rounded-b-full hydro-loader-wave ${
+                    isNight ? "bg-cyan-200/50" : "bg-sky-700/35"
+                  }`}
+                />
+              </div>
+            </div>
+
+            <div className="min-w-0 flex-1">
+              <p
+                className={`text-[0.62rem] font-semibold uppercase tracking-[0.22em] ${
+                  isNight ? "text-cyan-100/62" : "text-sky-900/55"
+                }`}
+              >
+                Modelo hidrológico
+              </p>
+              <h2 className="mt-1 text-2xl font-semibold tracking-normal">
+                Cuenca {cityName}
+              </h2>
+              <p
+                className={`mt-1 text-sm ${
+                  isNight ? "text-sky-100/70" : "text-slate-600"
+                }`}
+              >
+                Sincronizando relieve, agua y vegetación
+              </p>
+            </div>
           </div>
-          <div className="min-w-0">
-            <p className="text-sm font-semibold">Preparando cuenca 3D</p>
-            <p
-              className={`text-xs ${
-                isNight ? "text-sky-100/72" : "text-slate-600"
+
+          <div className="grid gap-2">
+            <div
+              className={`relative h-1.5 overflow-hidden rounded-full ${
+                isNight ? "bg-cyan-100/10" : "bg-sky-900/10"
               }`}
             >
-              Cargando relieve, agua y vegetación
-            </p>
+              <div
+                className={`absolute inset-y-0 left-0 w-2/3 rounded-full hydro-loader-shimmer ${
+                  isNight
+                    ? "bg-gradient-to-r from-cyan-300/10 via-cyan-100/85 to-blue-300/10"
+                    : "bg-gradient-to-r from-sky-700/10 via-sky-700/70 to-cyan-600/10"
+                }`}
+              />
+            </div>
+            <div className="flex items-center justify-between gap-3">
+              <span
+                className={`text-xs ${
+                  isNight ? "text-sky-100/58" : "text-slate-500"
+                }`}
+              >
+                Preparando simulación
+              </span>
+              <span className="flex items-center gap-1" aria-hidden>
+                {[0, 1, 2].map((index) => (
+                  <span
+                    key={index}
+                    className={`size-1.5 rounded-full hydro-loader-dot ${
+                      isNight ? "bg-cyan-100/80" : "bg-sky-700/70"
+                    }`}
+                    style={{ animationDelay: `${index * 160}ms` }}
+                  />
+                ))}
+              </span>
+            </div>
           </div>
         </div>
       </div>
@@ -177,7 +274,9 @@ export function ModelViewport() {
           </Suspense>
         </Canvas>
       ) : null}
-      {!modelSceneReady ? <ModelLoadingOverlay theme={theme} /> : null}
+      {!modelSceneReady ? (
+        <ModelLoadingOverlay cityName={city.name} theme={theme} />
+      ) : null}
       <div
         className={`model-viewport-mist ${
           theme === "dark" ? "model-viewport-mist-dark" : ""

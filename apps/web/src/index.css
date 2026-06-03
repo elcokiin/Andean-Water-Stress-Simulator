@@ -214,6 +214,55 @@
   --mist-edge-color: rgba(16, 36, 61, 0.96);
 }
 
+@keyframes hydro-loader-shimmer {
+  0% {
+    transform: translateX(-85%);
+    opacity: 0.45;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(185%);
+    opacity: 0.45;
+  }
+}
+
+@keyframes hydro-loader-wave {
+  0%,
+  100% {
+    transform: translateY(0) scaleX(0.94);
+  }
+  50% {
+    transform: translateY(-3px) scaleX(1.08);
+  }
+}
+
+@keyframes hydro-loader-dot {
+  0%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.42;
+  }
+  50% {
+    transform: translateY(-4px);
+    opacity: 1;
+  }
+}
+
+.hydro-loader-shimmer {
+  animation: hydro-loader-shimmer 1.75s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+.hydro-loader-wave {
+  animation: hydro-loader-wave 1.8s ease-in-out infinite;
+  transform-origin: center bottom;
+}
+
+.hydro-loader-dot {
+  animation: hydro-loader-dot 1.05s ease-in-out infinite;
+}
+
 .hydrosim-driver-popover {
   max-width: min(360px, calc(100vw - 2rem));
   border: 1px solid color-mix(in oklch, var(--border), transparent 12%);
