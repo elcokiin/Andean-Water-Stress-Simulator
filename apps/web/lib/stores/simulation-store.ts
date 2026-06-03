@@ -106,7 +106,7 @@ export const useSimulationStore = create<SimulationState>((set, get) => ({
   simulationSpeed: 1,
   configOpen: false,
   configTab: "scenarios",
-  controlsPanelMinimized: false,
+  controlsPanelMinimized: true,
   ambientAudioEnabled: false,
   showShortcutHints: true,
   isDialogExpanded: false,
@@ -123,7 +123,7 @@ export const useSimulationStore = create<SimulationState>((set, get) => ({
   migrationRateAnnual: getCityProfile("tunja").migrationRateAnnual,
   rationingActive: false,
   fogIntensity: 0.8,
-  chartsPanelOpen: true,
+  chartsPanelOpen: false,
   simState: {
     month: 0,
     reservoirPct: 68,

@@ -34,7 +34,6 @@ export function ChartsPanel() {
   if (!open) {
     return (
       <Card className="absolute top-3 right-3 z-10 rounded-[10px] border-border/80 bg-background/90 p-2 shadow-xl backdrop-blur-sm">
-        <ShortcutFlag hidden={!showShortcutHints} hotkey={CHARTS_HOTKEY} />
         <CardContent className="flex items-center gap-1.5 p-0">
           <Tooltip>
             <TooltipTrigger asChild>

@@ -1,4 +1,11 @@
-import { Minimize2, Pause, Play, RotateCcw, Settings } from "lucide-react";
+import {
+  Maximize2,
+  Minimize2,
+  Pause,
+  Play,
+  RotateCcw,
+  Settings,
+} from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -71,11 +78,34 @@ export function ControlsPanel() {
   if (isMinimized) {
     return (
       <Card className="absolute right-3 bottom-3 z-10 rounded-[10px] border-border/80 bg-background/90 p-2 shadow-xl backdrop-blur-sm sm:right-auto sm:left-4">
-        <ShortcutFlag
-          hidden={!showShortcutHints}
-          hotkey={CONTROLS_PANEL_HOTKEY}
-        />
         <CardContent className="flex items-center gap-1.5 p-0">
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="outline"
+                size="icon"
+                className="relative size-10 rounded-[8px]"
+                onClick={toggleControlsPanelMinimized}
+                aria-label="Expandir panel de control"
+                data-tour="controls-panel"
+              >
+                <ShortcutFlag
+                  className={compactFlagClassName}
+                  hidden={!showShortcutHints}
+                  hotkey={CONTROLS_PANEL_HOTKEY}
+                />
+                <Maximize2 />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              Expandir panel{" "}
+              <ShortcutBadge
+                hidden={!showShortcutHints}
+                hotkey={CONTROLS_PANEL_HOTKEY}
+              />
+            </TooltipContent>
+          </Tooltip>
+
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
