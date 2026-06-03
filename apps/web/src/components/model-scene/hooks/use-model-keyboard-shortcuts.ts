@@ -10,7 +10,7 @@ export function useModelKeyboardShortcuts() {
 
   useHotkey("Space", () => {
     const store = useSimulationStore.getState();
-    if (store.simState.collapse) return;
+    if (!store.modelSceneReady || store.simState.collapse) return;
     store.togglePlayback();
   });
 

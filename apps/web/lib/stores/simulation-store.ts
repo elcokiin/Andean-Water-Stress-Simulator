@@ -25,6 +25,7 @@ interface SimulationState {
   configOpen: boolean;
   configTab: ConfigTab;
   controlsPanelMinimized: boolean;
+  modelSceneReady: boolean;
   ambientAudioEnabled: boolean;
   showShortcutHints: boolean;
   isDialogExpanded: boolean;
@@ -64,6 +65,7 @@ interface SimulationState {
   setReservoir: (reservoir: ReservoirId) => void;
   setWaterVisible: (reservoir: ReservoirId, visible: boolean) => void;
   togglePlayback: () => void;
+  setModelSceneReady: (ready: boolean) => void;
   setSimulationSpeed: (speed: number) => void;
   setConfigOpen: (open: boolean) => void;
   setConfigTab: (tab: ConfigTab) => void;
@@ -107,6 +109,7 @@ export const useSimulationStore = create<SimulationState>((set, get) => ({
   configOpen: false,
   configTab: "scenarios",
   controlsPanelMinimized: true,
+  modelSceneReady: false,
   ambientAudioEnabled: false,
   showShortcutHints: true,
   isDialogExpanded: false,
@@ -183,7 +186,16 @@ export const useSimulationStore = create<SimulationState>((set, get) => ({
         [reservoir]: visible,
       },
     })),
-  togglePlayback: () => set((state) => ({ isPlaying: !state.isPlaying })),
+  togglePlayback: () =>
+    set((state) => {
+      if (!state.modelSceneReady || state.simState.collapse) return state;
+      return { isPlaying: !state.isPlaying };
+    }),
+  setModelSceneReady: (modelSceneReady) =>
+    set((state) => ({
+      modelSceneReady,
+      isPlaying: modelSceneReady ? state.isPlaying : false,
+    })),
   setSimulationSpeed: (simulationSpeed) =>
     set({
       simulationSpeed: Math.min(

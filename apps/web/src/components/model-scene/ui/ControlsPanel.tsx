@@ -46,6 +46,7 @@ const compactFlagClassName =
 export function ControlsPanel() {
   const isPlaying = useSimulationStore((s) => s.isPlaying);
   const isMinimized = useSimulationStore((s) => s.controlsPanelMinimized);
+  const modelSceneReady = useSimulationStore((s) => s.modelSceneReady);
   const showShortcutHints = useSimulationStore((s) => s.showShortcutHints);
   const scenario = useSimulationStore((s) => s.scenario);
   const simState = useSimulationStore((s) => s.simState);
@@ -74,6 +75,12 @@ export function ControlsPanel() {
   const simulationSpeedLabel = Number.isInteger(simulationSpeed)
     ? simulationSpeed.toFixed(0)
     : simulationSpeed.toFixed(2).replace(/0$/, "");
+  const playbackDisabled = !modelSceneReady || metrics.collapse;
+  const playbackLabel = !modelSceneReady
+    ? "Cargando modelo 3D"
+    : isPlaying
+      ? "Pausar simulacion"
+      : "Iniciar simulacion";
 
   if (isMinimized) {
     return (
@@ -113,9 +120,8 @@ export function ControlsPanel() {
                 size="icon"
                 className="relative size-10 rounded-[8px]"
                 onClick={togglePlayback}
-                aria-label={
-                  isPlaying ? "Pausar simulacion" : "Iniciar simulacion"
-                }
+                disabled={playbackDisabled}
+                aria-label={playbackLabel}
               >
                 <ShortcutFlag
                   className={compactFlagClassName}
@@ -126,7 +132,7 @@ export function ControlsPanel() {
               </Button>
             </TooltipTrigger>
             <TooltipContent>
-              {isPlaying ? "Pausar simulacion" : "Iniciar simulacion"}{" "}
+              {playbackLabel}{" "}
               <ShortcutBadge
                 hidden={!showShortcutHints}
                 hotkey={PLAYBACK_HOTKEY}
@@ -368,8 +374,8 @@ export function ControlsPanel() {
             variant={isPlaying ? "secondary" : "default"}
             className="relative h-10 rounded-[8px]"
             onClick={togglePlayback}
-            disabled={metrics.collapse}
-            aria-label={isPlaying ? "Pausar simulacion" : "Iniciar simulacion"}
+            disabled={playbackDisabled}
+            aria-label={playbackLabel}
           >
             <ShortcutFlag
               className={compactFlagClassName}
