@@ -9,6 +9,11 @@ export default defineConfig({
       title: "Proyecto Final Docs",
       description:
         "Documentacion del modelo de colapso hidrico regional y sus diagramas de simulacion.",
+      logo: {
+        src: "./src/assets/hydrosim-logo.svg",
+        alt: "HydroSim",
+      },
+      favicon: "/favicon.svg",
       customCss: ["./src/styles/custom.css"],
       sidebar: [
         {

@@ -6,10 +6,10 @@ import {
   Music,
   Sun,
   VolumeOff,
-  Waves,
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 
+import { AppLogo } from "@/src/components/AppLogo";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { ShortcutBadge, ShortcutFlag } from "@/components/ui/shortcut-flag";
@@ -136,7 +136,7 @@ export function TitleBar() {
         </Button>
         <Separator orientation="vertical" className="h-5" />
         <div className="flex min-w-0 items-center gap-2">
-          <Waves className="shrink-0 text-primary" aria-hidden="true" />
+          <AppLogo className="h-6 w-6 rounded-[7px]" />
           <h1 className="truncate text-sm font-bold tracking-tight text-foreground sm:text-base">
             {city.title}
           </h1>

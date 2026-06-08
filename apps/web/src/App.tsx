@@ -10,11 +10,11 @@ import {
   Moon,
   Sun,
   ArrowRight,
-  Activity,
   ChevronRight,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 
+import { AppLogo } from "@/src/components/AppLogo";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -144,9 +144,7 @@ function App() {
       <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/60 backdrop-blur-xl transition-all">
         <div className="mx-auto flex h-16 max-w-[1200px] items-center justify-between px-6">
           <div className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-sm">
-              <Activity size={18} strokeWidth={2.5} />
-            </div>
+            <AppLogo className="h-8 w-8" />
             <span className="text-lg font-bold tracking-tight text-foreground">
               HydroSim
             </span>

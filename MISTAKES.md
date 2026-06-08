@@ -14,3 +14,4 @@
 - I tried to run workspace scripts with `bun --cwd apps/web run ...`, which printed Bun help instead of running the scripts; run from the package directory or use Bun's supported workspace flags.
 - I initially added industrial and agricultural demand defaults that were too large for the documented 41.2 Mm³ Teatinos capacity, causing the baseline scenario to collapse in engine tests. Calibrate new sector loads against the documented reservoir capacity before treating them as defaults.
 - I tried to fix the dark-mode sky by swapping the visible cubemap background, but Elemental Serenity uses the cubemap only for environment lighting and renders the actual day/night sky with a shader skydome. Check the reference implementation before assuming the visible background path.
+- I created `apps/docs/src/assets/hydrosim-logo.svg` with `cp` instead of `apply_patch`. Manual file creation in this repo should use `apply_patch` unless it is generated output.
