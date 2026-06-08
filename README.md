@@ -19,19 +19,7 @@ Astro documentation site, and reusable causal/system-flow diagrams.
 
 ## Demo Video
 
-> [!NOTE]
-> Add the simulator video here. The recording should focus on the Three.js model
-> in action; the landing page and documentation site do not need to be shown.
-
-<!--
-Recommended options:
-
-1. Upload the video to the repository or GitHub release assets and paste the URL:
-   https://github.com/user-attachments/assets/your-video-id
-
-2. Or keep a local preview asset:
-   <video src="./docs/demo.mp4" controls width="100%"></video>
--->
+https://github.com/user-attachments/assets/3164bf74-1ab3-4aaa-b26b-9b0ee491f59d
 
 ## Overview
 
