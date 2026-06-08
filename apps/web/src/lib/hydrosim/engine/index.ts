@@ -1,5 +1,8 @@
 export { cityProfiles, getCityProfile } from "./city-profiles";
 export {
+  BASE_EVAPORATION_FACTOR,
+  BASE_FIRE_PROBABILITY,
+  BASE_RUNOFF_COEFFICIENT,
   createInitialState,
   formatMonth,
   getCapacityM3,
@@ -15,6 +18,17 @@ export {
   formatPct,
   type DisplayMetrics,
 } from "./metrics";
+export {
+  clearHistoryBuffer,
+  createEmptyHistory,
+  HISTORY_CAPACITY,
+  pushHistory,
+  snapshotToEntry,
+  toSimState,
+  type HistoryBuffer,
+  type HistoryEntry,
+  type HistoryMap,
+} from "./history";
 export {
   AQUIFER_STRESS_DENOMINATOR_PCT,
   PNR_CONSECUTIVE_MONTHS,

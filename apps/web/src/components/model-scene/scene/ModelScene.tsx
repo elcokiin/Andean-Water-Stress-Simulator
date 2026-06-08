@@ -4,7 +4,6 @@ import { useCallback, useMemo, useRef } from "react";
 import { createTerrainSampler } from "@/src/lib/hydrosim/terrain-sampler";
 import { getRainIntensity } from "@/src/lib/hydrosim/rain-intensity";
 import type { CitySceneConfig } from "@/src/lib/hydrosim/types";
-import { CloudGroup } from "./CloudGroup";
 import { Rain, type RainRippleTarget } from "./Rain";
 import { TerrainMesh } from "./Terrain";
 import { ReservoirWater, type WaterSimHandle } from "./Water";
@@ -108,14 +107,6 @@ export function ModelScene({
       <ModelEnvironment theme={theme} />
       <ModelSky theme={theme} />
       <ModelLighting theme={theme} />
-      {city.clouds.map((cloud, index) => (
-        <CloudGroup
-          key={`${city.id}-cloud-${index}`}
-          mode={isNight ? "night" : "day"}
-          position={cloud.position}
-          scale={cloud.scale}
-        />
-      ))}
       {rainIntensity > 0 ? (
         <Rain
           intensity={rainIntensity}

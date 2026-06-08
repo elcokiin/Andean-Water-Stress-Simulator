@@ -1,7 +1,15 @@
 import { useEffect, useRef } from "react";
-import { ArrowLeft, HelpCircle, Moon, Music, Sun, VolumeOff, Waves } from "lucide-react";
+import {
+  ArrowLeft,
+  HelpCircle,
+  Moon,
+  Music,
+  Sun,
+  VolumeOff,
+} from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 
+import { AppLogo } from "@/src/components/AppLogo";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { ShortcutBadge, ShortcutFlag } from "@/components/ui/shortcut-flag";
@@ -15,6 +23,7 @@ import { useTheme } from "@/lib/theme-provider";
 import { useSimulationStore } from "@/lib/stores/simulation-store";
 import { getCitySceneConfig } from "@/src/lib/hydrosim/city-scenes";
 import type { ReservoirId } from "@/src/lib/hydrosim/types";
+import { useModelTour } from "../hooks/use-model-tour";
 
 const reservoirOptions: { id: ReservoirId; label: string }[] = [
   { id: "tunja", label: "Tunja" },
@@ -22,20 +31,24 @@ const reservoirOptions: { id: ReservoirId; label: string }[] = [
   { id: "sogamoso", label: "Sogamoso" },
 ];
 
-const CONFIG_HOTKEY = "C";
-const SHORTCUTS_HOTKEY = "Shift+/";
 const THEME_HOTKEY = "D";
 const AUDIO_HOTKEY = "M";
+const HELP_TOUR_HOTKEY = "H";
 const compactFlagClassName =
   "h-3.5 min-w-3.5 rounded-[3px] px-0.5 text-[0.5rem]";
 const AMBIENT_AUDIO_FADE_IN_START = 0.4;
 const AMBIENT_AUDIO_FADE_IN_DURATION_MS = 2000;
 const AMBIENT_AUDIO_LOOP_END_TRIM_S = 0.3;
+const AMBIENT_AUDIO_SRC_BY_THEME = {
+  light: "/nature.mp3",
+  dark: "/nature-night.mp3",
+} as const;
 
 export function TitleBar() {
   const audioRef = useRef<HTMLAudioElement>(null);
   const fadeFrameRef = useRef<number | null>(null);
   const { theme, toggle } = useTheme();
+  const ambientAudioSrc = AMBIENT_AUDIO_SRC_BY_THEME[theme];
   const navigate = useNavigate();
   const reservoir = useSimulationStore((s) => s.reservoir);
   const setReservoir = useSimulationStore((s) => s.setReservoir);
@@ -45,7 +58,7 @@ export function TitleBar() {
     (s) => s.setAmbientAudioEnabled,
   );
   const showShortcutHints = useSimulationStore((s) => s.showShortcutHints);
-  const setConfigOpen = useSimulationStore((s) => s.setConfigOpen);
+  const startModelTour = useModelTour();
   const city = getCitySceneConfig(reservoir);
 
   useEffect(() => {
@@ -102,17 +115,20 @@ export function TitleBar() {
       }
       audio.removeEventListener("timeupdate", handleTimeUpdate);
     };
-  }, [ambientAudioEnabled, setAmbientAudioEnabled]);
+  }, [ambientAudioEnabled, ambientAudioSrc, setAmbientAudioEnabled]);
 
   return (
     <div className="absolute top-4 left-1/2 z-10 -translate-x-1/2">
       <audio
         ref={audioRef}
-        src="/nature.mp3"
+        src={ambientAudioSrc}
         preload="auto"
         onError={() => setAmbientAudioEnabled(false)}
       />
-      <div className="flex max-w-[calc(100vw-2rem)] items-center gap-2 rounded-[10px] border border-border bg-background/85 px-3 py-2 shadow-lg backdrop-blur-sm sm:px-5">
+      <div
+        className="flex max-w-[calc(100vw-2rem)] items-center gap-2 rounded-[10px] border border-border bg-background/85 px-3 py-2 shadow-lg backdrop-blur-sm sm:px-5"
+        data-tour="title-bar"
+      >
         <Button variant="ghost" size="icon-sm" asChild aria-label="Volver">
           <Link to="/">
             <ArrowLeft />
@@ -120,7 +136,7 @@ export function TitleBar() {
         </Button>
         <Separator orientation="vertical" className="h-5" />
         <div className="flex min-w-0 items-center gap-2">
-          <Waves className="shrink-0 text-primary" aria-hidden="true" />
+          <AppLogo className="h-6 w-6 rounded-[7px]" />
           <h1 className="truncate text-sm font-bold tracking-tight text-foreground sm:text-base">
             {city.title}
           </h1>
@@ -143,6 +159,7 @@ export function TitleBar() {
           spacing={0}
           aria-label="Seleccionar embalse"
           className="shrink-0"
+          data-tour="city-selector"
         >
           {reservoirOptions.map((option) => (
             <ToggleGroupItem
@@ -160,23 +177,23 @@ export function TitleBar() {
               variant="ghost"
               size="icon-sm"
               className="relative"
-              onClick={() => setConfigOpen(true)}
-              aria-label="Abrir guia del modelo"
+              onClick={startModelTour}
+              aria-label="Iniciar tour del modelo"
+              data-tour="help-tour-button"
             >
               <ShortcutFlag
                 className={compactFlagClassName}
                 hidden={!showShortcutHints}
-                hotkey={CONFIG_HOTKEY}
+                hotkey={HELP_TOUR_HOTKEY}
               />
               <HelpCircle />
             </Button>
           </TooltipTrigger>
           <TooltipContent>
-            Guia del modelo{" "}
-            <ShortcutBadge hidden={!showShortcutHints} hotkey={CONFIG_HOTKEY} />
+            Iniciar tour del modelo{" "}
             <ShortcutBadge
               hidden={!showShortcutHints}
-              hotkey={SHORTCUTS_HOTKEY}
+              hotkey={HELP_TOUR_HOTKEY}
             />
           </TooltipContent>
         </Tooltip>

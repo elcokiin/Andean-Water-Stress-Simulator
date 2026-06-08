@@ -19,8 +19,15 @@ const TUNJA = cityProfiles.tunja;
 const baselineParams = (): SimParams => ({
   oni: 0,
   rainMm: 85,
+  runoffCoefficient: 0.48,
+  fireProbability: 0,
   demandLpcd: TUNJA.perCapitaDemandLpcd,
+  industrialDemandMcmMonth: TUNJA.industrialDemandMcmMonth,
+  agriculturalDemandMcmMonth: TUNJA.agriculturalDemandMcmMonth,
   efficiencyPct: 62,
+  evaporationFactor: 1,
+  birthRateAnnual: TUNJA.birthRateAnnual,
+  migrationRateAnnual: TUNJA.migrationRateAnnual,
   rationingActive: false,
 });
 
@@ -41,6 +48,8 @@ describe("simulation engine: createInitialState", () => {
     const state = createInitialState(TUNJA, "baseline");
     expect(state.aquiferLevel).toBeGreaterThan(0.5);
     expect(state.paramoCoverage).toBeGreaterThan(0.7);
+    expect(state.fireEvent).toBeNull();
+    expect(state.rngSeed).toBeGreaterThan(0);
     expect(state.pnrTriggered).toBe(false);
     expect(state.collapse).toBe(false);
     expect(state.consecutivePnrMonths).toBe(0);
@@ -194,6 +203,30 @@ describe("simulation engine: parameters influence flows", () => {
     expect(high.flows.extraction).toBeGreaterThan(low.flows.extraction);
   });
 
+  it("higher sector demands increase total demand and extraction", () => {
+    const state = createInitialState(TUNJA, "baseline");
+    const low = step(
+      state,
+      {
+        ...baselineParams(),
+        industrialDemandMcmMonth: 0.1,
+        agriculturalDemandMcmMonth: 0.1,
+      },
+      TUNJA,
+    );
+    const high = step(
+      state,
+      {
+        ...baselineParams(),
+        industrialDemandMcmMonth: 0.8,
+        agriculturalDemandMcmMonth: 0.6,
+      },
+      TUNJA,
+    );
+    expect(high.flows.totalDemand).toBeGreaterThan(low.flows.totalDemand);
+    expect(high.flows.extraction).toBeGreaterThan(low.flows.extraction);
+  });
+
   it("lower efficiency inflates gross extraction to compensate for losses", () => {
     const state = createInitialState(TUNJA, "baseline");
     const efficient = step(
@@ -215,6 +248,99 @@ describe("simulation engine: parameters influence flows", () => {
     const wet = step(state, { ...baselineParams(), rainMm: 180 }, TUNJA);
     expect(wet.flows.inflow).toBeGreaterThan(dry.flows.inflow);
     expect(wet.flows.recharge).toBeGreaterThan(dry.flows.recharge);
+  });
+
+  it("higher runoff coefficient increases inflow without changing recharge", () => {
+    const state = createInitialState(TUNJA, "baseline");
+    const low = step(
+      state,
+      { ...baselineParams(), runoffCoefficient: 0.2 },
+      TUNJA,
+    );
+    const high = step(
+      state,
+      { ...baselineParams(), runoffCoefficient: 0.8 },
+      TUNJA,
+    );
+    expect(high.flows.inflow).toBeGreaterThan(low.flows.inflow);
+    expect(high.flows.recharge).toBeCloseTo(low.flows.recharge, 5);
+  });
+
+  it("higher evaporation factor increases evaporative loss", () => {
+    const state = createInitialState(TUNJA, "baseline");
+    const low = step(
+      state,
+      { ...baselineParams(), evaporationFactor: 0.5 },
+      TUNJA,
+    );
+    const high = step(
+      state,
+      { ...baselineParams(), evaporationFactor: 1.8 },
+      TUNJA,
+    );
+    expect(high.flows.evaporation).toBeGreaterThan(low.flows.evaporation);
+  });
+
+  it("fire probability triggers a stochastic fire event with reservoir and paramo losses", () => {
+    const state = createInitialState(TUNJA, "baseline");
+    const noFire = step(
+      state,
+      { ...baselineParams(), fireProbability: 0 },
+      TUNJA,
+    );
+    const fire = step(
+      state,
+      { ...baselineParams(), fireProbability: 1 },
+      TUNJA,
+    );
+    expect(noFire.fireEvent).toBeNull();
+    expect(fire.fireEvent).not.toBeNull();
+    expect(fire.flows.fireImpact).toBeGreaterThan(0);
+    expect(fire.flows.fireReservoirLoss).toBeGreaterThan(0);
+    expect(fire.flows.fireParamoLoss).toBeGreaterThan(0);
+    expect(fire.reservoirPct).toBeLessThan(noFire.reservoirPct);
+    expect(fire.paramoCoverage).toBeLessThan(noFire.paramoCoverage);
+  });
+
+  it("multiplicative congruential fire sequence is deterministic from the state seed", () => {
+    const state = createInitialState(TUNJA, "baseline");
+    const first = step(
+      state,
+      { ...baselineParams(), fireProbability: 1 },
+      TUNJA,
+    );
+    const second = step(
+      state,
+      { ...baselineParams(), fireProbability: 1 },
+      TUNJA,
+    );
+    expect(first.rngSeed).toBe(second.rngSeed);
+    expect(first.fireEvent?.roll).toBe(second.fireEvent?.roll);
+    expect(first.fireEvent?.impact).toBe(second.fireEvent?.impact);
+  });
+
+  it("birth and migration rates control population growth", () => {
+    const state = createInitialState(TUNJA, "baseline");
+    const shrinking = step(
+      state,
+      {
+        ...baselineParams(),
+        birthRateAnnual: 0,
+        migrationRateAnnual: -0.01,
+      },
+      TUNJA,
+    );
+    const growing = step(
+      state,
+      {
+        ...baselineParams(),
+        birthRateAnnual: 0.02,
+        migrationRateAnnual: 0.01,
+      },
+      TUNJA,
+    );
+    expect(growing.population).toBeGreaterThan(state.population);
+    expect(shrinking.population).toBeLessThan(state.population);
   });
 });
 

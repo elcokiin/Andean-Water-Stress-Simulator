@@ -9,6 +9,8 @@ import {
   ModelConfigDialog,
   ModelViewport,
   TitleBar,
+  ChartsPanel,
+  FireEventToast,
   useModelKeyboardShortcuts,
   useSimulationEngine,
 } from "@/src/components/model-scene";
@@ -42,6 +44,8 @@ export default function ModelScene() {
         <ModelViewport />
         <TitleBar />
         <ControlsPanel />
+        <ChartsPanel />
+        <FireEventToast />
         <ModelConfigDialog />
       </div>
     </TooltipProvider>

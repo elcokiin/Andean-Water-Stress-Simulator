@@ -1,15 +1,29 @@
-import { Minimize2, Pause, Play, RotateCcw, Settings } from "lucide-react";
+import {
+  Maximize2,
+  Minimize2,
+  Pause,
+  Play,
+  RotateCcw,
+  Settings,
+} from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
 import { ShortcutBadge, ShortcutFlag } from "@/components/ui/shortcut-flag";
+import { Slider } from "@/components/ui/slider";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { useSimulationStore } from "@/lib/stores/simulation-store";
+import {
+  SIMULATION_SPEED_MAX,
+  SIMULATION_SPEED_MIN,
+  SIMULATION_SPEED_STEP,
+  useSimulationStore,
+} from "@/lib/stores/simulation-store";
 import {
   buildDisplayMetrics,
   formatM3PerSecond,
@@ -32,12 +46,15 @@ const compactFlagClassName =
 export function ControlsPanel() {
   const isPlaying = useSimulationStore((s) => s.isPlaying);
   const isMinimized = useSimulationStore((s) => s.controlsPanelMinimized);
+  const modelSceneReady = useSimulationStore((s) => s.modelSceneReady);
   const showShortcutHints = useSimulationStore((s) => s.showShortcutHints);
   const scenario = useSimulationStore((s) => s.scenario);
   const simState = useSimulationStore((s) => s.simState);
   const reservoir = useSimulationStore((s) => s.reservoir);
+  const simulationSpeed = useSimulationStore((s) => s.simulationSpeed);
   const setScenario = useSimulationStore((s) => s.setScenario);
   const setConfigOpen = useSimulationStore((s) => s.setConfigOpen);
+  const setSimulationSpeed = useSimulationStore((s) => s.setSimulationSpeed);
   const toggleControlsPanelMinimized = useSimulationStore(
     (s) => s.toggleControlsPanelMinimized,
   );
@@ -55,15 +72,47 @@ export function ControlsPanel() {
     : timeline[
         Math.min(Math.floor(simState.month / 12) + 1, timeline.length - 1)
       ];
+  const simulationSpeedLabel = Number.isInteger(simulationSpeed)
+    ? simulationSpeed.toFixed(0)
+    : simulationSpeed.toFixed(2).replace(/0$/, "");
+  const playbackDisabled = !modelSceneReady || metrics.collapse;
+  const playbackLabel = !modelSceneReady
+    ? "Cargando modelo 3D"
+    : isPlaying
+      ? "Pausar simulacion"
+      : "Iniciar simulacion";
 
   if (isMinimized) {
     return (
       <Card className="absolute right-3 bottom-3 z-10 rounded-[10px] border-border/80 bg-background/90 p-2 shadow-xl backdrop-blur-sm sm:right-auto sm:left-4">
-        <ShortcutFlag
-          hidden={!showShortcutHints}
-          hotkey={CONTROLS_PANEL_HOTKEY}
-        />
         <CardContent className="flex items-center gap-1.5 p-0">
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="outline"
+                size="icon"
+                className="relative size-10 rounded-[8px]"
+                onClick={toggleControlsPanelMinimized}
+                aria-label="Expandir panel de control"
+                data-tour="controls-panel"
+              >
+                <ShortcutFlag
+                  className={compactFlagClassName}
+                  hidden={!showShortcutHints}
+                  hotkey={CONTROLS_PANEL_HOTKEY}
+                />
+                <Maximize2 />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              Expandir panel{" "}
+              <ShortcutBadge
+                hidden={!showShortcutHints}
+                hotkey={CONTROLS_PANEL_HOTKEY}
+              />
+            </TooltipContent>
+          </Tooltip>
+
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
@@ -71,9 +120,8 @@ export function ControlsPanel() {
                 size="icon"
                 className="relative size-10 rounded-[8px]"
                 onClick={togglePlayback}
-                aria-label={
-                  isPlaying ? "Pausar simulacion" : "Iniciar simulacion"
-                }
+                disabled={playbackDisabled}
+                aria-label={playbackLabel}
               >
                 <ShortcutFlag
                   className={compactFlagClassName}
@@ -84,7 +132,7 @@ export function ControlsPanel() {
               </Button>
             </TooltipTrigger>
             <TooltipContent>
-              {isPlaying ? "Pausar simulacion" : "Iniciar simulacion"}{" "}
+              {playbackLabel}{" "}
               <ShortcutBadge
                 hidden={!showShortcutHints}
                 hotkey={PLAYBACK_HOTKEY}
@@ -100,6 +148,7 @@ export function ControlsPanel() {
                 className="relative size-10 rounded-[8px]"
                 onClick={() => setConfigOpen(true)}
                 aria-label="Configurar modelo"
+                data-tour="config-button"
               >
                 <ShortcutFlag
                   className={compactFlagClassName}
@@ -123,7 +172,10 @@ export function ControlsPanel() {
   }
 
   return (
-    <Card className="absolute right-3 bottom-3 left-3 z-10 gap-3 rounded-[10px] border-border/80 bg-background/90 p-3 shadow-xl backdrop-blur-sm sm:right-auto sm:left-4 sm:w-[360px]">
+    <Card
+      className="absolute right-3 bottom-3 left-3 z-10 gap-3 rounded-[10px] border-border/80 bg-background/90 p-3 shadow-xl backdrop-blur-sm sm:right-auto sm:left-4 sm:w-[360px]"
+      data-tour="controls-panel"
+    >
       <CardHeader className="flex items-center justify-between gap-3 p-0">
         <div className="min-w-0">
           <CardTitle className="text-sm">Panel de control</CardTitle>
@@ -166,6 +218,7 @@ export function ControlsPanel() {
                 className="relative rounded-[8px]"
                 onClick={() => setConfigOpen(true)}
                 aria-label="Configurar modelo"
+                data-tour="config-button"
               >
                 <ShortcutFlag
                   className={compactFlagClassName}
@@ -187,7 +240,7 @@ export function ControlsPanel() {
       </CardHeader>
 
       <CardContent className="flex flex-col gap-3 p-0">
-        <div className="grid grid-cols-3 gap-1.5">
+        <div className="grid grid-cols-3 gap-1.5" data-tour="scenario-selector">
           {scenarioIds.map((scenarioId) => (
             <Button
               key={scenarioId}
@@ -206,7 +259,10 @@ export function ControlsPanel() {
           ))}
         </div>
 
-        <div className="rounded-[8px] border border-border bg-card/80 p-2.5">
+        <div
+          className="rounded-[8px] border border-border bg-card/80 p-2.5"
+          data-tour="reservoir-status"
+        >
           <div className="flex items-center justify-between gap-3">
             <div className="min-w-0">
               <p className="text-xs font-medium text-foreground">
@@ -241,7 +297,10 @@ export function ControlsPanel() {
           />
         </div>
 
-        <div className="grid grid-cols-2 gap-1.5 text-xs">
+        <div
+          className="grid grid-cols-2 gap-1.5 text-xs"
+          data-tour="flow-metrics"
+        >
           <Metric
             label="Entrada"
             value={`${formatMcm(metrics.inflowMcmPerMonth)} Mm³/mes`}
@@ -251,6 +310,20 @@ export function ControlsPanel() {
             label="Extraccion"
             value={`${formatMcm(metrics.extractionMcmPerMonth)} Mm³/mes`}
             hint={`${formatM3PerSecond(metrics.extractionM3PerSecond)} m³/s`}
+          />
+          <Metric
+            label="Demanda"
+            value={`${formatMcm(metrics.totalDemandMcmPerMonth)} Mm³/mes`}
+            hint="Dom + ind + agr"
+          />
+          <Metric
+            label="Evaporacion"
+            value={`${formatMcm(metrics.evaporationMcmPerMonth)} Mm³/mes`}
+            hint={
+              metrics.fireImpactPct > 0
+                ? `Fuego ${formatPct(metrics.fireImpactPct, 0)}`
+                : `Riesgo ${formatPct(metrics.fireProbabilityPct, 0)}`
+            }
           />
           <Metric
             label="Páramo"
@@ -264,13 +337,45 @@ export function ControlsPanel() {
           />
         </div>
 
-        <div className="grid grid-cols-[1fr_auto_auto] items-center gap-2">
+        <div className="rounded-[8px] border border-border bg-card/80 p-2.5">
+          <div className="mb-2 flex items-center justify-between gap-3">
+            <Label
+              htmlFor="simulation-speed"
+              className="text-xs font-medium text-foreground"
+            >
+              Velocidad de simulacion
+            </Label>
+            <span className="font-mono text-xs text-muted-foreground tabular-nums">
+              {simulationSpeedLabel}x
+            </span>
+          </div>
+          <Slider
+            id="simulation-speed"
+            value={[simulationSpeed]}
+            min={SIMULATION_SPEED_MIN}
+            max={SIMULATION_SPEED_MAX}
+            step={SIMULATION_SPEED_STEP}
+            onValueChange={(value) => setSimulationSpeed(value[0])}
+            aria-label="Velocidad de simulacion"
+            className="w-full"
+          />
+          <div className="mt-1.5 flex justify-between text-[0.68rem] text-muted-foreground">
+            <span>Lenta</span>
+            <span>Normal</span>
+            <span>Rapida</span>
+          </div>
+        </div>
+
+        <div
+          className="grid grid-cols-[1fr_auto_auto] items-center gap-2"
+          data-tour="playback-controls"
+        >
           <Button
             variant={isPlaying ? "secondary" : "default"}
             className="relative h-10 rounded-[8px]"
             onClick={togglePlayback}
-            disabled={metrics.collapse}
-            aria-label={isPlaying ? "Pausar simulacion" : "Iniciar simulacion"}
+            disabled={playbackDisabled}
+            aria-label={playbackLabel}
           >
             <ShortcutFlag
               className={compactFlagClassName}

@@ -2,13 +2,15 @@ import { useHotkey } from "@tanstack/react-hotkeys";
 
 import { useTheme } from "@/lib/theme-provider";
 import { useSimulationStore } from "@/lib/stores/simulation-store";
+import { useModelTour } from "./use-model-tour";
 
 export function useModelKeyboardShortcuts() {
   const { toggle: toggleTheme } = useTheme();
+  const startModelTour = useModelTour();
 
   useHotkey("Space", () => {
     const store = useSimulationStore.getState();
-    if (store.simState.collapse) return;
+    if (!store.modelSceneReady || store.simState.collapse) return;
     store.togglePlayback();
   });
 
@@ -42,6 +44,10 @@ export function useModelKeyboardShortcuts() {
     store.setConfigOpen(!store.configOpen);
   });
 
+  useHotkey("G", () => {
+    useSimulationStore.getState().toggleChartsPanel();
+  });
+
   useHotkey("P", () => {
     useSimulationStore.getState().toggleControlsPanelMinimized();
   });
@@ -56,6 +62,10 @@ export function useModelKeyboardShortcuts() {
 
   useHotkey("D", () => {
     toggleTheme();
+  });
+
+  useHotkey("H", () => {
+    startModelTour();
   });
 
   useHotkey("Escape", () => {

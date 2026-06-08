@@ -7,6 +7,7 @@ import {
   RATIONING_THRESHOLD_PCT,
   RECHARGE_COLLAPSE_RATIO,
   type CityProfile,
+  type FireEvent,
   type SimFlows,
   type SimParams,
   type SimSnapshot,
@@ -18,7 +19,6 @@ const ONI_RAIN_FACTOR_MIN = 0.25;
 const ONI_RAIN_FACTOR_MAX = 1.3;
 const PARAMO_RETENTION_MIN = 0.5;
 const PARAMO_RETENTION_MAX = 1;
-const RUNOFF_COEFFICIENT = 0.5;
 const RECHARGE_COEFFICIENT = 0.15;
 const EVAP_MM_PER_MONTH = 35;
 const EVAP_ONI_SLOPE_MM = 18;
@@ -30,6 +30,12 @@ const PARAMO_DEGRADATION_SLOPE = 0.015;
 const PARAMO_DEGRADATION_BIAS = 0.5;
 const PARAMO_MIN_COVERAGE = 0.05;
 const AQUIFER_NORMALIZATION = 0.35;
+const M3_PER_MCM = 1_000_000;
+const DEFAULT_RUNOFF_COEFFICIENT = 0.48;
+const DEFAULT_EVAPORATION_FACTOR = 1;
+const DEFAULT_FIRE_PROBABILITY = 0.04;
+const MCG_MODULUS = 2_147_483_647;
+const MCG_MULTIPLIER = 48_271;
 const STARTING_RESERVOIR_PCT_BY_SCENARIO: Record<
   "baseline" | "moderate" | "extreme",
   number
@@ -40,7 +46,7 @@ const STARTING_RESERVOIR_PCT_BY_SCENARIO: Record<
 };
 
 const CAPACITY_M3: Record<CityProfile["id"], number> = {
-  tunja: 100_000_000,
+  tunja: 41_200_000,
   duitama: 35_000_000,
   sogamoso: 60_000_000,
 };
@@ -60,6 +66,19 @@ function monthToDate(month: number): { year: number; month: number } {
   };
 }
 
+function nextRandom(seed: number): { seed: number; value: number } {
+  const nextSeed = (seed * MCG_MULTIPLIER) % MCG_MODULUS;
+  return {
+    seed: nextSeed,
+    value: nextSeed / MCG_MODULUS,
+  };
+}
+
+function initialSeed(city: CityProfile): number {
+  const cityOffset = city.id === "tunja" ? 11 : city.id === "duitama" ? 23 : 37;
+  return 184_337 + cityOffset;
+}
+
 export function createInitialState(
   city: CityProfile,
   scenario: keyof typeof STARTING_RESERVOIR_PCT_BY_SCENARIO = "baseline",
@@ -70,16 +89,27 @@ export function createInitialState(
     aquiferLevel: 0.7,
     paramoCoverage: 0.9,
     population: city.population,
+    rngSeed: initialSeed(city),
+    fireEvent: null,
     consecutivePnrMonths: 0,
     pnrTriggered: false,
     collapse: false,
     flows: {
       inflow: 0,
       recharge: 0,
+      domesticDemand: 0,
+      industrialDemand: 0,
+      agriculturalDemand: 0,
+      totalDemand: 0,
+      networkLoss: 0,
       extraction: 0,
       evaporation: 0,
       filtration: 0,
       aquiferExtraction: 0,
+      fireProbability: 0,
+      fireImpact: 0,
+      fireReservoirLoss: 0,
+      fireParamoLoss: 0,
     },
   };
 }
@@ -87,6 +117,8 @@ export function createInitialState(
 interface StepResult {
   state: SimState;
   flows: SimFlows;
+  rngSeed: number;
+  fireEvent: FireEvent | null;
 }
 
 function computeFlows(
@@ -107,24 +139,36 @@ function computeFlows(
 
   const basinAreaM2 = city.basinAreaKm2 * 1_000_000;
   const rainVolumeM3 = (effectiveRainMm / 1000) * basinAreaM2;
-  const inflow = rainVolumeM3 * RUNOFF_COEFFICIENT;
+  const runoffCoefficient = clamp(params.runoffCoefficient, 0, 1);
+  const inflow = rainVolumeM3 * runoffCoefficient;
   const recharge = rainVolumeM3 * RECHARGE_COEFFICIENT;
 
-  const populationMonthly = state.population * (1 + city.growthRateAnnual / 12);
+  const populationGrowthAnnual =
+    params.birthRateAnnual + params.migrationRateAnnual;
+  const populationMonthly =
+    state.population * (1 + populationGrowthAnnual / 12);
   const perCapitaM3PerMonth = (params.demandLpcd * 30) / 1000;
-  const grossExtractionM3 =
-    (populationMonthly * perCapitaM3PerMonth) / (params.efficiencyPct / 100);
+  const domesticDemand = populationMonthly * perCapitaM3PerMonth;
+  const industrialDemand = params.industrialDemandMcmMonth * M3_PER_MCM;
+  const agriculturalDemand = params.agriculturalDemandMcmMonth * M3_PER_MCM;
+  const totalDemand = domesticDemand + industrialDemand + agriculturalDemand;
   const rationingActive =
     params.rationingActive && state.reservoirPct < RATIONING_THRESHOLD_PCT;
-  const extraction = rationingActive
-    ? grossExtractionM3 * (1 - RATIONING_REDUCTION)
-    : grossExtractionM3;
+  const deliveredDemand = rationingActive
+    ? totalDemand * (1 - RATIONING_REDUCTION)
+    : totalDemand;
+  const extraction = deliveredDemand / (params.efficiencyPct / 100);
+  const networkLoss = Math.max(0, extraction - deliveredDemand);
 
   const evapMm = Math.max(
     0,
     EVAP_MM_PER_MONTH + params.oni * EVAP_ONI_SLOPE_MM,
   );
-  const evaporation = (evapMm / 1000) * basinAreaM2 * EVAP_BASIN_FRACTION;
+  const evaporation =
+    (evapMm / 1000) *
+    basinAreaM2 *
+    EVAP_BASIN_FRACTION *
+    params.evaporationFactor;
 
   const filtration = capacityM3 * FILTRATION_FRACTION_OF_CAPACITY;
 
@@ -137,16 +181,55 @@ function computeFlows(
     capacityM3 *
     AQUIFER_BASE_EXTRACTION_FRACTION *
     (1 + AQUIFER_STRESS_GAIN * stressIndex);
+  const fireProbability = clamp(params.fireProbability, 0, 1);
+  const fireRoll = nextRandom(state.rngSeed);
+  const impactRoll = nextRandom(fireRoll.seed);
+  const fireOccurred = fireRoll.value < fireProbability;
+  const environmentalSeverity = clamp(
+    Math.max(0, params.oni) * 0.12 +
+      stressIndex * 0.2 +
+      (1 - state.paramoCoverage) * 0.18,
+    0,
+    0.35,
+  );
+  const fireImpact = fireOccurred
+    ? clamp(0.15 + impactRoll.value * 0.65 + environmentalSeverity, 0, 1)
+    : 0;
+  const fireReservoirLoss = fireOccurred ? capacityM3 * fireImpact * 0.025 : 0;
+  const fireParamoLoss = fireOccurred ? fireImpact * 0.12 : 0;
+  const rngSeed = impactRoll.seed;
+  const fireEvent: FireEvent | null = fireOccurred
+    ? {
+        id: `${city.id}-${state.month + 1}-${rngSeed}`,
+        month: state.month + 1,
+        probability: fireProbability,
+        roll: fireRoll.value,
+        impact: fireImpact,
+        reservoirLossM3: fireReservoirLoss,
+        paramoLoss: fireParamoLoss,
+      }
+    : null;
 
   return {
     state: { ...state, population: populationMonthly },
+    rngSeed,
+    fireEvent,
     flows: {
       inflow,
       recharge,
+      domesticDemand,
+      industrialDemand,
+      agriculturalDemand,
+      totalDemand,
+      networkLoss,
       extraction,
       evaporation,
       filtration,
       aquiferExtraction,
+      fireProbability,
+      fireImpact,
+      fireReservoirLoss,
+      fireParamoLoss,
     },
   };
 }
@@ -160,14 +243,20 @@ export function step(
     return state;
   }
 
-  const { state: preFlowState, flows } = computeFlows(state, params, city);
+  const {
+    state: preFlowState,
+    flows,
+    rngSeed,
+    fireEvent,
+  } = computeFlows(state, params, city);
   const capacityM3 = CAPACITY_M3[city.id];
   const netReservoirM3 =
     flows.inflow +
     flows.recharge -
     flows.extraction -
     flows.evaporation -
-    flows.filtration;
+    flows.filtration -
+    flows.fireReservoirLoss;
   const deltaPct = (netReservoirM3 / capacityM3) * 100;
   const reservoirPct = clamp(preFlowState.reservoirPct + deltaPct, 0, 100);
 
@@ -188,9 +277,10 @@ export function step(
   const paramoStress = stressIndex + oniStress * 0.3;
   const degradation =
     Math.max(0, paramoStress - PARAMO_DEGRADATION_BIAS) *
-    PARAMO_DEGRADATION_SLOPE;
+      PARAMO_DEGRADATION_SLOPE +
+    flows.fireProbability * 0.004;
   const paramoCoverage = clamp(
-    preFlowState.paramoCoverage - degradation,
+    preFlowState.paramoCoverage - degradation - flows.fireParamoLoss,
     PARAMO_MIN_COVERAGE,
     1,
   );
@@ -217,6 +307,8 @@ export function step(
     aquiferLevel,
     paramoCoverage,
     population: preFlowState.population,
+    rngSeed,
+    fireEvent,
     consecutivePnrMonths,
     pnrTriggered,
     collapse,
@@ -270,5 +362,8 @@ export function getCapacityM3(cityId: CityProfile["id"]): number {
 }
 
 export const SCENARIO_INITIAL_RESERVOIR = STARTING_RESERVOIR_PCT_BY_SCENARIO;
+export const BASE_RUNOFF_COEFFICIENT = DEFAULT_RUNOFF_COEFFICIENT;
+export const BASE_EVAPORATION_FACTOR = DEFAULT_EVAPORATION_FACTOR;
+export const BASE_FIRE_PROBABILITY = DEFAULT_FIRE_PROBABILITY;
 
 export { cityProfiles, getCityProfile };

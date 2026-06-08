@@ -4,17 +4,21 @@ import { useSimulationStore } from "@/lib/stores/simulation-store";
 import {
   createInitialState,
   getCityProfile,
+  snapshotToEntry,
   step,
+  toSimState,
 } from "@/src/lib/hydrosim/engine";
 import { scenarioIds, scenarios } from "@/src/lib/hydrosim/scenarios";
-import type { ScenarioId } from "@/src/lib/hydrosim/types";
+import type { ReservoirId, ScenarioId } from "@/src/lib/hydrosim/types";
+import { SCENARIO_ONI } from "@/lib/stores/simulation-store";
+import type { SimState } from "@/src/lib/hydrosim/engine";
 
-const TICK_MS = 700;
+const BASE_TICK_MS = 700;
 
 function buildInitialForScenario(
   scenario: ScenarioId,
-  reservoir: "tunja" | "duitama" | "sogamoso",
-) {
+  reservoir: ReservoirId,
+): SimState {
   const startReserve = scenarios[scenario].reserve;
   const city = getCityProfile(reservoir);
   return {
@@ -23,68 +27,137 @@ function buildInitialForScenario(
   };
 }
 
+function buildSimStateFromHistory(
+  scenario: ScenarioId,
+  reservoir: ReservoirId,
+  lastEntry: ReturnType<
+    ReturnType<typeof useSimulationStore.getState>["history"][ScenarioId]["at"]
+  >,
+): SimState {
+  if (lastEntry) return toSimState(lastEntry);
+  return buildInitialForScenario(scenario, reservoir);
+}
+
 export function useSimulationEngine() {
   const scenario = useSimulationStore((s) => s.scenario);
   const reservoir = useSimulationStore((s) => s.reservoir);
   const isPlaying = useSimulationStore((s) => s.isPlaying);
   const oniValue = useSimulationStore((s) => s.oniValue);
   const rainValue = useSimulationStore((s) => s.rainValue);
+  const runoffCoefficient = useSimulationStore((s) => s.runoffCoefficient);
+  const fireProbability = useSimulationStore((s) => s.fireProbability);
   const demandValue = useSimulationStore((s) => s.demandValue);
+  const industrialDemandValue = useSimulationStore(
+    (s) => s.industrialDemandValue,
+  );
+  const agriculturalDemandValue = useSimulationStore(
+    (s) => s.agriculturalDemandValue,
+  );
   const efficiencyValue = useSimulationStore((s) => s.efficiencyValue);
+  const evaporationFactor = useSimulationStore((s) => s.evaporationFactor);
+  const birthRateAnnual = useSimulationStore((s) => s.birthRateAnnual);
+  const migrationRateAnnual = useSimulationStore((s) => s.migrationRateAnnual);
   const rationingActive = useSimulationStore((s) => s.rationingActive);
+  const simulationSpeed = useSimulationStore((s) => s.simulationSpeed);
   const setSimState = useSimulationStore((s) => s.setSimState);
   const simState = useSimulationStore((s) => s.simState);
   const lastAppliedScenario = useRef<ScenarioId | null>(null);
-  const lastAppliedReservoir = useRef<typeof reservoir | null>(null);
-  const lastSimStateRef = useRef(simState);
+  const lastAppliedReservoir = useRef<ReservoirId | null>(null);
 
   useEffect(() => {
-    lastSimStateRef.current = simState;
-  }, [simState]);
-
-  useEffect(() => {
-    if (
-      lastAppliedScenario.current !== scenario ||
-      lastAppliedReservoir.current !== reservoir
-    ) {
-      lastAppliedScenario.current = scenario;
+    if (lastAppliedReservoir.current === null) {
       lastAppliedReservoir.current = reservoir;
+      lastAppliedScenario.current = scenario;
+      return;
+    }
+    if (lastAppliedReservoir.current !== reservoir) {
+      lastAppliedReservoir.current = reservoir;
+      lastAppliedScenario.current = scenario;
+      useSimulationStore.getState().clearAllHistory();
       setSimState(buildInitialForScenario(scenario, reservoir));
+      return;
+    }
+    if (lastAppliedScenario.current !== scenario) {
+      lastAppliedScenario.current = scenario;
+      const lastEntry = useSimulationStore.getState().history[scenario].at(-1);
+      setSimState(buildSimStateFromHistory(scenario, reservoir, lastEntry));
     }
   }, [scenario, reservoir, setSimState]);
 
   useEffect(() => {
     if (!isPlaying) return undefined;
     const city = getCityProfile(reservoir);
+    const tickMs = Math.round(BASE_TICK_MS / simulationSpeed);
     const id = window.setInterval(() => {
       const current = useSimulationStore.getState();
       if (current.simState.collapse) {
         useSimulationStore.setState({ isPlaying: false });
         return;
       }
-      const next = step(
-        current.simState,
-        {
-          oni: current.oniValue,
-          rainMm: current.rainValue,
-          demandLpcd: current.demandValue,
-          efficiencyPct: current.efficiencyValue,
-          rationingActive: current.rationingActive,
-        },
-        city,
-      );
-      setSimState(next);
-    }, TICK_MS);
+
+      const sharedParams = {
+        rainMm: current.rainValue,
+        runoffCoefficient: current.runoffCoefficient,
+        fireProbability: current.fireProbability,
+        demandLpcd: current.demandValue,
+        industrialDemandMcmMonth: current.industrialDemandValue,
+        agriculturalDemandMcmMonth: current.agriculturalDemandValue,
+        efficiencyPct: current.efficiencyValue,
+        evaporationFactor: current.evaporationFactor,
+        birthRateAnnual: current.birthRateAnnual,
+        migrationRateAnnual: current.migrationRateAnnual,
+        rationingActive: current.rationingActive,
+      };
+
+      let activeNext: SimState | null = null;
+      const nextHistoryEntries: Record<
+        ScenarioId,
+        ReturnType<typeof snapshotToEntry> | null
+      > = {
+        baseline: null,
+        moderate: null,
+        extreme: null,
+      };
+
+      for (const s of scenarioIds) {
+        const prev =
+          current.history[s].at(-1) ?? buildInitialForScenario(s, reservoir);
+        const oni = s === current.scenario ? current.oniValue : SCENARIO_ONI[s];
+        const next = step(prev, { oni, ...sharedParams }, city);
+        nextHistoryEntries[s] = snapshotToEntry(next);
+        if (s === current.scenario) activeNext = next;
+      }
+
+      useSimulationStore.setState((state) => {
+        const newHistory = { ...state.history };
+        for (const s of scenarioIds) {
+          const entry = nextHistoryEntries[s];
+          if (!entry) continue;
+          newHistory[s] = [...newHistory[s], entry].slice(-600);
+        }
+        return {
+          simState: activeNext ?? state.simState,
+          history: newHistory,
+        };
+      });
+    }, tickMs);
     return () => window.clearInterval(id);
   }, [
     isPlaying,
     reservoir,
     oniValue,
     rainValue,
+    runoffCoefficient,
+    fireProbability,
     demandValue,
+    industrialDemandValue,
+    agriculturalDemandValue,
     efficiencyValue,
+    evaporationFactor,
+    birthRateAnnual,
+    migrationRateAnnual,
     rationingActive,
-    setSimState,
+    simulationSpeed,
   ]);
 
   return {

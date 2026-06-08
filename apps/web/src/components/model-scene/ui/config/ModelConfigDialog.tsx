@@ -144,6 +144,7 @@ export function ModelConfigDialog() {
             ? "!h-[calc(100vh-2rem)] !max-h-[calc(100vh-2rem)] !w-[calc(100vw-2rem)] !max-w-[calc(100vw-2rem)] sm:!max-w-[calc(100vw-2rem)]"
             : "h-[min(760px,calc(100vh-2rem))] sm:max-w-4xl",
         )}
+        data-tour="config-dialog"
       >
         <DialogHeader className="shrink-0 border-b border-border px-6 py-4">
           <div className="flex items-start gap-3 pr-8">
@@ -182,13 +183,17 @@ export function ModelConfigDialog() {
         </DialogHeader>
 
         <div className="flex min-h-0 flex-1 overflow-hidden">
-          <div className="w-64 shrink-0 border-r border-border bg-muted/30">
+          <div
+            className="w-64 shrink-0 border-r border-border bg-muted/30"
+            data-tour="config-tabs"
+          >
             <ScrollArea className="h-full">
               <div className="flex flex-col gap-1 p-3">
                 {sidebarItems.map((item) => (
                   <button
                     key={item.id}
                     onClick={() => setConfigTab(item.id as ConfigTab)}
+                    data-tour={`config-tab-${item.id}`}
                     className={cn(
                       "grid w-full grid-cols-[minmax(0,1fr)_auto] items-center gap-2 rounded-md px-2.5 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground",
                       activeTab === item.id
@@ -211,14 +216,17 @@ export function ModelConfigDialog() {
             </ScrollArea>
           </div>
 
-          <div className="flex-1 bg-background">
+          <div className="flex-1 bg-background" data-tour="config-content">
             <ScrollArea className="h-full">
               <div className="p-6">{renderTab()}</div>
             </ScrollArea>
           </div>
         </div>
 
-        <DialogFooter className="shrink-0 border-t border-border bg-muted/10 px-6 py-4">
+        <DialogFooter
+          className="shrink-0 border-t border-border bg-muted/10 px-6 py-4"
+          data-tour="config-footer"
+        >
           <Button variant="outline" onClick={handleDiscard}>
             Descartar cambios
             <ShortcutBadge

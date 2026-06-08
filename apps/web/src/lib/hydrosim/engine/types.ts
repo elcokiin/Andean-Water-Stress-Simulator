@@ -3,25 +3,55 @@ export interface CityProfile {
   name: string;
   population: number;
   growthRateAnnual: number;
+  birthRateAnnual: number;
+  migrationRateAnnual: number;
   basinAreaKm2: number;
   perCapitaDemandLpcd: number;
+  industrialDemandMcmMonth: number;
+  agriculturalDemandMcmMonth: number;
 }
 
 export interface SimParams {
   oni: number;
   rainMm: number;
+  runoffCoefficient: number;
+  fireProbability: number;
   demandLpcd: number;
+  industrialDemandMcmMonth: number;
+  agriculturalDemandMcmMonth: number;
   efficiencyPct: number;
+  evaporationFactor: number;
+  birthRateAnnual: number;
+  migrationRateAnnual: number;
   rationingActive: boolean;
 }
 
 export interface SimFlows {
   inflow: number;
   recharge: number;
+  domesticDemand: number;
+  industrialDemand: number;
+  agriculturalDemand: number;
+  totalDemand: number;
+  networkLoss: number;
   extraction: number;
   evaporation: number;
   filtration: number;
   aquiferExtraction: number;
+  fireProbability: number;
+  fireImpact: number;
+  fireReservoirLoss: number;
+  fireParamoLoss: number;
+}
+
+export interface FireEvent {
+  id: string;
+  month: number;
+  probability: number;
+  roll: number;
+  impact: number;
+  reservoirLossM3: number;
+  paramoLoss: number;
 }
 
 export interface SimState {
@@ -30,6 +60,8 @@ export interface SimState {
   aquiferLevel: number;
   paramoCoverage: number;
   population: number;
+  rngSeed: number;
+  fireEvent: FireEvent | null;
   consecutivePnrMonths: number;
   pnrTriggered: boolean;
   collapse: boolean;
